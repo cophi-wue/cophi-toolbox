@@ -941,7 +941,7 @@ def _stopwords_large_corpus_model(document_term_matrix, type_ids, most_frequent_
 def _token2id(tokens):
     """Creates a dictionary of tokens as keys and identifier as keys.
 
-    This private function is wrapped in :func:`_create_largecounter()`.
+    This private function is wrapped in :func:`_create_bag_of_words()`.
 
     Args:
         tokens (list): Iterable of tokens.
