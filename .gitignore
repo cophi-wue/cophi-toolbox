@@ -29,3 +29,4 @@ demonstrator/static/*.pngcover
 .idea
 Topics.iml
 _build
+*.iml
