@@ -890,16 +890,16 @@ def _remove_features_from_small_corpus_model(document_term_matrix, features):
 
 def _remove_features_from_tokenized_document(tokenized_document, features):
     """Removes features from a tokenized document.
-
+    
     This private function is wrapped in :func:`remove_features()`.
-
+    
     Args:
-        tokenized_corpus (list): The tokenized corpus to process. This is an iterable of
-            documents, each of which is an iterable of tokens.
-        features (list): A list of tokens.
-
-    Yields:
-        A clean tokenized corpus as list.
+        tokenized_document (list): The tokenized document to process. This is an iterable of
+            tokens.
+        features (list): An iterable of tokens.
+    
+    Returns:
+        A clean tokenized document as list.
 
     Example:
         >>> tokenized_document = ['token', 'stopword', 'stopword']
