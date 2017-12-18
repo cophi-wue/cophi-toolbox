@@ -902,9 +902,10 @@ def _remove_features_from_tokenized_document(tokenized_document, features):
         A clean tokenized corpus as list.
 
     Example:
-        >>> tokenized_corpus = [['token', 'stopword', 'stopword']]
-        >>> list(_remove_features_from_tokenized_document(tokenized_corpus, ['stopword']))
-        [['token']]
+        >>> tokenized_document = ['token', 'stopword', 'stopword']
+        >>> features = ['stopword']
+        >>> _remove_features_from_tokenized_document(tokenized_document, features)
+        ['token']
     """
     tokenized_document_arr = np.array(tokenized_document)
     features_arr = np.array(features)
