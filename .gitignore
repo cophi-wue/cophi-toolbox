@@ -30,3 +30,6 @@ demonstrator/static/*.pngcover
 Topics.iml
 _build
 *.iml
+.cache
+htmlcov
+tests.xml

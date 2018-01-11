@@ -1,7 +1,12 @@
 -r requirements.txt
-nose
-nosexcover
+
+# Testing:
+pytest
+pytest-cov
+pytest-nbsmoke
+
+# Documentation:
 sphinx
 jupyter
-nbsphinx
+git+https://github.com/spatialaudio/nbsphinx#egg=nbsphinx
 recommonmark
