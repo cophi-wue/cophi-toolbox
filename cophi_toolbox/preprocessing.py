@@ -44,7 +44,6 @@ Contents
     of a ``document_term_matrix``.
     * :func:`read_document_term_matrix()` reads a document-term matrix from a CSV file.
     * :func:`read_from_pathlist()` reads one or multiple files based on a pathlist.
-    * :func:`read_model()` reads a LDA model.
     * :func:`remove_features()` removes features from a ``document_term_matrix``.
     * :func:`segment()` is a wrapper for :func:`segment_fuzzy()` and segments a \
     ``tokenized_document`` into segments of a certain number of tokens, respecting existing chunks.
@@ -319,43 +318,7 @@ def read_from_pathlist(pathlist, file_format=None, xpath_expression='//tei:text'
                 pass
             else:
                 raise ValueError("Unable to read {}, because the file format {} is not supported.".format(file, file_format))
-
-
-def read_model(filepath):
-    """Reads a LDA model.
-
-    With this function you can read a LDA model, if it was saved using :module:`pickle`.
-    If you want to read MALLET models, you have to specify a parameter of the
-    function :func:`create_mallet_model()`.
-
-    Args:
-        filepath (str): Path to LDA model, e.g. ``/home/models/model.pickle``.
-
-    Returns:
-        A LDA model.
-
-    Example:
-        >>> import lda
-        >>> import gensim
-        >>> import tempfile
-        >>> a = lda.LDA
-        >>> with tempfile.NamedTemporaryFile(suffix='.pickle') as tmpfile:
-        ...     pickle.dump(a, tmpfile, protocol=pickle.HIGHEST_PROTOCOL)
-        ...     tmpfile.flush()
-        ...     read_model(tmpfile.name) == a
-        True
-        >>> a = gensim.models.LdaModel
-        >>> with tempfile.NamedTemporaryFile(suffix='.pickle') as tmpfile:
-        ...     pickle.dump(a, tmpfile, protocol=pickle.HIGHEST_PROTOCOL)
-        ...     tmpfile.flush()
-        ...     read_model(tmpfile.name) == a
-        True
-    """
-    with open(filepath, 'rb') as model:
-        return pickle.load(model)
-
-    
-    
+ 
 def remove_features(features, document_term_matrix=None, tokenized_corpus=None, type_ids=None):
     """Removes features based on a list of tokens.
 
