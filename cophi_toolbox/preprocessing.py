@@ -231,14 +231,14 @@ def read_document_term_matrix(filepath):
     
     Example:
         >>> import tempfile
-        >>> with tempfile.NamedTemporaryFile(suffix='.csv') as tmpfile:
+        >>> with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as tmpfile:
         ...     tmpfile.write(b',this,is,an,example,text\\ndocument,1,0,1,0,1') and True
         ...     tmpfile.flush()
         ...     read_document_term_matrix(tmpfile.name) #doctest: +NORMALIZE_WHITESPACE
         True
                   this  is  an  example  text
         document     1   0   1        0     1
-        >>> with tempfile.NamedTemporaryFile(suffix='.csv') as tmpfile:
+        >>> with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as tmpfile:
         ...     tmpfile.write(b'document_id,type_id,0\\n1,1,1') and True
         ...     tmpfile.flush()
         ...     read_document_term_matrix(tmpfile.name) #doctest: +NORMALIZE_WHITESPACE
@@ -288,12 +288,12 @@ def read_from_pathlist(pathlist, file_format=None, xpath_expression='//tei:text'
 
     Example:
         >>> import tempfile
-        >>> with tempfile.NamedTemporaryFile(suffix='.txt') as first:
+        >>> with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as first:
         ...     pathlist = []
         ...     first.write(b"This is the first example.") and True
         ...     first.flush()
         ...     pathlist.append(first.name)
-        ...     with tempfile.NamedTemporaryFile(suffix='.txt') as second:
+        ...     with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as second:
         ...         second.write(b"This is the second example.") and True
         ...         second.flush()
         ...         pathlist.append(second.name)
@@ -726,7 +726,7 @@ def _read_csv(filepath, sep, columns):
     
     Example:
         >>> import tempfile
-        >>> with tempfile.NamedTemporaryFile(suffix='.csv') as tmpfile:
+        >>> with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as tmpfile:
         ...     tmpfile.write(b"Token,POS\\nThis,ART\\nis,V\\na,ART\\nCSV,NN\\nexample,NN\\n.,PUNC") and True
         ...     tmpfile.flush()
         ...     _read_csv(tmpfile.name, ',', ['Token']) #doctest: +NORMALIZE_WHITESPACE
@@ -758,7 +758,7 @@ def _read_txt(filepath):
     
     Example:
         >>> import tempfile
-        >>> with tempfile.NamedTemporaryFile(suffix='.txt') as tmpfile:
+        >>> with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as tmpfile:
         ...     tmpfile.write(b"This is a plain text example.") and True
         ...     tmpfile.flush()
         ...     _read_txt(tmpfile.name)
@@ -785,7 +785,7 @@ def _read_xml(filepath, xpath_expression):
     
     Example:
         >>> import tempfile
-        >>> with tempfile.NamedTemporaryFile(suffix='.xml') as tmpfile:
+        >>> with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as tmpfile:
         ...     tmpfile.write(b"<text>This is a XML example.</text>") and True
         ...     tmpfile.flush()
         ...     _read_xml(tmpfile.name, '//text')
