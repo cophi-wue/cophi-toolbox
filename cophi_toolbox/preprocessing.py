@@ -235,6 +235,7 @@ def read_document_term_matrix(filepath):
         ...     tmpfile.write(b',this,is,an,example,text\\ndocument,1,0,1,0,1') and True
         ...     tmpfile.flush()
         ...     read_document_term_matrix(tmpfile.name) #doctest: +NORMALIZE_WHITESPACE
+        ...     tmpfile.close()
         True
                   this  is  an  example  text
         document     1   0   1        0     1
@@ -242,6 +243,7 @@ def read_document_term_matrix(filepath):
         ...     tmpfile.write(b'document_id,type_id,0\\n1,1,1') and True
         ...     tmpfile.flush()
         ...     read_document_term_matrix(tmpfile.name) #doctest: +NORMALIZE_WHITESPACE
+        ...     tmpfile.close()
         True
                              0
         document_id type_id   
@@ -730,6 +732,7 @@ def _read_csv(filepath, sep, columns):
         ...     tmpfile.write(b"Token,POS\\nThis,ART\\nis,V\\na,ART\\nCSV,NN\\nexample,NN\\n.,PUNC") and True
         ...     tmpfile.flush()
         ...     _read_csv(tmpfile.name, ',', ['Token']) #doctest: +NORMALIZE_WHITESPACE
+        ...     tmpfile.close()
         True
               Token
         0      This
@@ -762,6 +765,7 @@ def _read_txt(filepath):
         ...     tmpfile.write(b"This is a plain text example.") and True
         ...     tmpfile.flush()
         ...     _read_txt(tmpfile.name)
+        ...     tmpfile.close()
         True
         'This is a plain text example.'
     """
@@ -789,6 +793,7 @@ def _read_xml(filepath, xpath_expression):
         ...     tmpfile.write(b"<text>This is a XML example.</text>") and True
         ...     tmpfile.flush()
         ...     _read_xml(tmpfile.name, '//text')
+        ...     tmpfile.close()
         True
         'This is a XML example.'
     """
