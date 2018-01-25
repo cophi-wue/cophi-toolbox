@@ -233,17 +233,15 @@ def read_document_term_matrix(filepath):
         >>> import tempfile
         >>> with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as tmpfile:
         ...     tmpfile.write(b',this,is,an,example,text\\ndocument,1,0,1,0,1') and True
-        ...     tmpfile.flush()
-        ...     read_document_term_matrix(tmpfile.name) #doctest: +NORMALIZE_WHITESPACE
         ...     tmpfile.close()
+        ...     read_document_term_matrix(tmpfile.name) #doctest: +NORMALIZE_WHITESPACE
         True
                   this  is  an  example  text
         document     1   0   1        0     1
         >>> with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as tmpfile:
         ...     tmpfile.write(b'document_id,type_id,0\\n1,1,1') and True
-        ...     tmpfile.flush()
-        ...     read_document_term_matrix(tmpfile.name) #doctest: +NORMALIZE_WHITESPACE
         ...     tmpfile.close()
+        ...     read_document_term_matrix(tmpfile.name) #doctest: +NORMALIZE_WHITESPACE
         True
                              0
         document_id type_id   
@@ -297,7 +295,7 @@ def read_from_pathlist(pathlist, file_format=None, xpath_expression='//tei:text'
         ...     pathlist.append(first.name)
         ...     with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as second:
         ...         second.write(b"This is the second example.") and True
-        ...         second.flush()
+        ...         second.close()
         ...         pathlist.append(second.name)
         ...         list(read_from_pathlist(pathlist, 'text'))
         True
@@ -730,9 +728,8 @@ def _read_csv(filepath, sep, columns):
         >>> import tempfile
         >>> with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as tmpfile:
         ...     tmpfile.write(b"Token,POS\\nThis,ART\\nis,V\\na,ART\\nCSV,NN\\nexample,NN\\n.,PUNC") and True
-        ...     tmpfile.flush()
-        ...     _read_csv(tmpfile.name, ',', ['Token']) #doctest: +NORMALIZE_WHITESPACE
         ...     tmpfile.close()
+        ...     _read_csv(tmpfile.name, ',', ['Token']) #doctest: +NORMALIZE_WHITESPACE
         True
               Token
         0      This
@@ -763,9 +760,8 @@ def _read_txt(filepath):
         >>> import tempfile
         >>> with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as tmpfile:
         ...     tmpfile.write(b"This is a plain text example.") and True
-        ...     tmpfile.flush()
-        ...     _read_txt(tmpfile.name)
         ...     tmpfile.close()
+        ...     _read_txt(tmpfile.name)
         True
         'This is a plain text example.'
     """
@@ -791,9 +787,8 @@ def _read_xml(filepath, xpath_expression):
         >>> import tempfile
         >>> with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as tmpfile:
         ...     tmpfile.write(b"<text>This is a XML example.</text>") and True
-        ...     tmpfile.flush()
-        ...     _read_xml(tmpfile.name, '//text')
         ...     tmpfile.close()
+        ...     _read_xml(tmpfile.name, '//text')
         True
         'This is a XML example.'
     """
