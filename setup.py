@@ -24,7 +24,8 @@ setup(
         'Programming Language :: Python :: 3.6'
     ],
     # keywords
-    packages=find_packages(exclude=['docs', 'test']),
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     install_requires=[
         'pandas>=0.19.2',
         'regex>=2017.01.14',
