@@ -137,10 +137,10 @@ def filter_pos_tags(dkpro_document, pos_tags=['ADJ', 'V', 'NN'], lemma=True):
     tokenized_document = dkpro_document[dkpro_document['CPOS'].isin(pos_tags)]
     if lemma:
         log.info("Selecting {} lemmas ...".format(pos_tags))
-        yield tokenized_document['Lemma']
+        return tokenized_document['Lemma']
     else:
         log.info("Selecting {} tokens ...".format(pos_tags))
-        yield tokenized_document['Token']
+        return tokenized_document['Token']
 
 
 def find_hapax_legomena(document_term_matrix, type_ids=None):
