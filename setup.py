@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 PROJECT = 'Computer Philology Toolbox'
 VERSION = "0.1"
-REVISION = "0.1.0.dev0"
+REVISION = "0.1.1.dev0"
 AUTHOR = "DARIAH-DE Wuerzburg Group"
 AUTHOR_EMAIL = "pielstroem@biozentrum.uni-wuerzburg.de"
 

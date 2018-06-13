@@ -40,10 +40,10 @@ Contents
     *part-of-speech tags* and returns either tokens or, if available, lemmas.
     * :func:`find_hapax_legomena()` determines *hapax legomena* based on frequencies \
     of a ``document_term_matrix``.
-    * :func:`find_stopwords()` determines *most frequent words* based on frequencies \
+    * :func:`list_mfw()` determines *most frequent words* based on frequencies \
     of a ``document_term_matrix``.
     * :func:`read_document_term_matrix()` reads a document-term matrix from a CSV file.
-    * :func:`read_from_pathlist()` reads one or multiple files based on a pathlist.
+    * :func:`read_files()` reads one or multiple files based on a pathlist.
     * :func:`remove_features()` removes features from a ``document_term_matrix``.
     * :func:`segment()` is a wrapper for :func:`segment_fuzzy()` and segments a \
     ``tokenized_document`` into segments of a certain number of tokens, respecting existing chunks.
@@ -77,7 +77,7 @@ def create_document_term_matrix(tokenized_corpus, document_labels, large_corpus=
 
     With this function you can create a document-term-matrix where rows \
     correspond to documents in the collection and columns correspond to terms. \
-    Use the function :func:`read_from_pathlist()` to read and :func:`tokenize()` \
+    Use the function :func:`read_files()` to read and :func:`tokenize()` \
     to tokenize your text files.
 
     Args:
@@ -113,7 +113,7 @@ def filter_pos_tags(dkpro_document, pos_tags=['ADJ', 'V', 'NN'], lemma=True):
     With this function you can filter `DARIAH-DKPro-Wrapper <https://github.com/DARIAH-DE/DARIAH-DKPro-Wrapper>`_ \
     output. Commit a list of POS-tags to get specific tokens (if ``lemma`` False) \
     or lemmas (if ``lemma`` True). 
-    Use the function :func:`read_from_pathlist()` to read CSV files.
+    Use the function :func:`read_files()` to read CSV files.
 
     Args:
         dkpro_document (pandas.DataFrame): DARIAH-DKPro-Wrapper output.
@@ -137,10 +137,11 @@ def filter_pos_tags(dkpro_document, pos_tags=['ADJ', 'V', 'NN'], lemma=True):
     tokenized_document = dkpro_document[dkpro_document['CPOS'].isin(pos_tags)]
     if lemma:
         log.info("Selecting {} lemmas ...".format(pos_tags))
-        yield tokenized_document['Lemma']
+        return tokenized_document['Lemma']
     else:
         log.info("Selecting {} tokens ...".format(pos_tags))
-        yield tokenized_document['Token']
+        assert isinstance(tokenized_document, object)
+        return tokenized_document['Token']
 
 
 def find_hapax_legomena(document_term_matrix, type_ids=None):
@@ -178,7 +179,7 @@ def find_hapax_legomena(document_term_matrix, type_ids=None):
         return document_term_matrix.loc[:, document_term_matrix.max() == 1].columns.tolist()
 
 
-def find_stopwords(document_term_matrix, most_frequent_tokens=100, type_ids=None):
+def list_mfw(document_term_matrix, most_frequent_tokens=100, type_ids=None):
     """Creates a list with stopword based on most frequent tokens.
 
     With this function you can determine *most frequent tokens*, also known as \
@@ -200,16 +201,16 @@ def find_stopwords(document_term_matrix, most_frequent_tokens=100, type_ids=None
         >>> document_labels = ['document']
         >>> tokenized_corpus = [['hapax', 'stopword', 'stopword']]
         >>> document_term_matrix = create_document_term_matrix(tokenized_corpus, document_labels)
-        >>> find_stopwords(document_term_matrix, 1)
+        >>> list_mfw(document_term_matrix, 1)
         ['stopword']
         >>> document_term_matrix, _, type_ids = create_document_term_matrix(tokenized_corpus, document_labels, large_corpus=True)
-        >>> find_stopwords(document_term_matrix, 1, type_ids)
+        >>> list_mfw(document_term_matrix, 1, type_ids)
         ['stopword']
     """
     log.info("Determining stopwords ...")
     if isinstance(document_term_matrix.index, pd.MultiIndex):
         log.debug("Large corpus model ...")
-        return _stopwords_large_corpus_model(document_term_matrix, type_ids, most_frequent_tokens)
+        return _list_mfw_large_corpus_model(document_term_matrix, type_ids, most_frequent_tokens)
     else:
         log.debug("Small corpus model ...")
         return document_term_matrix.iloc[:, :most_frequent_tokens].columns.tolist()
@@ -256,7 +257,7 @@ def read_document_term_matrix(filepath):
         return document_term_matrix
 
 
-def read_from_pathlist(pathlist, file_format=None, xpath_expression='//tei:text', sep='\t', csv_columns=None):
+def read_files(pathlist, file_format=None, xpath_expression='//tei:text', sep='\t', csv_columns=None):
     """Reads text files based on a pathlist.
 
     With this function you can read multiple file formats:
@@ -297,7 +298,7 @@ def read_from_pathlist(pathlist, file_format=None, xpath_expression='//tei:text'
         ...         second.write(b"This is the second example.") and True
         ...         second.close()
         ...         pathlist.append(second.name)
-        ...         list(read_from_pathlist(pathlist, 'text'))
+        ...         list(read_files(pathlist, 'text'))
         True
         True
         ['This is the first example.', 'This is the second example.']
@@ -493,7 +494,7 @@ def split_paragraphs(document, sep=regex.compile(r'\n')):
     With this function you can split a document by paragraphs. In case of a \
     document as str, you also have the ability to select a certain regular \
     expression to split the document.
-    Use the function :func:`read_from_pathlist()` to read files.
+    Use the function :func:`read_files()` to read files.
 
     Args:
         document Union(str, pandas.DataFrame): Document text or DARIAH-DKPro-Wrapper output.
@@ -533,7 +534,7 @@ def tokenize(document, pattern=r'\p{L}+\p{P}?\p{L}+', lower=True):
     more letters, followed by one or no punctuation, followed by one or more \
     letters. So, one letter words will not match. In case you want to lower \
     all tokens, set the argument ``lower`` to True (it is by default).    
-    Use the functions :func:`read_from_pathlist()` to read your text files.
+    Use the functions :func:`read_files()` to read your text files.
 
     Args:
         document (str): Document text.
@@ -713,7 +714,7 @@ def _hapax_legomena_large_corpus_model(document_term_matrix, type_ids):
 def _read_csv(filepath, sep, columns):
     """Reads a CSV file based on its path.
     
-    This private function is wrapped in `read_from_pathlist()`.
+    This private function is wrapped in `read_files()`.
     
     Args:
         filepath (str): Path to CSV file.
@@ -748,7 +749,7 @@ def _read_csv(filepath, sep, columns):
 def _read_txt(filepath):
     """Reads a plain text file based on its path.
 
-    This private function is wrapped in `read_from_pathlist()`.
+    This private function is wrapped in `read_files()`.
 
     Args:
         filepath (str): Path to plain text file.
@@ -773,7 +774,7 @@ def _read_txt(filepath):
 def _read_xml(filepath, xpath_expression):
     """Reads a TEI XML file based on its path.
     
-    This private function is wrapped in `read_from_pathlist()`.
+    This private function is wrapped in `read_files()`.
     
     Args:
         filepath (str): Path to XML file.
@@ -876,10 +877,10 @@ def _remove_features_from_tokenized_document(tokenized_document, features):
     return np.delete(tokenized_document_arr, indices).tolist()
 
 
-def _stopwords_large_corpus_model(document_term_matrix, type_ids, most_frequent_tokens):
+def _list_mfw_large_corpus_model(document_term_matrix, type_ids, most_frequent_tokens):
     """Determines stopwords in large corpus model.
 
-    This private function is wrapped in :func:`find_stopwords()`.
+    This private function is wrapped in :func:`list_mfw()`.
 
     Args:
         document_term_matrix (pandas.DataFrame): A document-term matrix.
@@ -893,7 +894,7 @@ def _stopwords_large_corpus_model(document_term_matrix, type_ids, most_frequent_
         >>> document_labels = ['document']
         >>> tokenized_corpus = [['hapax', 'stopword', 'stopword']]
         >>> document_term_matrix, _, type_ids = create_document_term_matrix(tokenized_corpus, document_labels, large_corpus=True)
-        >>> find_stopwords(document_term_matrix, 1, type_ids)
+        >>> list_mfw(document_term_matrix, 1, type_ids)
         ['stopword']
     """
     id2type = {id_: type_ for type_, id_ in type_ids.items()}
