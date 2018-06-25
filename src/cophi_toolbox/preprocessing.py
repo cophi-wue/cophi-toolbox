@@ -88,7 +88,7 @@ def create_document_term_matrix(tokenized_corpus, document_labels, large_corpus=
             very large. Defaults to False.
 
     Returns:
-        Document-term matrix as pandas DataFrame.
+        A sorted Document-term matrix as pandas DataFrame.
 
     Example:
         >>> tokenized_corpus = [['this', 'is', 'document', 'one'], ['this', 'is', 'document', 'two']]
@@ -187,9 +187,10 @@ def list_mfw(document_term_matrix, most_frequent_tokens=100, type_ids=None):
     matrix.
     Use the function :func:`create_document_term_matrix()` to create a \
     document-term matrix.
+	A sorted document-term-matrix is needed for this function to work properly.
 
     Args:
-        document_term_matrix (pandas.DataFrame): A document-term matrix.
+        document_term_matrix (pandas.DataFrame): A sorted document-term matrix.
         most_frequent_tokens (int, optional): Treshold for most frequent tokens.
         type_ids (dict): If ``document_term_matrix`` is designed for large corpora,
             you have to commit ``type_ids``, too.
