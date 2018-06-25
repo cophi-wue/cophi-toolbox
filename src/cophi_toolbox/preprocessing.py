@@ -580,7 +580,9 @@ def sort_doc_term_matrix(document_term_matrix, ascending = False):
         ...         'example' : pd.Series([0, 1], index=['document_one', 'document_two'])}
         >>> unsorted_doc_term_matrix = pd.DataFrame(data)
         >>> sort_doc_term_matrix(unsorted_doc_term_matrix)
-
+					  this  is  an  example
+        document_one     3	 2   1        0
+        document_two	 1 	 2   1        1
     """
     document_term_matrix = document_term_matrix.loc[:, document_term_matrix.sum().sort_values(ascending=ascending).index]
     return document_term_matrix
