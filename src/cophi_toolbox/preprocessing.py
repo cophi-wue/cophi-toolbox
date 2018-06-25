@@ -557,6 +557,33 @@ def tokenize(document, pattern=r'\p{L}+\p{P}?\p{L}+', lower=True):
     tokenized_document = compiled_pattern.finditer(document)
     for match in tokenized_document:
         yield match.group()
+		
+		
+def sort_doc_term_matrix(document_term_matrix, ascending = False):
+    """Sorts a document-term-matrix. Use this function,
+    if you wish to sort a Document-term matrix which was not created
+    by :func:`create_document_term_matrix()`.
+
+    This function is wrapped in :func:`_create_small_corpus_model()`.
+
+    Args:
+        document_term_matrix: Document-term matrix as pandas DataFrame.
+        ascending (bool): Sort ascending vs. descending. Defaults to False (recommended).
+
+    Returns:
+        A sorted Document-term matrix as pandas DataFrame.
+
+    Example:
+        >>> data = {'this' : pd.Series([3, 1], index=['document_one', 'document_two']),
+        ...         'is' : pd.Series([2, 2], index=['document_one', 'document_two']),
+        ...         'an' : pd.Series([1, 1], index=['document_one', 'document_two']),
+        ...         'example' : pd.Series([0, 1], index=['document_one', 'document_two'])}
+        >>>unsorted_doc_term_matrix = pd.DataFrame(data)
+        >>>sort_doc_term_matrix(unsorted_doc_term_matrix)
+
+    """
+    document_term_matrix = document_term_matrix.loc[:, document_term_matrix.sum().sort_values(ascending=ascending).index]
+    return document_term_matrix
 
 
 def _create_bag_of_words(document_labels, tokenized_corpus):
@@ -683,7 +710,7 @@ def _create_small_corpus_model(tokenized_corpus, document_labels):
         current_document = pd.Series(Counter(tokenized_document))
         current_document.name = document_label
         document_term_matrix = document_term_matrix.append(current_document)
-    document_term_matrix = document_term_matrix.loc[:, document_term_matrix.sum().sort_values(ascending=False).index]
+    document_term_matrix = sort_doc_term_matrix(document_term_matrix)
     return document_term_matrix.fillna(0)
 
 
