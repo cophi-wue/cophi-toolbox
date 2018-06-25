@@ -578,8 +578,8 @@ def sort_doc_term_matrix(document_term_matrix, ascending = False):
         ...         'is' : pd.Series([2, 2], index=['document_one', 'document_two']),
         ...         'an' : pd.Series([1, 1], index=['document_one', 'document_two']),
         ...         'example' : pd.Series([0, 1], index=['document_one', 'document_two'])}
-        >>>unsorted_doc_term_matrix = pd.DataFrame(data)
-        >>>sort_doc_term_matrix(unsorted_doc_term_matrix)
+        >>> unsorted_doc_term_matrix = pd.DataFrame(data)
+        >>> sort_doc_term_matrix(unsorted_doc_term_matrix)
 
     """
     document_term_matrix = document_term_matrix.loc[:, document_term_matrix.sum().sort_values(ascending=ascending).index]
