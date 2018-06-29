@@ -6,21 +6,22 @@ This module provides corpus model objects to manage and process
 text data in Python.
 """
 
-import logging
+from . import utils
+
 import pathlib
-import utils
 import collections
-from typing import Generator, Optional, List, Iterable, Union
+import itertools
+from typing import Optional, Iterable
 from dataclasses import dataclass
+
 from lxml import etree
 import pandas as pd
 import regex as re
-import itertools
 
 
 @dataclass
 class Token:
-    document: str
+    document: Optional[str] = None
     pattern: str = r"\p{L}+\p{P}?\p{L}+"
     maximum: Optional[int] = None
     lowercase: bool = True
@@ -37,6 +38,18 @@ class Token:
         if self.ngrams > 1:
             self.tokens = utils.get_ngrams(self.tokens, n=self.ngrams)
 
+    def drop(self, features: Iterable[str]):
+        self.tokens = (token for token in self.tokens if token not in features)
+
+    def to_disk(self, filepath: str, encoding: str, sep: str = "\n"):
+        with pathlib.Path(filepath).open("w", encoding=encoding) as file:
+            for token in self.tokens:
+                file.write(token + sep)
+
+    def from_disk(self, filepath: str, encoding: str, sep: str = "\n"):
+        with pathlib.Path(filepath).open("r", encoding=encoding) as file:
+            self.tokens = iter(file.read().split(sep))
+
 
 @dataclass
 class Document:
@@ -44,36 +57,41 @@ class Document:
     treat_as: str = ".txt"
     encoding: str = "utf-8"
 
-    def txt(self) -> str:
+    def read_txt(self):
         p = pathlib.Path(self.filepath)
         self.name = p.stem
-        self.text = p.read_text(encoding=self.encoding)
+        self.document = p.read_text(encoding=self.encoding)
 
-    def xml(self, parser=etree.XMLParser, _path=None,
-                 namespaces=dict(tei="http://www.tei-c.org/ns/1.0")) -> Union[list, str]:
+    def read_xml(self, parser: etree.Parser = etree.XMLParser(), _path: str = None,
+                 namespaces: dict = dict(tei="http://www.tei-c.org/ns/1.0")):
         self.read_txt(self.filepath)
-        tree = etree.fromstring(self.text, parser=parser)
+        tree = etree.fromstring(self.document, parser=parser)
         if _path is None:
-            self.text = " ".join(tree.itertext())
+            self.document = " ".join(tree.itertext())
         else:
-            self.text = tree.xpath(_path, namespaces=namespaces)
+            self.document = tree.xpath(_path, namespaces=namespaces)
 
-    def read(self) -> pd.Series:
+    def from_disk(self):
         if self.treat_as == ".txt":
-            self.txt()
+            self.read_txt()
         elif self.treat_as == ".xml":
-            self.xml()
+            self.read_xml()
         else:
             raise ValueError("The file format '{}' is not supported. "
                              "Try '.txt', or '.xml'.".format(self.treat_as))
 
-    def split_paragraphs(self, sep=re.compile(r"\n")):
+    def to_disk(self, filepath: str):
+        with pathlib.Path(filepath).open("w", encoding=encoding) as file:
+            file.write(self.document)
+
+    def paragraphs(self, sep: re.compile = re.compile(r"\n")):
         if not hasattr(sep, 'match'):
             sep = re.compile(sep)
-        splitted = sep.split(self.text)
+        splitted = sep.split(self.document)
         self.paragraphs = list(filter(str.strip, splitted))
 
-    def segment(self, segment_size=1000, tolerance=0.05, flatten_chunks=True):
+    def segment(self, segment_size: int = 1000, tolerance: float = 0.05,
+                flatten_chunks: bool = True):
         segments = utils.segment_fuzzy([self.paragraphs],
                                        segment_size,
                                        tolerance)
@@ -82,23 +100,35 @@ class Document:
                 def flatten_chunks(segment):
                     return list(itertools.chain.from_iterable(segment))
             segments = map(flatten_chunks, segments)
-        self.segments = list(segments)
+        self.segments = segments
 
 
 @dataclass
 class Corpus:
-    tokenized_documents: Iterable[Iterable[str]]
+    tokens: Iterable[pd.Series[str]]
 
-    def document_term_matrix(self) -> pd.DataFrame:
+    def dtm(self):
         self.model = pd.DataFrame({document.name: utils.count_tokens(document)
-                                   for document in self.tokenized_documents}).T
-        self.model = self.model.fillna(0)
+                                   for document in self.tokens}).T.fillna(0)
 
-    def get_mfw(self):
-        self.mfw = None
+    def mm(self):
+        self.model = None
 
-    def get_hapax_legomena(self):
-        self.hl = None
+    def sort(self, ascending: bool = False):
+        self.model = self.model.loc[:, self.model.sum().sort_values(ascending=ascending).index]
 
-    def drop_features(self, features: Iterable[str]):
-        self.dtm = None
+    def get_mfw(self, threshold: int = 100):
+        self.mfw = list(self.model.iloc[:, :threshold].columns)
+
+    def get_hl(self):
+        self.hl = list(self.model.loc[:, self.model.max() == 1].columns)
+
+    def drop(self, features: Iterable[str]):
+        features = [token for token in features if token in self.model.columns]
+        self.model = self.model.drop(features, axis=1)
+
+    def to_disk(self, filepath: str, **kwargs: str):
+        self.model.to_csv(filepath, **kwargs)
+
+    def from_disk(self, filepath: str, **kwargs: str):
+        self.model = pd.read_csv(filepath, **kwargs)

@@ -5,11 +5,11 @@ cophi_toolbox.api
 This module implements the cophi_toolbox API.
 """
 
-import model
-from typing import Generator
+from . import model
+from typing import Generator, Union
 
 
-def tokens(document: str, **kwargs):
+def token(document: str, **kwargs: str) -> model.Token:
     """Represents a document on the token level.
 
     Parameters:
@@ -23,10 +23,10 @@ def tokens(document: str, **kwargs):
         A Token object.
 
     Example:
-        >>> t = tokens("Everything's gone green.")
+        >>> t = token("Everything's gone green.")
         >>> t.document
         "Everything's gone green."
-        >>> t.tokens
+        >>> list(t.tokens)
         ["everything's", 'gone', 'green']
     """
     t = model.Token(document, **kwargs)
@@ -35,7 +35,7 @@ def tokens(document: str, **kwargs):
     return t
 
 
-def document(filepath: str, **kwargs):
+def document(filepath: str, **kwargs: str) -> model.Document:
     """Represents a document on the document level.
 
     Parameters:
@@ -47,28 +47,42 @@ def document(filepath: str, **kwargs):
         A Document object.
 
     Example:
-        >>> d = document("~/corpus/goethe_werther.txt")
+        >>> d = document("corpus/goethe_werther.txt")
         >>> d.name
         "goethe_werther"
-        >>> d.text
+        >>> d.document
         "Wie froh bin ich, ..."
         >>> d.paragraphs
-        blabla
+        ['Wie froh bin ich, ...', ...]
         >>> d.segments
-        blabla
+        ['Wie froh bin ich, ...', ...]
     """
     d = model.Document(filepath, **kwargs)
-    d.read()
+    d.from_disk()
     d.split_paragraphs()
     d.segment()
     return d
 
-def corpus(files, **kwargs):
+def corpus(tokens: Iterable[pd.Series[str]]) -> model.Corpus:
     """Represents a corpus on the corpus level.
 
     Parameters:
-        files:
+        tokens: 
+
+    Returns:
+        A Corpus object.
+
+    Example:
+        >>> c = corpus([["everything's", 'gone', 'green']])
+        >>> c.model
+
+        >>> c.mfw(1)
+
+        >>> c.hl
+
     """
-    c = model.Corpus(**kwargs)
-    c.process(files)
+    c = model.Corpus(tokenized_documents)
+    c.document_term_matrix()
+    c.get_mfw()
+    c.get_hapax_legomena()
     return c
