@@ -73,7 +73,7 @@ def corpus(tokens: Iterable[pd.Series]) -> model.Corpus:
         >>> import pandas as pd
         >>> s = pd.Series(["everything's", "gone", "green", "green"], name="doc")
         >>> c = corpus([s])
-        >>> c.model  # +NORMALIZE_WHITESPACE
+        >>> c.model  # doctest: +NORMALIZE_WHITESPACE
              everything's  gone  green
         doc             1     1      2
         >>> c.mfw(threshold=1)  # defaults to 100
