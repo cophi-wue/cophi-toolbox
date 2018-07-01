@@ -92,7 +92,7 @@ class Document:
         self.name = p.stem
         self.document = p.read_text(encoding=self.encoding)
 
-    def read_xml(self, parser: etree.XMLParser = etree.XMLParser(), _path: str = None,
+    def read_xml(self, parser: etree.XMLParser = etree.XMLParser(), _path: Optional[str] = None,
                  namespaces: dict = dict(tei="http://www.tei-c.org/ns/1.0")):
         """Read and parse XML file from disk, instance document object, wrapped in :func:`from_disk()`.
 
@@ -161,27 +161,60 @@ class Corpus:
     tokens: Iterable[pd.Series]
 
     def dtm(self):
+        """Create classic document-term matrix, instance model object.
+
+        Note:
+            * Not recommended for very extensive corpora.
+        """
         self.model = pd.DataFrame({document.name: utils.count_tokens(document)
                                    for document in self.tokens}).T.fillna(0)
 
     def mm(self):
-        self.model = None
+        """Create Matrix Market corpus format, instance model object.
+
+        Note:
+            * Recommended for very extensive corpora.
+        """
+        raise NotImplementedError
 
     def sort(self, ascending: bool = False):
+        """Sort corpus model by frequency.
+        """
         self.model = self.model.loc[:, self.model.sum().sort_values(ascending=ascending).index]
 
     def get_mfw(self, threshold: int = 100):
+        """Get the most frequent words from corpus object.
+        """
         self.mfw = list(self.model.iloc[:, :threshold].columns)
 
     def get_hl(self):
+        """Get hapax legomena from corpus object.
+        """
         self.hl = list(self.model.loc[:, self.model.max() == 1].columns)
 
     def drop(self, features: Iterable[str]):
+        """Drop features (tokens, or words) from model object.
+
+        Parameters:
+            features: Tokens to remove from the tokens object.
+        """
         features = [token for token in features if token in self.model.columns]
         self.model = self.model.drop(features, axis=1)
 
     def to_disk(self, filepath: str, **kwargs: str):
+        """Write corpus model object to disk.
+
+        Parameters:
+            filepath: Path to text file.
+            **kwargs: See :func:`pd.DataFrame().to_csv()`.
+        """
         self.model.to_csv(filepath, **kwargs)
 
     def from_disk(self, filepath: str, **kwargs: str):
+        """Read corpus model object from disk.
+
+        Parameters:
+            filepath: Path to text file.
+            **kwargs: See :func:`pd.read_csv()`.
+        """
         self.model = pd.read_csv(filepath, **kwargs)
