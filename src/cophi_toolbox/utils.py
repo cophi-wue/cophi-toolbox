@@ -6,14 +6,14 @@ This module provides low-level helper functions to manage and
 process text data in Python.
 """
 
-from typing import Iterable, Generator
+from typing import Iterable, Generator, Optional
 import collections
 
 import pandas as pd
 import regex as re
 
 
-def get_ngrams(tokens: Iterable[str], n: int = 2, sep: str = " ") -> Generator[str]:
+def get_ngrams(tokens: Iterable[str], n: int = 2, sep: str = " ") -> Generator[str, None, None]:
     """Construct ngrams.
 
     Parameters:
@@ -26,7 +26,7 @@ def get_ngrams(tokens: Iterable[str], n: int = 2, sep: str = " ") -> Generator[s
     """
     return (sep.join(ngram) for ngram in zip(*[tokens[i:] for i in range(n)]))
 
-def count_tokens(tokens: Iterable[str]) -> pd.Series[str]:
+def count_tokens(tokens: Iterable[str]) -> pd.Series:
     """Count tokens.
 
     Parameters:
@@ -38,7 +38,7 @@ def count_tokens(tokens: Iterable[str]) -> pd.Series[str]:
     return pd.Series(collections.Counter(tokens))
 
 def find_tokens(document: str, pattern: str = r"\p{L}+\p{P}?\p{L}+",
-                maximum: Optional[int] = None) -> Generator[str]:
+                maximum: Optional[int] = None) -> Generator[str, None, None]:
     """Find tokens from a pattern.
 
     Parameters:
@@ -56,7 +56,7 @@ def find_tokens(document: str, pattern: str = r"\p{L}+\p{P}?\p{L}+",
         if maximum is not None and count >= maximum:
             return
 
-def segment_fuzzy(paragraphs, segment_size=1000, tolerance=0.05) -> Generator[list]:
+def segment_fuzzy(paragraphs, segment_size=1000, tolerance=0.05) -> Generator[list, None, None]:
     """Segment a string, respecting paragraphs.
 
     Parameters:

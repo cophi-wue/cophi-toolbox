@@ -6,11 +6,14 @@ This module implements the cophi_toolbox API.
 """
 
 from . import model
-from typing import Generator, Union
+
+from typing import Generator, Union, Iterable
+
+import pandas as pd
 
 
 def token(document: str, **kwargs: str) -> model.Token:
-    """Represents a document on the token level.
+    """Represent a document on the token level.
 
     Parameters:
         document: String to be tokenized.
@@ -36,7 +39,7 @@ def token(document: str, **kwargs: str) -> model.Token:
 
 
 def document(filepath: str, **kwargs: str) -> model.Document:
-    """Represents a document on the document level.
+    """Represent a document on the document level.
 
     Parameters:
         filepath: Path to text file.
@@ -52,22 +55,18 @@ def document(filepath: str, **kwargs: str) -> model.Document:
         "goethe_werther"
         >>> d.document
         "Wie froh bin ich, ..."
-        >>> d.paragraphs
-        ['Wie froh bin ich, ...', ...]
-        >>> d.segments
-        ['Wie froh bin ich, ...', ...]
     """
     d = model.Document(filepath, **kwargs)
     d.from_disk()
-    d.split_paragraphs()
+    d.paragraphs()
     d.segment()
     return d
 
-def corpus(tokens: Iterable[pd.Series[str]]) -> model.Corpus:
-    """Represents a corpus on the corpus level.
+def corpus(tokens: Iterable[pd.Series]) -> model.Corpus:
+    """Represent a corpus on the corpus level.
 
     Parameters:
-        tokens: 
+        tokens: Tokenized corpus.
 
     Returns:
         A Corpus object.

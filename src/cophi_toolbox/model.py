@@ -86,7 +86,7 @@ class Document:
                              "Try '.txt', or '.xml'.".format(self.treat_as))
 
     def read_txt(self):
-        """Read plain text file from disk, instance document object, wrapped in :func:`from_disk()`.
+        """Read plain text file from disk, construct document object, wrapped in :func:`from_disk()`.
         """
         p = pathlib.Path(self.filepath)
         self.name = p.stem
@@ -94,7 +94,7 @@ class Document:
 
     def read_xml(self, parser: etree.XMLParser = etree.XMLParser(), _path: Optional[str] = None,
                  namespaces: dict = dict(tei="http://www.tei-c.org/ns/1.0")):
-        """Read and parse XML file from disk, instance document object, wrapped in :func:`from_disk()`.
+        """Read and parse XML file from disk, construct document object, wrapped in :func:`from_disk()`.
 
         Parameters:
             parser: Overwrite default parser with this.
@@ -125,8 +125,8 @@ class Document:
         with pathlib.Path(filepath).open("w", encoding=encoding) as file:
             file.write(self.document)
 
-    def paragraphs(self, sep: Union(re.compile, str): re.compile(r"\n")):
-        """Split document object by paragraphs, instance chunks object.
+    def paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")):
+        """Split document object by paragraphs, construct chunks object.
 
         Parameters:
             sep: Separator between paragraphs.
@@ -161,7 +161,7 @@ class Corpus:
     tokens: Iterable[pd.Series]
 
     def dtm(self):
-        """Create classic document-term matrix, instance model object.
+        """Create classic document-term matrix, construct model object.
 
         Note:
             * Not recommended for very extensive corpora.
@@ -170,7 +170,7 @@ class Corpus:
                                    for document in self.tokens}).T.fillna(0)
 
     def mm(self):
-        """Create Matrix Market corpus format, instance model object.
+        """Create Matrix Market corpus format, construct model object.
 
         Note:
             * Recommended for very extensive corpora.
