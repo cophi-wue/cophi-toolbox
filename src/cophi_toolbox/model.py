@@ -125,7 +125,7 @@ class Document:
         with pathlib.Path(filepath).open("w", encoding=encoding) as file:
             file.write(self.document)
 
-    def paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")):
+    def get_paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")):
         """Split document object by paragraphs, construct chunks object.
 
         Parameters:
@@ -136,7 +136,7 @@ class Document:
         splitted = sep.split(self.document)
         self.chunks = filter(str.strip, splitted)
 
-    def segment(self, segment_size: int = 1000, tolerance: float = 0.05,
+    def get_segments(self, segment_size: int = 1000, tolerance: float = 0.05,
                 flatten_chunks: bool = True):
         """Segment chunks object, respecting a tolerance threshold value.
 
@@ -158,7 +158,7 @@ class Document:
 
 @dataclass
 class Corpus:
-    tokens: Iterable[pd.Series]
+    tokens: Optional[Iterable[pd.Series]] = None
 
     def dtm(self):
         """Create classic document-term matrix, construct model object.
@@ -170,7 +170,7 @@ class Corpus:
                                    for document in self.tokens}).T.fillna(0)
 
     def mm(self):
-        """Create Matrix Market corpus format, construct model object.
+        """Create Matrix Market corpus model, construct model object.
 
         Note:
             * Recommended for very extensive corpora.
@@ -185,12 +185,13 @@ class Corpus:
     def get_mfw(self, threshold: int = 100):
         """Get the most frequent words from corpus object.
         """
-        self.mfw = list(self.model.iloc[:, :threshold].columns)
+        self.sort()
+        self.mfw = iter(self.model.iloc[:, :threshold].columns)
 
     def get_hl(self):
         """Get hapax legomena from corpus object.
         """
-        self.hl = list(self.model.loc[:, self.model.max() == 1].columns)
+        self.hl = iter(self.model.loc[:, self.model.max() == 1].columns)
 
     def drop(self, features: Iterable[str]):
         """Drop features (tokens, or words) from model object.

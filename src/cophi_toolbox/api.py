@@ -2,13 +2,11 @@
 cophi_toolbox.api
 ~~~~~~~~~~~~~~~~~
 
-This module implements the cophi_toolbox API.
+This module implements the high-level cophi_toolbox API.
 """
 
 from . import model
-
 from typing import Generator, Union, Iterable
-
 import pandas as pd
 
 
@@ -50,16 +48,16 @@ def document(filepath: str, **kwargs: str) -> model.Document:
         A Document object.
 
     Example:
-        >>> d = document("corpus/goethe_werther.txt")
+        >>> d = document("corpus/document.txt")
         >>> d.name
-        "goethe_werther"
+        "document"
         >>> d.document
-        "Wie froh bin ich, ..."
+        "Everything's gone green."
     """
     d = model.Document(filepath, **kwargs)
     d.from_disk()
-    d.paragraphs()
-    d.segment()
+    d.get_paragraphs()
+    d.get_segments()
     return d
 
 def corpus(tokens: Iterable[pd.Series]) -> model.Corpus:
@@ -72,16 +70,21 @@ def corpus(tokens: Iterable[pd.Series]) -> model.Corpus:
         A Corpus object.
 
     Example:
-        >>> c = corpus([["everything's", 'gone', 'green']])
-        >>> c.model
-
-        >>> c.mfw(1)
-
-        >>> c.hl
+        >>> import pandas as pd
+        >>> s = pd.Series(["everything's", "gone", "green", "green"], name="doc")
+        >>> c = corpus([s])
+        >>> c.model  # +NORMALIZE_WHITESPACE
+             everything's  gone  green
+        doc             1     1      2
+        >>> c.mfw(threshold=1)  # defaults to 100
+        >>> list(c.mfw)
+        ["green"]
+        >>> list(c.hl)
+        ["everything's", "gone"]
 
     """
-    c = model.Corpus(tokenized_documents)
-    c.document_term_matrix()
+    c = model.Corpus(tokens)
+    c.dtm()
     c.get_mfw()
-    c.get_hapax_legomena()
+    c.get_hl()
     return c
