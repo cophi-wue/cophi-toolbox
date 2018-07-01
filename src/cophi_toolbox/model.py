@@ -2,8 +2,8 @@
 cophi_toolbox.model
 ~~~~~~~~~~~~~~~~~~~
 
-This module provides corpus model objects to manage and process 
-text data in Python.
+This module provides low-level corpus model objects to manage and 
+process text data in Python.
 """
 
 from . import utils
@@ -11,7 +11,7 @@ from . import utils
 import pathlib
 import collections
 import itertools
-from typing import Optional, Iterable
+from typing import Optional, Iterable, Union
 from dataclasses import dataclass
 
 from lxml import etree
@@ -28,42 +28,79 @@ class Token:
     ngrams: int = 1
 
     def tokenize(self):
+        """Tokenize document object.
+        """
         self.tokens = utils.find_tokens(self.document,
                                         self.pattern,
                                         self.maximum)
 
     def postprocess(self):
+        """Postprocess tokens object.
+        """
         if self.lowercase:
             self.tokens = (token.lower() for token in self.tokens)
         if self.ngrams > 1:
             self.tokens = utils.get_ngrams(self.tokens, n=self.ngrams)
 
     def drop(self, features: Iterable[str]):
+        """Drop features (tokens, or words) from tokens object.
+
+        Parameters:
+            features: Tokens to remove from the tokens object.
+        """
         self.tokens = (token for token in self.tokens if token not in features)
 
     def to_disk(self, filepath: str, encoding: str, sep: str = "\n"):
+        """Write tokens object to a text file, tokens separated with `sep`.
+
+        Parameters:
+            filepath: Path to text file.
+            encoding: Encoding to use for UTF when writing.
+            sep: Separator between two tokens.
+        """
         with pathlib.Path(filepath).open("w", encoding=encoding) as file:
             for token in self.tokens:
                 file.write(token + sep)
 
     def from_disk(self, filepath: str, encoding: str, sep: str = "\n"):
+        """Read tokens object from a text file, tokens separated with `sep`.
+
+        Parameters:
+            filepath: Path to text file.
+            encoding: Encoding to use for UTF when reading.
+            sep: Separator between two tokens.
+        """
         with pathlib.Path(filepath).open("r", encoding=encoding) as file:
             self.tokens = iter(file.read().split(sep))
 
 
 @dataclass
 class Document:
-    filepath: str
+    filepath: Optional[str] = None
     treat_as: str = ".txt"
     encoding: str = "utf-8"
 
+    def __post_init__(self):
+        if self.treat_as not in [".txt", ".xml"]:
+            raise ValueError("The file format '{}' is not supported. "
+                             "Try '.txt', or '.xml'.".format(self.treat_as))
+
     def read_txt(self):
+        """Read plain text file from disk, instance document object, wrapped in :func:`from_disk()`.
+        """
         p = pathlib.Path(self.filepath)
         self.name = p.stem
         self.document = p.read_text(encoding=self.encoding)
 
-    def read_xml(self, parser: etree.Parser = etree.XMLParser(), _path: str = None,
+    def read_xml(self, parser: etree.XMLParser = etree.XMLParser(), _path: str = None,
                  namespaces: dict = dict(tei="http://www.tei-c.org/ns/1.0")):
+        """Read and parse XML file from disk, instance document object, wrapped in :func:`from_disk()`.
+
+        Parameters:
+            parser: Overwrite default parser with this.
+            _path: Evaluate this XPath expression using the document as context node.
+            namespaces: Namespaces for the XPath expression.
+        """
         self.read_txt(self.filepath)
         tree = etree.fromstring(self.document, parser=parser)
         if _path is None:
@@ -72,26 +109,42 @@ class Document:
             self.document = tree.xpath(_path, namespaces=namespaces)
 
     def from_disk(self):
+        """Read document object from a text file.
+        """
         if self.treat_as == ".txt":
             self.read_txt()
         elif self.treat_as == ".xml":
             self.read_xml()
-        else:
-            raise ValueError("The file format '{}' is not supported. "
-                             "Try '.txt', or '.xml'.".format(self.treat_as))
 
     def to_disk(self, filepath: str):
+        """Write document object to a text file.
+
+        Parameters:
+            filepath: Path to text file.
+        """
         with pathlib.Path(filepath).open("w", encoding=encoding) as file:
             file.write(self.document)
 
-    def paragraphs(self, sep: re.compile = re.compile(r"\n")):
-        if not hasattr(sep, 'match'):
+    def paragraphs(self, sep: Union(re.compile, str): re.compile(r"\n")):
+        """Split document object by paragraphs, instance chunks object.
+
+        Parameters:
+            sep: Separator between paragraphs.
+        """
+        if not hasattr(sep, "match"):
             sep = re.compile(sep)
         splitted = sep.split(self.document)
-        self.paragraphs = list(filter(str.strip, splitted))
+        self.chunks = filter(str.strip, splitted)
 
     def segment(self, segment_size: int = 1000, tolerance: float = 0.05,
                 flatten_chunks: bool = True):
+        """Segment chunks object, respecting a tolerance threshold value.
+
+        Parameters:
+            segment_size: 
+            tolerance: 
+            flatten_chunks: 
+        """
         segments = utils.segment_fuzzy([self.paragraphs],
                                        segment_size,
                                        tolerance)
@@ -105,7 +158,7 @@ class Document:
 
 @dataclass
 class Corpus:
-    tokens: Iterable[pd.Series[str]]
+    tokens: Iterable[pd.Series]
 
     def dtm(self):
         self.model = pd.DataFrame({document.name: utils.count_tokens(document)
