@@ -92,21 +92,28 @@ def pipe(directory: str, encoding: str = "utf-8", suffix: str = ".txt",
          treat_as: str = ".txt", pattern: str = r"\p{L}+\p{P}?\p{L}+",
          maximum: Optional[int] = None, lowercase: bool = True,
          ngrams: int = 1) -> model.Corpus:
-         """Pipe files in a directory to the corpus model.
+    """Pipe files in a directory to the corpus model.
 
-         Parameters:
-            directory:
-            encoding: Encoding to use for UTF when reading.
-            suffix:
-            treat_as: Treat a file like one with this suffix.
-            pattern: Regular expression token pattern.
-            maximum: If set, stop reading after that many words.
-            lowercase: If True, normalize all tokens to lowercase.
-            ngrams: Ngram size.
+    Parameters:
+        directory:
+        encoding: Encoding to use for UTF when reading.
+        suffix:
+        treat_as: Treat a file like one with this suffix.
+        pattern: Regular expression token pattern.
+        maximum: If set, stop reading after that many words.
+        lowercase: If True, normalize all tokens to lowercase.
+        ngrams: Ngram size.
 
-        Returns:
-            A Corpus model object.
-         """
+    Returns:
+        A Corpus model object.
+
+    Example:
+        >>> c = pipe("/home/user/corpus")
+        >>> c.dtm()
+        >>> c.model  # doctest: +NORMALIZE_WHITESPACE
+         everything's  gone  green
+    doc             1     1      2
+    """
     glob = pathlib.Path(directory).glob("**/*{}".format(suffix))
     def lazy_reading(glob):
         for filepath in glob:
