@@ -21,16 +21,16 @@ import regex as re
 
 @dataclass
 class Token:
-    document: Optional[str] = None
+    text: Optional[str] = None
     pattern: str = r"\p{L}+\p{P}?\p{L}+"
     maximum: Optional[int] = None
     lowercase: bool = True
     ngrams: int = 1
 
     def tokenize(self):
-        """Tokenize document object.
+        """Tokenize text object.
         """
-        self.tokens = utils.find_tokens(self.document,
+        self.tokens = utils.find_tokens(self.text,
                                         self.pattern,
                                         self.maximum)
 
@@ -86,30 +86,30 @@ class Document:
                              "Try '.txt', or '.xml'.".format(self.treat_as))
 
     def read_txt(self):
-        """Read plain text file from disk, construct document object, wrapped in :func:`from_disk()`.
+        """Read plain text file from disk, construct text object, wrapped in :func:`from_disk()`.
         """
         p = pathlib.Path(self.filepath)
         self.name = p.stem
-        self.document = p.read_text(encoding=self.encoding)
+        self.text = p.read_text(encoding=self.encoding)
 
     def read_xml(self, parser: etree.XMLParser = etree.XMLParser(), _path: Optional[str] = None,
                  namespaces: dict = dict(tei="http://www.tei-c.org/ns/1.0")):
-        """Read and parse XML file from disk, construct document object, wrapped in :func:`from_disk()`.
+        """Read and parse XML file from disk, construct text object, wrapped in :func:`from_disk()`.
 
         Parameters:
             parser: Overwrite default parser with this.
-            _path: Evaluate this XPath expression using the document as context node.
+            _path: Evaluate this XPath expression using the text as context node.
             namespaces: Namespaces for the XPath expression.
         """
         self.read_txt(self.filepath)
-        tree = etree.fromstring(self.document, parser=parser)
+        tree = etree.fromstring(self.text, parser=parser)
         if _path is None:
-            self.document = " ".join(tree.itertext())
+            self.text = " ".join(tree.itertext())
         else:
-            self.document = tree.xpath(_path, namespaces=namespaces)
+            self.text = tree.xpath(_path, namespaces=namespaces)
 
     def from_disk(self):
-        """Read document object from a text file.
+        """Read text object from a text file.
         """
         if self.treat_as == ".txt":
             self.read_txt()
@@ -117,23 +117,23 @@ class Document:
             self.read_xml()
 
     def to_disk(self, filepath: str):
-        """Write document object to a text file.
+        """Write text object to a text file.
 
         Parameters:
             filepath: Path to text file.
         """
         with pathlib.Path(filepath).open("w", encoding=encoding) as file:
-            file.write(self.document)
+            file.write(self.text)
 
     def get_paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")):
-        """Split document object by paragraphs, construct chunks object.
+        """Split text object by paragraphs, construct chunks object.
 
         Parameters:
             sep: Separator between paragraphs.
         """
         if not hasattr(sep, "match"):
             sep = re.compile(sep)
-        splitted = sep.split(self.document)
+        splitted = sep.split(self.text)
         self.chunks = filter(str.strip, splitted)
 
     def get_segments(self, segment_size: int = 1000, tolerance: float = 0.05,

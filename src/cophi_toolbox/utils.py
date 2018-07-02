@@ -20,11 +20,11 @@ def get_ngrams(tokens: Iterable[str], n: int = 2, sep: str = " ") -> Generator[s
         tokens: 
         n: 
         sep: 
-    
+
     Returns:
 
     """
-    return (sep.join(ngram) for ngram in zip(*[tokens[i:] for i in range(n)]))
+    return (sep.join(ngram) for ngram in zip(*[list(tokens)[i:] for i in range(n)]))
 
 def count_tokens(tokens: Iterable[str]) -> pd.Series:
     """Count tokens.
@@ -79,11 +79,9 @@ def segment_fuzzy(paragraphs, segment_size=1000, tolerance=0.05) -> Generator[li
             carry = None
             current_segment.append(chunk)
             current_size += len(chunk)
-
             if current_size >= segment_size:
                 too_long = current_size - segment_size
                 too_short = segment_size - (current_size - len(chunk))
-
                 if tolerance >= 0 and min(too_long, too_short) > tolerance:
                     chunk_part0 = chunk[:-too_long]
                     carry = chunk[-too_long:]
