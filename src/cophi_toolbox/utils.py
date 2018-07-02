@@ -17,12 +17,12 @@ def get_ngrams(tokens: Iterable[str], n: int = 2, sep: str = " ") -> Generator[s
     """Construct ngrams.
 
     Parameters:
-        tokens: 
+        tokens: An iterable of tokens.
         n: 
         sep: 
 
     Returns:
-
+        A generator of ngrams.
     """
     return (sep.join(ngram) for ngram in zip(*[list(tokens)[i:] for i in range(n)]))
 

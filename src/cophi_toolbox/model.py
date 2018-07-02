@@ -2,7 +2,7 @@
 cophi_toolbox.model
 ~~~~~~~~~~~~~~~~~~~
 
-This module provides low-level corpus model objects to manage and 
+This module provides low-level corpus model classes to manage and 
 process text data in Python.
 """
 
