@@ -47,10 +47,13 @@ class Token:
 
         Parameters:
             features: Tokens to remove from the tokens object.
+
+        Todo:
+            * :func:`filter()` might be faster, but Guido doesn't like that.
         """
         self.tokens = (token for token in self.tokens if token not in features)
 
-    def to_disk(self, filepath: str, encoding: str, sep: str = "\n"):
+    def to_disk(self, filepath: str, encoding: str = "utf-8", sep: str = "\n"):
         """Write tokens object to a text file, tokens separated with `sep`.
 
         Parameters:
@@ -69,9 +72,12 @@ class Token:
             filepath: Path to text file.
             encoding: Encoding to use for UTF when reading.
             sep: Separator between two tokens.
+
+        Todo:
+            * Use a list comprehension instead of :func:`filter()`?
         """
         with pathlib.Path(filepath).open("r", encoding=encoding) as file:
-            self.tokens = iter(file.read().split(sep))
+            self.tokens = filter(None, file.read().split(sep))
 
 
 @dataclass
@@ -101,20 +107,26 @@ class Document:
             _path: Evaluate this XPath expression using the text as context node.
             namespaces: Namespaces for the XPath expression.
         """
-        self.read_txt(self.filepath)
+        self.read_txt()
         tree = etree.fromstring(self.text, parser=parser)
         if _path is None:
             self.text = " ".join(tree.itertext())
         else:
-            self.text = tree.xpath(_path, namespaces=namespaces)
+            self.text = " ".join(tree.xpath(_path, namespaces=namespaces))
 
-    def from_disk(self):
+    def from_disk(self, **kwargs):
         """Read text object from a text file.
+
+        Parameters:
+            parser: Only if `treat_as` is `.xml`. Overwrite default XML parser with this.
+            _path: Only if `treat_as` is `.xml`. Evaluate this XPath expression using 
+                the text as context node.
+            namespaces: Only if `treat_as` is `.xml`. Namespaces for the XPath expression.
         """
         if self.treat_as == ".txt":
             self.read_txt()
         elif self.treat_as == ".xml":
-            self.read_xml()
+            self.read_xml(**kwargs)
 
     def to_disk(self, filepath: str):
         """Write text object to a text file.
@@ -122,7 +134,7 @@ class Document:
         Parameters:
             filepath: Path to text file.
         """
-        with pathlib.Path(filepath).open("w", encoding=encoding) as file:
+        with pathlib.Path(filepath).open("w", encoding=self.encoding) as file:
             file.write(self.text)
 
     def get_paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")):
@@ -130,6 +142,9 @@ class Document:
 
         Parameters:
             sep: Separator between paragraphs.
+
+        Todo:
+            * Use a list comprehension instead of :func:`filter()`?
         """
         if not hasattr(sep, "match"):
             sep = re.compile(sep)
@@ -141,11 +156,17 @@ class Document:
         """Segment chunks object, respecting a tolerance threshold value.
 
         Parameters:
-            segment_size: 
-            tolerance: 
-            flatten_chunks: 
+            segment_size: The target size of each segment, in tokens.
+            tolerance: How much may the actual segment size differ from
+                the segment_size? If ``0 < tolerance < 1``, this is interpreted as a
+                fraction of the segment_size, otherwise it is interpreted as an
+                absolute number. If ``tolerance < 0``, chunks are never split apart.
+            flatten_chunks: If True, undo the effect of the chunker by
+                chaining the chunks in each segment, thus each segment consists of
+                tokens. This can also be a one-argument function in order to
+                customize the un-chunking.
         """
-        segments = utils.segment_fuzzy([self.paragraphs],
+        segments = utils.segment_fuzzy([self.chunks],
                                        segment_size,
                                        tolerance)
         if flatten_chunks:
@@ -164,7 +185,7 @@ class Corpus:
         """Create classic document-term matrix, construct model object.
 
         Note:
-            * Not recommended for very extensive corpora.
+            * Not recommended for very large corpora. See :meth:`mm()`.
         """
         self.model = pd.DataFrame({document.name: utils.count_tokens(document)
                                    for document in self.tokens}).T.fillna(0)
@@ -173,7 +194,7 @@ class Corpus:
         """Create Matrix Market corpus model, construct model object.
 
         Note:
-            * Recommended for very extensive corpora.
+            * Recommended for very large corpora.
         """
         raise NotImplementedError
 
@@ -218,4 +239,4 @@ class Corpus:
             filepath: Path to text file.
             **kwargs: See :func:`pd.read_csv()`.
         """
-        self.model = pd.read_csv(filepath, **kwargs)
+        self.model = pd.read_csv(filepath, index_col=0, **kwargs)
