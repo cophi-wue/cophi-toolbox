@@ -36,6 +36,9 @@ class Token:
 
     def postprocess(self):
         """Postprocess tokens object.
+
+        Todo:
+            * :func:`filter()` might be faster, but Guido doesn't like that.
         """
         if self.lowercase:
             self.tokens = (token.lower() for token in self.tokens)

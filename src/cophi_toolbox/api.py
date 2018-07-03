@@ -95,9 +95,9 @@ def pipe(directory: str, encoding: str = "utf-8", suffix: str = ".txt",
     """Pipe files in a directory to the corpus model.
 
     Parameters:
-        directory:
+        directory: Path to corpus directory.
         encoding: Encoding to use for UTF when reading.
-        suffix:
+        suffix: Suffix of text files.
         treat_as: Treat a file like one with this suffix.
         pattern: Regular expression token pattern.
         maximum: If set, stop reading after that many words.
@@ -136,4 +136,3 @@ def pipe(directory: str, encoding: str = "utf-8", suffix: str = ".txt",
         tokens.name = document.name
         corpus[document.name] = tokens
     return model.Corpus(corpus)
-
