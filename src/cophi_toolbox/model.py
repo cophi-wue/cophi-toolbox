@@ -32,13 +32,13 @@ class Textfile:
     def __post_init__(self):
         if self.treat_as not in {".txt", ".xml"}:
             raise ValueError("The file format '{}' is not supported. "
-                             "Try '.txt', or '.xml'.".format(self.treat_as))
+                             "Try '.txt', or '.xml'.".format(value))
 
     def __enter__(self):
         self.from_disk()
         return self.text
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, tb):
         del self.text
         del self.name
 
@@ -59,12 +59,12 @@ class Textfile:
             _path: Evaluate this XPath expression using the text as context node.
             namespaces: Namespaces for the XPath expression.
         """
-        self.read_txt()
+        self._read_txt()
         tree = etree.fromstring(self.text, parser=parser)
         if _path is None:
-            self.text = " ".join(tree.itertext())
+            self.text = " ".join(tree.itertext()).strip()
         else:
-            self.text = " ".join(tree.xpath(_path, namespaces=namespaces))
+            self.text = " ".join(tree.xpath(_path, namespaces=namespaces)).strip()
 
     def from_disk(self, **kwargs: str):
         """Read text object from a text file.
@@ -194,9 +194,8 @@ class Corpus:
 
     @property
     def size(self):
-        return len(self.tokens) if self.tokens
+        return len(self.tokens) if self.tokens else 0
 
-    @property
     def dtm(self, dense: bool = False):
         """Create classic document-term matrix, construct model object.
 

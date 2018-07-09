@@ -5,14 +5,14 @@ cophi_toolbox.api
 This module implements the high-level cophi_toolbox API.
 """
 
-import pathlib
 from . import model
+import pathlib
 from typing import Generator, Union, Iterable, Optional
 import pandas as pd
 
 
-def document(filepath: str, **kwargs: str) -> model.Document:
-    """Represent a document on the document level.
+def textfile(filepath: str, **kwargs: str) -> model.Textfile:
+    """Represent a text file.
 
     Parameters:
         filepath: Path to text file.
@@ -20,23 +20,14 @@ def document(filepath: str, **kwargs: str) -> model.Document:
         encoding: Encoding to use for UTF when reading.
 
     Returns:
-        A Document object.
-
-    Example:
-        >>> d = document("corpus/document.txt")
-        >>> d.name
-        "document"
-        >>> d.text
-        "Everything's gone green."
+        A Textfile object.
     """
-    d = model.Document(filepath, **kwargs)
-    d.from_disk()
-    d.get_paragraphs()
-    d.get_segments()
-    return d
+    f = model.Textfile(filepath, **kwargs)
+    f.from_disk()
+    return f
 
-def token(text: str, **kwargs: str) -> model.Token:
-    """Represent a document on the token level.
+def document(text: str, **kwargs: str) -> model.Document:
+    """Represent a document.
 
     Parameters:
         text: String to be tokenized.
@@ -47,15 +38,8 @@ def token(text: str, **kwargs: str) -> model.Token:
 
     Returns:
         A Token object.
-
-    Example:
-        >>> t = token("Everything's gone green.")
-        >>> t.text
-        "Everything's gone green."
-        >>> list(t.tokens)
-        ["everything's", 'gone', 'green']
     """
-    t = model.Token(text, **kwargs)
+    t = model.Document(text, **kwargs)
     t.tokenize()
     t.postprocess()
     return t
@@ -68,24 +52,10 @@ def corpus(tokens: Iterable[pd.Series]) -> model.Corpus:
 
     Returns:
         A Corpus object.
-
-    Example:
-        >>> import pandas as pd
-        >>> s = pd.Series(["everything's", "gone", "green", "green"], name="doc")
-        >>> c = corpus([s])
-        >>> c.model  # doctest: +NORMALIZE_WHITESPACE
-             everything's  gone  green
-        doc             1     1      2
-        >>> c.mfw(threshold=1)  # defaults to 100
-        >>> list(c.mfw)  # most frequent words
-        ["green"]
-        >>> list(c.hl)  # hapax legomena
-        ["everything's", "gone"]
     """
     c = model.Corpus(tokens)
     c.dtm()
-    c.get_mfw()
-    c.get_hl()
+    c.mfw()
     return c
 
 def pipe(directory: str, encoding: str = "utf-8", suffix: str = ".txt",
@@ -106,33 +76,17 @@ def pipe(directory: str, encoding: str = "utf-8", suffix: str = ".txt",
 
     Returns:
         A Corpus model object.
-
-    Example:
-        >>> c = pipe("/home/user/corpus")
-        >>> c.dtm()
-        >>> c.model  # doctest: +NORMALIZE_WHITESPACE
-         everything's  gone  green
-    doc             1     1      2
     """
     glob = pathlib.Path(directory).glob("**/*{}".format(suffix))
+
     def lazy_reading(glob):
         for filepath in glob:
-            d = model.Document(filepath,
-                               encoding=encoding,
-                               treat_as=treat_as)
-            d.from_disk()
-            yield d
+            yield textfile(filepath)
 
-    corpus = pd.Series()
-    for document in lazy_reading(glob):
-        t = model.Token(document.text,
-                        pattern=pattern,
-                        maximum=maximum,
-                        lowercase=lowercase,
-                        ngrams=ngrams)
-        t.tokenize()
-        t.postprocess()
-        tokens = pd.Series(t.tokens)
-        tokens.name = document.name
-        corpus[document.name] = tokens
-    return model.Corpus(corpus)
+    documents = pd.Series()
+    for document_ in lazy_reading(glob):
+        d = document(document_.text)
+        tokens = pd.Series(d.tokens)
+        tokens.name = document_.name
+        documents[document.name] = tokens
+    return corpus(documents)

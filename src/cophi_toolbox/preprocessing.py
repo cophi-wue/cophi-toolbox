@@ -72,90 +72,6 @@ logging.basicConfig(level=logging.WARNING,
                     format='%(levelname)s %(name)s: %(message)s')
 
 
-
-
-
-def filter_pos_tags(dkpro_document, pos_tags=['ADJ', 'V', 'NN'], lemma=True):
-    """Gets tokens or lemmas respectively of selected POS-tags from pandas DataFrame.
-
-    With this function you can filter `DARIAH-DKPro-Wrapper <https://github.com/DARIAH-DE/DARIAH-DKPro-Wrapper>`_ \
-    output. Commit a list of POS-tags to get specific tokens (if ``lemma`` False) \
-    or lemmas (if ``lemma`` True). 
-    Use the function :func:`read_files()` to read CSV files.
-
-    Args:
-        dkpro_document (pandas.DataFrame): DARIAH-DKPro-Wrapper output.
-        pos_tags (list, optional): List of desired POS-tags. Defaults
-            to ``['ADJ', 'V', 'NN']``.
-        lemma (bool, optional): If True, lemmas will be selected, otherwise tokens.
-            Defaults to True.
-
-    Yields:
-        A pandas DataFrame containing tokens or lemmas.
-
-    Example:
-        >>> dkpro_document = pd.DataFrame({'CPOS': ['ART', 'V', 'ART', 'NN'],
-        ...                                'Token': ['this', 'was', 'a', 'document'],
-        ...                                'Lemma': ['this', 'is', 'a', 'document']})
-        >>> list(filter_pos_tags(dkpro_document)) #doctest: +NORMALIZE_WHITESPACE
-        [1          is
-        3    document
-        Name: Lemma, dtype: object]
-    """
-    tokenized_document = dkpro_document[dkpro_document['CPOS'].isin(pos_tags)]
-    if lemma:
-        log.info("Selecting {} lemmas ...".format(pos_tags))
-        return tokenized_document['Lemma']
-    else:
-        log.info("Selecting {} tokens ...".format(pos_tags))
-        assert isinstance(tokenized_document, object)
-        return tokenized_document['Token']
-
-
-
-def read_document_term_matrix(filepath):
-    """Reads a document-term matrix from CSV file.
-
-    With this function you can read a CSV file containing a document-term \
-    matrix.
-    Use the function :func:`create_document_term_matrix()` to create a document-term \
-    matrix.
-
-    Args:
-        filepath (str): Path to CSV file.
-
-    Returns:
-        A document-term matrix as pandas DataFrame.
-    
-    Example:
-        >>> import tempfile
-        >>> with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as tmpfile:
-        ...     tmpfile.write(b',this,is,an,example,text\\ndocument,1,0,1,0,1') and True
-        ...     tmpfile.close()
-        ...     read_document_term_matrix(tmpfile.name) #doctest: +NORMALIZE_WHITESPACE
-        True
-                  this  is  an  example  text
-        document     1   0   1        0     1
-        >>> with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as tmpfile:
-        ...     tmpfile.write(b'document_id,type_id,0\\n1,1,1') and True
-        ...     tmpfile.close()
-        ...     read_document_term_matrix(tmpfile.name) #doctest: +NORMALIZE_WHITESPACE
-        True
-                             0
-        document_id type_id   
-        1           1        1
-    """
-    document_term_matrix = pd.read_csv(filepath)
-    if 'document_id' and 'type_id' in document_term_matrix:
-        return document_term_matrix.set_index(['document_id', 'type_id'])
-    else:
-        document_term_matrix = document_term_matrix.set_index('Unnamed: 0')
-        document_term_matrix.index.name = None
-        return document_term_matrix
-
-
-
-
 def _create_bag_of_words(document_labels, tokenized_corpus):
     """Creates a bag-of-words model.
 
@@ -277,41 +193,6 @@ def _hapax_legomena_large_corpus_model(document_term_matrix, type_ids):
     return [id2type[token] for token in hapax_legomena.index.get_level_values('type_id')]
 
 
-def _read_csv(filepath, sep, columns):
-    """Reads a CSV file based on its path.
-    
-    This private function is wrapped in `read_files()`.
-    
-    Args:
-        filepath (str): Path to CSV file.
-        sep (str): Separator of CSV file.
-        columns (list): Column names for the CSV file. If None, the whole file will be processed.
-
-    Returns:
-        A ``dkpro_document`` as pandas DataFrame with additional information,
-            e.g. lemmas or POS-tags.
-    
-    Example:
-        >>> import tempfile
-        >>> with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as tmpfile:
-        ...     tmpfile.write(b"Token,POS\\nThis,ART\\nis,V\\na,ART\\nCSV,NN\\nexample,NN\\n.,PUNC") and True
-        ...     tmpfile.close()
-        ...     _read_csv(tmpfile.name, ',', ['Token']) #doctest: +NORMALIZE_WHITESPACE
-        True
-              Token
-        0      This
-        1        is
-        2         a
-        3       CSV
-        4   example
-        5         .
-    """
-    log.debug("Reading columns {} of {} ...".format(columns, filepath))
-    if columns is None:
-        log.warning("No column names were specified or do not match. The whole file will be processed.")
-    return pd.read_csv(filepath, sep=sep, quoting=csv.QUOTE_NONE, usecols=columns)
-
-
 def _remove_features_from_large_corpus_model(document_term_matrix, type_ids, features):
     """Removes features from large corpus model.
 
@@ -337,29 +218,6 @@ def _remove_features_from_large_corpus_model(document_term_matrix, type_ids, fea
 
 
 
-def _remove_features_from_tokenized_document(tokenized_document, features):
-    """Removes features from a tokenized document.
-    
-    This private function is wrapped in :func:`remove_features()`.
-    
-    Args:
-        tokenized_document (list): The tokenized document to process. This is an iterable of
-            tokens.
-        features (list): An iterable of tokens.
-    
-    Returns:
-        A clean tokenized document as list.
-
-    Example:
-        >>> tokenized_document = ['token', 'stopword', 'stopword']
-        >>> features = ['stopword']
-        >>> _remove_features_from_tokenized_document(tokenized_document, features)
-        ['token']
-    """
-    tokenized_document_arr = np.array(tokenized_document)
-    features_arr = np.array(features)
-    indices = np.where(np.in1d(tokenized_document_arr, features_arr))
-    return np.delete(tokenized_document_arr, indices).tolist()
 
 
 def _list_mfw_large_corpus_model(document_term_matrix, type_ids, most_frequent_tokens):
