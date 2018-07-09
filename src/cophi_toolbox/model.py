@@ -7,7 +7,6 @@ process text data in Python.
 """
 
 from . import utils
-
 import logging
 import pathlib
 import math
@@ -15,9 +14,9 @@ import collections
 import itertools
 from typing import Optional, Iterable, Union, List
 from dataclasses import dataclass
-
 from lxml import etree
 import pandas as pd
+import numpy as np
 import regex as re
 
 logger = logging.getLogger("cophi_toolbox.model")
@@ -30,9 +29,11 @@ class Textfile:
     encoding: str = "utf-8"
 
     def __post_init__(self):
+        self.p = pathlib.Path(self.filepath)
+        self.name = self.p.stem
         if self.treat_as not in {".txt", ".xml"}:
             raise ValueError("The file format '{}' is not supported. "
-                             "Try '.txt', or '.xml'.".format(value))
+                             "Try '.txt', or '.xml'.".format(self.treat_as))
 
     def __enter__(self):
         self.from_disk()
@@ -43,12 +44,9 @@ class Textfile:
         del self.name
 
     def _read_txt(self):
-        """Read plain text file, construct text and name object. Wrapped in :func:`from_disk()`,
-        and :func:`_read_xml()`.
+        """Read plain text file, construct text and name object. Wrapped in :func:`from_disk()`.
         """
-        p = pathlib.Path(self.filepath)
-        self.name = p.stem
-        self.text = p.read_text(encoding=self.encoding)
+        self.text = self.p.read_text(encoding=self.encoding)
 
     def _read_xml(self, parser: etree.XMLParser = etree.XMLParser(), _path: Optional[str] = None,
                  namespaces: dict = dict(tei="http://www.tei-c.org/ns/1.0")):
@@ -59,10 +57,9 @@ class Textfile:
             _path: Evaluate this XPath expression using the text as context node.
             namespaces: Namespaces for the XPath expression.
         """
-        self._read_txt()
-        tree = etree.fromstring(self.text, parser=parser)
+        tree = etree.parse(self.filepath, parser=parser)
         if _path is None:
-            self.text = " ".join(tree.itertext()).strip()
+            self.text = etree.tostring(tree, method="text", encoding=str).strip()
         else:
             self.text = " ".join(tree.xpath(_path, namespaces=namespaces)).strip()
 
@@ -89,7 +86,6 @@ class Textfile:
         """
         with open(filepath, "w", encoding=self.encoding) as file:
             file.write(self.text)
-
 
 @dataclass
 class Document:
@@ -120,7 +116,7 @@ class Document:
         Parameters:
             features: Tokens to remove.
         """
-        self.tokens = (token for token in tokens if token not in features)
+        self.tokens = (token for token in self.tokens if token not in features)
 
     def get_paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")) -> Iterable[str]:
         """Split text object by paragraphs.
@@ -187,25 +183,24 @@ class Document:
         with open(filepath, "r", encoding=encoding) as file:
             self.tokens = filter(None, file.read().split(sep))
 
-
 @dataclass
 class Corpus:
     tokens: Optional[Iterable[pd.Series]] = None
 
     @property
     def size(self):
-        return len(self.tokens) if self.tokens else 0
+        return len(self.tokens) if self.tokens is not None else 0
 
-    def dtm(self, dense: bool = False):
+    def dtm(self, sparse: bool = False):
         """Create classic document-term matrix, construct model object.
 
         Parameters:
             dense: If True, create dense document-term matrix.
         """
-        self.model = pd.SparseDataFrame({document.name: utils.count_tokens(document)
-                                         for document in self.tokens}).T.fillna(0)
-        if dense:
-            self.model = self.model.to_dense()
+        self.model = pd.DataFrame({document.name: utils.count_tokens(document)
+                                   for document in self.tokens}).T.fillna(0)
+        if sparse:
+            self.model = self.model.to_sparse()
 
     def sort(self, ascending: bool = False):
         """Sort corpus model by frequency.
@@ -252,13 +247,13 @@ class Corpus:
         Returns:
             A document-term matrix with relative word frequencies.
         """
-        return self.model.div(self.model.sum(axis=1).to_sparse(), axis=0)
+        return self.model.div(self.model.sum(axis=1), axis=0)
 
     @property
     def tfidf(self):
         """Calculate TF-IDF.
 
-        Used formula is
+        Used formula is:
 
         .. math::
             \mbox{tf-idf}_{t,d} = (1 +\log \mbox{tf}_{t,d}) \cdot \log \frac{N}{\mbox{df}_t}
@@ -266,8 +261,8 @@ class Corpus:
         Returns:
             A document-term matrix with TF-IDF weighted tokens.
         """
-        tf = self.get_rel()
-        idf = math.log(self.size / self.model.astype(bool).sum(axis=0))
+        tf = self.rel_freqs
+        idf = np.log(self.size / self.model.astype(bool).sum(axis=0))
         return tf * idf
 
     def to_disk(self, filepath: str, **kwargs: str):

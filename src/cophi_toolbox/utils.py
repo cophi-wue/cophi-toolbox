@@ -6,9 +6,8 @@ This module provides low-level helper functions to manage and
 process text data in Python.
 """
 
-from typing import Iterable, Generator, Optional
+from typing import Iterable, Generator, Optional, Dict
 import collections
-
 import pandas as pd
 import regex as re
 
@@ -17,14 +16,16 @@ def get_ngrams(tokens: Iterable[str], n: int = 2, sep: str = " ") -> Generator[s
     """Construct ngrams.
 
     Parameters:
-        tokens: Tokens, obviously.
-        n: Treat `n` words as one token. 
+        tokens: The tokenized document.
+        n: Treat `n` words as one token.
         sep: Separator between words within ngrams.
 
     Returns:
         Ngrams.
     """
-    return (sep.join(ngram) for ngram in zip(*[list(tokens)[i:] for i in range(n)]))
+    if isinstance(tokens, Generator):
+        tokens = list(tokens)
+    return (sep.join(ngram) for ngram in zip(*[tokens[i:] for i in range(n)]))
 
 def count_tokens(tokens: Iterable[str]) -> pd.Series:
     """Count tokens.
@@ -99,3 +100,18 @@ def segment_fuzzy(paragraphs: Iterable[Iterable], segment_size: int = 1000,
         pass
     if current_segment:
         yield current_segment
+
+def type2id(tokens: Iterable[str], bow: dict = dict()) -> Dict[str, int]:
+    """
+
+    Parameters:
+        tokens:
+        bow:
+
+    Returns:
+
+    """
+    for token in set(tokens):
+        if token not in bow:
+            bow[token] = len(bow)
+    return bow

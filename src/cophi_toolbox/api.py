@@ -37,7 +37,7 @@ def document(text: str, **kwargs: str) -> model.Document:
         ngrams: Ngram size.
 
     Returns:
-        A Token object.
+        A Document object.
     """
     t = model.Document(text, **kwargs)
     t.tokenize()
@@ -81,12 +81,13 @@ def pipe(directory: str, encoding: str = "utf-8", suffix: str = ".txt",
 
     def lazy_reading(glob):
         for filepath in glob:
-            yield textfile(filepath)
+            yield textfile(filepath, encoding=encoding, treat_as=treat_as)
 
     documents = pd.Series()
     for document_ in lazy_reading(glob):
-        d = document(document_.text)
+        d = document(document_.text, pattern=pattern, maximum=maximum,
+                     lowercase=lowercase, ngrams=ngrams)
         tokens = pd.Series(d.tokens)
         tokens.name = document_.name
-        documents[document.name] = tokens
+        documents[document_.name] = tokens
     return corpus(documents)
