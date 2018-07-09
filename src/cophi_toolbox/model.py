@@ -8,7 +8,9 @@ process text data in Python.
 
 from . import utils
 
+import logging
 import pathlib
+import math
 import collections
 import itertools
 from typing import Optional, Iterable, Union
@@ -18,92 +20,39 @@ from lxml import etree
 import pandas as pd
 import regex as re
 
-
-@dataclass
-class Token:
-    text: Optional[str] = None
-    pattern: str = r"\p{L}+\p{P}?\p{L}+"
-    maximum: Optional[int] = None
-    lowercase: bool = True
-    ngrams: int = 1
-
-    def tokenize(self):
-        """Tokenize text object.
-        """
-        self.tokens = utils.find_tokens(self.text,
-                                        self.pattern,
-                                        self.maximum)
-
-    def postprocess(self):
-        """Postprocess tokens object.
-
-        Todo:
-            * :func:`filter()` might be faster, but Guido doesn't like that.
-        """
-        if self.lowercase:
-            self.tokens = (token.lower() for token in self.tokens)
-        if self.ngrams > 1:
-            self.tokens = utils.get_ngrams(self.tokens, n=self.ngrams)
-
-    def drop(self, features: Iterable[str]):
-        """Drop features (tokens, or words) from tokens object.
-
-        Parameters:
-            features: Tokens to remove from the tokens object.
-
-        Todo:
-            * :func:`filter()` might be faster, but Guido doesn't like that.
-        """
-        self.tokens = (token for token in self.tokens if token not in features)
-
-    def to_disk(self, filepath: str, encoding: str = "utf-8", sep: str = "\n"):
-        """Write tokens object to a text file, tokens separated with `sep`.
-
-        Parameters:
-            filepath: Path to text file.
-            encoding: Encoding to use for UTF when writing.
-            sep: Separator between two tokens.
-        """
-        with pathlib.Path(filepath).open("w", encoding=encoding) as file:
-            for token in self.tokens:
-                file.write(token + sep)
-
-    def from_disk(self, filepath: str, encoding: str, sep: str = "\n"):
-        """Read tokens object from a text file, tokens separated with `sep`.
-
-        Parameters:
-            filepath: Path to text file.
-            encoding: Encoding to use for UTF when reading.
-            sep: Separator between two tokens.
-
-        Todo:
-            * Use a list comprehension instead of :func:`filter()`?
-        """
-        with pathlib.Path(filepath).open("r", encoding=encoding) as file:
-            self.tokens = filter(None, file.read().split(sep))
+logger = logging.getLogger("cophi_toolbox.model")
 
 
 @dataclass
-class Document:
-    filepath: Optional[str] = None
+class Textfile:
+    filepath: str
     treat_as: str = ".txt"
     encoding: str = "utf-8"
 
     def __post_init__(self):
-        if self.treat_as not in [".txt", ".xml"]:
+        if self.treat_as not in {".txt", ".xml"}:
             raise ValueError("The file format '{}' is not supported. "
                              "Try '.txt', or '.xml'.".format(self.treat_as))
 
-    def read_txt(self):
-        """Read plain text file from disk, construct text object, wrapped in :func:`from_disk()`.
+    def __enter__(self):
+        self.from_disk()
+        return self.text
+
+    def __exit__(self):
+        del self.text
+        del self.name
+
+    def _read_txt(self):
+        """Read plain text file, construct text and name object. Wrapped in :func:`from_disk()`,
+        and :func:`_read_xml()`.
         """
         p = pathlib.Path(self.filepath)
         self.name = p.stem
         self.text = p.read_text(encoding=self.encoding)
 
-    def read_xml(self, parser: etree.XMLParser = etree.XMLParser(), _path: Optional[str] = None,
+    def _read_xml(self, parser: etree.XMLParser = etree.XMLParser(), _path: Optional[str] = None,
                  namespaces: dict = dict(tei="http://www.tei-c.org/ns/1.0")):
-        """Read and parse XML file from disk, construct text object, wrapped in :func:`from_disk()`.
+        """Read and parse XML file, construct text and name object. Wrapped in :func:`from_disk()`.
 
         Parameters:
             parser: Overwrite default parser with this.
@@ -117,19 +66,20 @@ class Document:
         else:
             self.text = " ".join(tree.xpath(_path, namespaces=namespaces))
 
-    def from_disk(self, **kwargs):
+    def from_disk(self, **kwargs: str):
         """Read text object from a text file.
 
         Parameters:
-            parser: Only if `treat_as` is `.xml`. Overwrite default XML parser with this.
-            _path: Only if `treat_as` is `.xml`. Evaluate this XPath expression using 
-                the text as context node.
-            namespaces: Only if `treat_as` is `.xml`. Namespaces for the XPath expression.
+            parser: Overwrite default XML parser with this. Only if `treat_as` is `.xml`.
+            _path: Evaluate this XPath expression using. Only if `treat_as` is `.xml`.
+            namespaces: Namespaces for the XPath expression. Only if `treat_as` is `.xml`.
         """
         if self.treat_as == ".txt":
-            self.read_txt()
+            self._read_txt()
         elif self.treat_as == ".xml":
-            self.read_xml(**kwargs)
+            self._read_xml(**kwargs)
+        if not self.text:
+            logger.warning("Your text object is empty.")
 
     def to_disk(self, filepath: str):
         """Write text object to a text file.
@@ -137,26 +87,62 @@ class Document:
         Parameters:
             filepath: Path to text file.
         """
-        with pathlib.Path(filepath).open("w", encoding=self.encoding) as file:
+        with open(filepath, "w", encoding=self.encoding) as file:
             file.write(self.text)
 
+
+@dataclass
+class Document:
+    text: Optional[str] = None
+    lowercase: bool = True
+    ngrams: int = 1
+    pattern: str = r"\p{L}+\p{P}?\p{L}+"
+    maximum: Optional[int] = None
+
+    def _tokenize(self):
+        """Tokenize text object.
+        """
+        self.tokens = utils.find_tokens(self.text,
+                                        self.pattern,
+                                        self.maximum)
+
+    def _postprocess(self):
+        """Postprocess tokens object.
+        """
+        if self.lowercase:
+            self.tokens = (token.lower() for token in self.tokens)
+        if self.ngrams > 1:
+            self.tokens = utils.get_ngrams(self.tokens, self.ngrams)
+
+    def drop(self, features: Iterable[str]):
+        """Drop features (tokens, or words) from tokens object.
+
+        Parameters:
+            features: Tokens to remove from the tokens object.
+
+        Returns:
+            An iterable of tokens.
+        """
+        tokens = self.tokens
+        return (token for token in tokens if token not in features)
+
     def get_paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")):
-        """Split text object by paragraphs, construct chunks object.
+        """Split text object by paragraphs.
 
         Parameters:
             sep: Separator between paragraphs.
 
-        Todo:
-            * Use a list comprehension instead of :func:`filter()`?
+        Returns:
+            An iterable of paragraphs.
         """
         if not hasattr(sep, "match"):
             sep = re.compile(sep)
         splitted = sep.split(self.text)
-        self.chunks = filter(str.strip, splitted)
+        return filter(None, splitted)
 
     def get_segments(self, segment_size: int = 1000, tolerance: float = 0.05,
-                flatten_chunks: bool = True):
-        """Segment chunks object, respecting a tolerance threshold value.
+                     flatten_chunks: bool = True):
+        """Segment paragraphs of text object, respecting a tolerance threshold value.
 
         Parameters:
             segment_size: The target size of each segment, in tokens.
@@ -168,8 +154,11 @@ class Document:
                 chaining the chunks in each segment, thus each segment consists of
                 tokens. This can also be a one-argument function in order to
                 customize the un-chunking.
+
+        Returns:
+            An iterable of segments.
         """
-        segments = utils.segment_fuzzy([self.chunks],
+        segments = utils.segment_fuzzy([self.get_paragraphs()],
                                        segment_size,
                                        tolerance)
         if flatten_chunks:
@@ -177,45 +166,61 @@ class Document:
                 def flatten_chunks(segment):
                     return list(itertools.chain.from_iterable(segment))
             segments = map(flatten_chunks, segments)
-        self.segments = segments
+        return segments
+
+    def to_disk(self, filepath: str, encoding: str = "utf-8", sep: str = "\n"):
+        """Write tokens object to a text file, tokens separated with `sep`.
+
+        Parameters:
+            filepath: Path to text file.
+            encoding: Encoding to use for UTF when writing.
+            sep: Separator between two tokens.
+        """
+        with open(filepath, "w", encoding=encoding) as file:
+            for token in self.tokens:
+                file.write(token + sep)
+
+    def from_disk(self, filepath: str, encoding: str, sep: str = "\n"):
+        """Read tokens object from a text file, tokens separated with `sep`.
+
+        Parameters:
+            filepath: Path to text file.
+            encoding: Encoding to use for UTF when reading.
+            sep: Separator between two tokens.
+        """
+        with open(filepath, "r", encoding=encoding) as file:
+            self.tokens = filter(None, file.read().split(sep))
 
 
 @dataclass
 class Corpus:
     tokens: Optional[Iterable[pd.Series]] = None
 
+    def __post_init__(self):
+        self.size = len(self.tokens)
+
     def dtm(self):
         """Create classic document-term matrix, construct model object.
-
-        Note:
-            * Not recommended for very large corpora. See :meth:`mm()`.
         """
-        self.model = pd.DataFrame({document.name: utils.count_tokens(document)
-                                   for document in self.tokens}).T.fillna(0)
-
-    def mm(self):
-        """Create Matrix Market corpus model, construct model object.
-
-        Note:
-            * Recommended for very large corpora.
-        """
-        raise NotImplementedError
+        self.model = pd.SparseDataFrame({document.name: utils.count_tokens(document)
+                                         for document in self.tokens}).T.fillna(0)
 
     def sort(self, ascending: bool = False):
         """Sort corpus model by frequency.
         """
         self.model = self.model.loc[:, self.model.sum().sort_values(ascending=ascending).index]
 
-    def get_mfw(self, threshold: int = 100):
+    def mfw(self, threshold: int = 100):
         """Get the most frequent words from corpus object.
         """
         self.sort()
-        self.mfw = iter(self.model.iloc[:, :threshold].columns)
+        self.mfw = list(self.model.iloc[:, :threshold].columns)
 
-    def get_hl(self):
+    @property
+    def hl(self):
         """Get hapax legomena from corpus object.
         """
-        self.hl = iter(self.model.loc[:, self.model.max() == 1].columns)
+        return list(self.model.loc[:, self.model.max() == 1].columns)
 
     def drop(self, features: Iterable[str]):
         """Drop features (tokens, or words) from model object.
@@ -225,6 +230,37 @@ class Corpus:
         """
         features = [token for token in features if token in self.model.columns]
         self.model = self.model.drop(features, axis=1)
+
+    def get_zscores(self):
+        """Calculate z-scores for word frequencies.
+
+        Returns:
+            A pandas DataFrame document-term matrix.
+        """
+        return (self.model - self.model.mean()) / self.model.std()
+
+    def get_rel_freqs(self):
+        """Calculate relative word frequencies.
+
+        Returns:
+            A pandas DataFrame document-term matrix.
+        """
+        return self.model.div(self.model.sum(axis=1).to_sparse(), axis=0)
+
+    def get_tfidf(self):
+        """Calculate TF-IDF.
+
+        Used formula is
+
+        .. math::
+            \sum_{i=1}^{\\infty} x_{i}
+
+        Returns:
+            A pandas DataFrame document-term matrix.
+        """
+        tf = self.get_rel()
+        idf = math.log(self.size / self.model.astype(bool).sum(axis=0))
+        return tf * idf
 
     def to_disk(self, filepath: str, **kwargs: str):
         """Write corpus model object to disk.
