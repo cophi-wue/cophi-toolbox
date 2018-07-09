@@ -13,7 +13,7 @@ import pathlib
 import math
 import collections
 import itertools
-from typing import Optional, Iterable, Union
+from typing import Optional, Iterable, Union, List
 from dataclasses import dataclass
 
 from lxml import etree
@@ -99,14 +99,14 @@ class Document:
     pattern: str = r"\p{L}+\p{P}?\p{L}+"
     maximum: Optional[int] = None
 
-    def _tokenize(self):
-        """Tokenize text object.
+    def tokenize(self):
+        """Tokenize text object, construct tokens object.
         """
         self.tokens = utils.find_tokens(self.text,
                                         self.pattern,
                                         self.maximum)
 
-    def _postprocess(self):
+    def postprocess(self):
         """Postprocess tokens object.
         """
         if self.lowercase:
@@ -114,26 +114,22 @@ class Document:
         if self.ngrams > 1:
             self.tokens = utils.get_ngrams(self.tokens, self.ngrams)
 
-    def drop(self, features: Iterable[str]):
+    def drop(self, features: List[str]):
         """Drop features (tokens, or words) from tokens object.
 
         Parameters:
-            features: Tokens to remove from the tokens object.
-
-        Returns:
-            An iterable of tokens.
+            features: Tokens to remove.
         """
-        tokens = self.tokens
-        return (token for token in tokens if token not in features)
+        self.tokens = (token for token in tokens if token not in features)
 
-    def get_paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")):
+    def get_paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")) -> Iterable[str]:
         """Split text object by paragraphs.
 
         Parameters:
             sep: Separator between paragraphs.
 
         Returns:
-            An iterable of paragraphs.
+            Paragraphs of the text object as separate entities.
         """
         if not hasattr(sep, "match"):
             sep = re.compile(sep)
@@ -141,7 +137,7 @@ class Document:
         return filter(None, splitted)
 
     def get_segments(self, segment_size: int = 1000, tolerance: float = 0.05,
-                     flatten_chunks: bool = True):
+                     flatten_chunks: bool = True) -> Iterable[List[str]]:
         """Segment paragraphs of text object, respecting a tolerance threshold value.
 
         Parameters:
@@ -156,7 +152,7 @@ class Document:
                 customize the un-chunking.
 
         Returns:
-            An iterable of segments.
+            Segments of the text object as separate entities.
         """
         segments = utils.segment_fuzzy([self.get_paragraphs()],
                                        segment_size,
@@ -196,14 +192,21 @@ class Document:
 class Corpus:
     tokens: Optional[Iterable[pd.Series]] = None
 
-    def __post_init__(self):
-        self.size = len(self.tokens)
+    @property
+    def size(self):
+        return len(self.tokens) if self.tokens
 
-    def dtm(self):
+    @property
+    def dtm(self, dense: bool = False):
         """Create classic document-term matrix, construct model object.
+
+        Parameters:
+            dense: If True, create dense document-term matrix.
         """
         self.model = pd.SparseDataFrame({document.name: utils.count_tokens(document)
                                          for document in self.tokens}).T.fillna(0)
+        if dense:
+            self.model = self.model.to_dense()
 
     def sort(self, ascending: bool = False):
         """Sort corpus model by frequency.
@@ -219,6 +222,9 @@ class Corpus:
     @property
     def hl(self):
         """Get hapax legomena from corpus object.
+
+        Returns:
+            Hapax legomena of the corpus.
         """
         return list(self.model.loc[:, self.model.max() == 1].columns)
 
@@ -231,32 +237,35 @@ class Corpus:
         features = [token for token in features if token in self.model.columns]
         self.model = self.model.drop(features, axis=1)
 
-    def get_zscores(self):
+    @property
+    def zscores(self):
         """Calculate z-scores for word frequencies.
 
         Returns:
-            A pandas DataFrame document-term matrix.
+            A document-term matrix with z-scores.
         """
         return (self.model - self.model.mean()) / self.model.std()
 
-    def get_rel_freqs(self):
+    @property
+    def rel_freqs(self):
         """Calculate relative word frequencies.
 
         Returns:
-            A pandas DataFrame document-term matrix.
+            A document-term matrix with relative word frequencies.
         """
         return self.model.div(self.model.sum(axis=1).to_sparse(), axis=0)
 
-    def get_tfidf(self):
+    @property
+    def tfidf(self):
         """Calculate TF-IDF.
 
         Used formula is
 
         .. math::
-            \sum_{i=1}^{\\infty} x_{i}
+            \mbox{tf-idf}_{t,d} = (1 +\log \mbox{tf}_{t,d}) \cdot \log \frac{N}{\mbox{df}_t}
 
         Returns:
-            A pandas DataFrame document-term matrix.
+            A document-term matrix with TF-IDF weighted tokens.
         """
         tf = self.get_rel()
         idf = math.log(self.size / self.model.astype(bool).sum(axis=0))
