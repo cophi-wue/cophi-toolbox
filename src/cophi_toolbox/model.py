@@ -7,126 +7,93 @@ process text data in Python.
 """
 
 from . import utils
+
 import logging
 import pathlib
 import math
 import collections
 import itertools
 from typing import Optional, Iterable, Union, List
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
 from lxml import etree
 import pandas as pd
 import numpy as np
 import regex as re
+
 
 logger = logging.getLogger("cophi_toolbox.model")
 
 
 @dataclass
 class Textfile:
-    filepath: str
+    filepath: Union[str, pathlib.Path]
     treat_as: str = ".txt"
     encoding: str = "utf-8"
 
     def __post_init__(self):
-        self.p = pathlib.Path(self.filepath)
-        self.name = self.p.stem
         if self.treat_as not in {".txt", ".xml"}:
             raise ValueError("The file format '{}' is not supported. "
                              "Try '.txt', or '.xml'.".format(self.treat_as))
+        if isinstance(self.filepath, str):
+            self.filepath = pathlib.Path(self.filepath)
+        self.title = self.filepath.stem
+        self.suffix = self.filepath.suffix
+        self.parent = str(self.filepath.parent)
 
     def __enter__(self):
-        self.from_disk()
-        return self.text
+        return self.content
 
     def __exit__(self, exc_type, exc_value, tb):
-        del self.text
-        del self.name
+        pass
 
-    def _read_txt(self):
-        """Read plain text file, construct text and name object. Wrapped in :func:`from_disk()`.
-        """
-        self.text = self.p.read_text(encoding=self.encoding)
+    def read_txt(self):
+        return self.filepath.read_text(encoding=self.encoding)
 
-    def _read_xml(self, parser: etree.XMLParser = etree.XMLParser(), _path: Optional[str] = None,
-                 namespaces: dict = dict(tei="http://www.tei-c.org/ns/1.0")):
-        """Read and parse XML file, construct text and name object. Wrapped in :func:`from_disk()`.
+    def parse_xml(self, parser: etree.XMLParser=etree.XMLParser()):
+        return etree.parse(str(self.filepath), parser=parser)
 
-        Parameters:
-            parser: Overwrite default parser with this.
-            _path: Evaluate this XPath expression using the text as context node.
-            namespaces: Namespaces for the XPath expression.
-        """
-        tree = etree.parse(self.filepath, parser=parser)
-        if _path is None:
-            self.text = etree.tostring(tree, method="text", encoding=str).strip()
-        else:
-            self.text = " ".join(tree.xpath(_path, namespaces=namespaces)).strip()
+    @staticmethod
+    def stringify(tree):
+        return etree.tostring(tree, method="text", encoding=str)
 
-    def from_disk(self, **kwargs: str):
-        """Read text object from a text file.
-
-        Parameters:
-            parser: Overwrite default XML parser with this. Only if `treat_as` is `.xml`.
-            _path: Evaluate this XPath expression using. Only if `treat_as` is `.xml`.
-            namespaces: Namespaces for the XPath expression. Only if `treat_as` is `.xml`.
-        """
+    @property
+    def content(self):
         if self.treat_as == ".txt":
-            self._read_txt()
+            return self.read_txt()
         elif self.treat_as == ".xml":
-            self._read_xml(**kwargs)
-        if not self.text:
-            logger.warning("Your text object is empty.")
+            tree = self.parse_xml()
+            return self.stringify(tree)
 
-    def to_disk(self, filepath: str):
-        """Write text object to a text file.
-
-        Parameters:
-            filepath: Path to text file.
-        """
-        with open(filepath, "w", encoding=self.encoding) as file:
-            file.write(self.text)
 
 @dataclass
 class Document:
-    text: Optional[str] = None
+    text: str
     lowercase: bool = True
     ngrams: int = 1
     pattern: str = r"\p{L}+\p{P}?\p{L}+"
     maximum: Optional[int] = None
 
-    def tokenize(self):
-        """Tokenize text object, construct tokens object.
-        """
-        self.tokens = utils.find_tokens(self.text,
-                                        self.pattern,
-                                        self.maximum)
+    @property
+    def unprocessed_tokens(self):
+        return utils.find_tokens(self.text,
+                                 self.pattern,
+                                 self.maximum)
 
-    def postprocess(self):
-        """Postprocess tokens object.
-        """
+    @property
+    def tokens(self):
+        tokens = self.unprocessed_tokens
         if self.lowercase:
-            self.tokens = (token.lower() for token in self.tokens)
+            tokens = (token.lower() for token in tokens)
         if self.ngrams > 1:
-            self.tokens = utils.get_ngrams(self.tokens, self.ngrams)
+            tokens = utils.get_ngrams(tokens, self.ngrams)
+        return tokens
 
-    def drop(self, features: List[str]):
-        """Drop features (tokens, or words) from tokens object.
-
-        Parameters:
-            features: Tokens to remove.
-        """
-        self.tokens = (token for token in self.tokens if token not in features)
+    @staticmethod
+    def drop(tokens, features: List[str]):
+        return (token for token in tokens if token not in features)
 
     def get_paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")) -> Iterable[str]:
-        """Split text object by paragraphs.
-
-        Parameters:
-            sep: Separator between paragraphs.
-
-        Returns:
-            Paragraphs of the text object as separate entities.
-        """
         if not hasattr(sep, "match"):
             sep = re.compile(sep)
         splitted = sep.split(self.text)
@@ -134,23 +101,7 @@ class Document:
 
     def get_segments(self, segment_size: int = 1000, tolerance: float = 0.05,
                      flatten_chunks: bool = True) -> Iterable[List[str]]:
-        """Segment paragraphs of text object, respecting a tolerance threshold value.
-
-        Parameters:
-            segment_size: The target size of each segment, in tokens.
-            tolerance: How much may the actual segment size differ from
-                the segment_size? If ``0 < tolerance < 1``, this is interpreted as a
-                fraction of the segment_size, otherwise it is interpreted as an
-                absolute number. If ``tolerance < 0``, chunks are never split apart.
-            flatten_chunks: If True, undo the effect of the chunker by
-                chaining the chunks in each segment, thus each segment consists of
-                tokens. This can also be a one-argument function in order to
-                customize the un-chunking.
-
-        Returns:
-            Segments of the text object as separate entities.
-        """
-        segments = utils.segment_fuzzy([self.get_paragraphs()],
+        segments = utils.segment_fuzzy([self.tokens],
                                        segment_size,
                                        tolerance)
         if flatten_chunks:
@@ -160,31 +111,9 @@ class Document:
             segments = map(flatten_chunks, segments)
         return segments
 
-    def to_disk(self, filepath: str, encoding: str = "utf-8", sep: str = "\n"):
-        """Write tokens object to a text file, tokens separated with `sep`.
-
-        Parameters:
-            filepath: Path to text file.
-            encoding: Encoding to use for UTF when writing.
-            sep: Separator between two tokens.
-        """
-        with open(filepath, "w", encoding=encoding) as file:
-            for token in self.tokens:
-                file.write(token + sep)
-
-    def from_disk(self, filepath: str, encoding: str, sep: str = "\n"):
-        """Read tokens object from a text file, tokens separated with `sep`.
-
-        Parameters:
-            filepath: Path to text file.
-            encoding: Encoding to use for UTF when reading.
-            sep: Separator between two tokens.
-        """
-        with open(filepath, "r", encoding=encoding) as file:
-            self.tokens = filter(None, file.read().split(sep))
 
 @dataclass
-class Corpus:
+class Corpus(pd.DataFrame):
     tokens: Optional[Iterable[pd.Series]] = None
 
     @property
