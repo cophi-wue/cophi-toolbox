@@ -6,43 +6,20 @@ This module implements the high-level cophi_toolbox API.
 """
 
 from . import model
+
 import pathlib
 from typing import Generator, Union, Iterable, Optional
+
 import pandas as pd
 
 
 def textfile(filepath: str, **kwargs: str) -> model.Textfile:
-    """Represent a text file.
+    return model.Textfile(filepath, **kwargs)
 
-    Parameters:
-        filepath: Path to text file.
-        treat_as: Treat a file like one with this suffix.
-        encoding: Encoding to use for UTF when reading.
-
-    Returns:
-        A Textfile object.
-    """
-    f = model.Textfile(filepath, **kwargs)
-    f.from_disk()
-    return f
 
 def document(text: str, **kwargs: str) -> model.Document:
-    """Represent a document.
+    return model.Document(text, **kwargs)
 
-    Parameters:
-        text: String to be tokenized.
-        pattern: Regular expression token pattern.
-        maximum: If set, stop reading after that many words.
-        lowercase: If True, normalize all tokens to lowercase.
-        ngrams: Ngram size.
-
-    Returns:
-        A Document object.
-    """
-    t = model.Document(text, **kwargs)
-    t.tokenize()
-    t.postprocess()
-    return t
 
 def corpus(tokens: Iterable[pd.Series]) -> model.Corpus:
     """Represent a corpus on the corpus level.
