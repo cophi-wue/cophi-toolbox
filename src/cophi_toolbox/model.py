@@ -4,6 +4,9 @@ cophi_toolbox.model
 
 This module provides low-level corpus model classes to manage and 
 process text data in Python.
+
+Complexity measures (:class:`Corpus`) implemented by Thomas Proisl,
+see https://github.com/tsproisl/Linguistic_and_Stylistic_Complexity
 """
 
 from . import utils
@@ -59,6 +62,7 @@ class Textfile:
 
     @property
     def content(self):
+        logger.info("Processing '{}' as '{}' ...".format(self.title, self.treat_as))
         if self.treat_as == ".txt":
             return self.read_txt()
         elif self.treat_as == ".xml":
@@ -123,202 +127,308 @@ class Corpus:
 
     def __post_init__(self):
         if self.sparse:
-            matrix = pd.SparseDataFrame
+            raise NotImplementedError
         else:
             matrix = pd.DataFrame
         self.dtm = matrix({document.name: utils.count_tokens(document)
                            for document in self.tokens}).T.fillna(0)
 
     @property
-    def size(self):
-        return self.dtm.shape
+    def size(self) -> pd.Series:
+        """Number of documents and types.
+        """
+        return pd.Series(self.dtm.shape, index=["documents", "types"])
 
     @property
-    def freq_spectrum(self):
+    def freq_spectrum(self) -> pd.Series:
+        """Frequency spectrum of types.
+        """
         return self.dtm.sum(axis=0).value_counts()
 
-    def get_vocabulary(self):
+    @property
+    def vocabulary(self) -> List:
+        """Corpus vocabulary.
+        """
         return list(self.dtm.columns)
 
-    def get_sorted(self):
+    @property
+    def sorted_dtm(self) -> pd.DataFrame:
+        """Descending sorted document-term matrix.
+        """
         return self.dtm.iloc[:, (-self.dtm.sum()).argsort()]
 
     def get_mfw(self, n: int = 100):
-        return list(self.dtm.iloc[:, :n].columns)
+        """Get the `n` most frequent words from corpus.
+        """
+        return list(self.sorted_dtm.iloc[:, :n].columns)
 
     def get_hl(self):
+        """Get hapax legomena from corpus.
+        """
         return list(self.dtm.loc[:, self.dtm.max() == 1].columns)
 
     @staticmethod
     def drop(dtm, features: Iterable[str]):
-        features = [token for token in features if token in self.model.columns]
-        return drop(features, axis=1)
+        """Drop words (or, `features`) from document-term matrix.
+        """
+        features = [token for token in features if token in dtm.columns]
+        return dtm.drop(features, axis=1)
 
-    def get_zscores(self):
-        """Calculate z-scores for word frequencies.
+    @property
+    def zscores(self):
+        """Standardized document-term matrix.
 
-        Returns:
-            A document-term matrix with z-scores.
+        Used formula is:
+        .. math::
+            \mbox
         """
         return (self.dtm - self.dtm.mean()) / self.dtm.std()
 
-    def get_rel_freqs(self):
-        """Calculate relative word frequencies.
-
-        Returns:
-            A document-term matrix with relative word frequencies.
+    @property
+    def rel_freqs(self):
+        """Document-term matrix with relative word frequencies.
         """
-        return self.model.div(self.model.sum(axis=1), axis=0)
+        return self.dtm.div(self.dtm.sum(axis=1), axis=0)
 
-    def get_tfidf(self):
-        """Calculate TF-IDF.
+    @property
+    def tfidf(self):
+        """TF-IDF normalized document-term matrix.
 
         Used formula is:
-
         .. math::
             \mbox{tf-idf}_{t,d} = (1 +\log \mbox{tf}_{t,d}) \cdot \log \frac{N}{\mbox{df}_t}
-
-        Returns:
-            A document-term matrix with TF-IDF weighted tokens.
         """
-        tf = self.get_rel_freqs()
-        idf = np.log(self.size[0] / self.dtm.astype(bool).sum(axis=0))
+        tf = self.rel_freqs
+        idf = np.log(self.size["documents"] / self.dtm.astype(bool).sum(axis=0))
         return tf * idf
 
     @property
     def sum_tokens(self):
+        """Summed token frequencies.
+        """
         return self.dtm.sum(axis=1)
 
     @property
     def sum_types(self):
+        """Summed type frequencies.
+        """
         return self.dtm.replace(0, np.nan).count(axis=1)
 
     def get_ttr(self):
+        """Get type-token ratio per document.
+
+        Used formula is:
+        .. math::
+            \mbox{ttr} = 
+        """
         return self.sum_types / self.sum_tokens
 
     @property
     def ttr(self):
+        """Type-token ratio.
+
+        Used formula is:
+        .. math::
+            \mbox
+        """
         return self.sum_types.sum() / self.sum_tokens.sum()
 
     @property
     def guiraud_r(self):
-        """Guiraud (1954)"""
+        """Guiraud (1954).
+
+        Used formula is:
+        .. math::
+            \mbox
+        """
         return self.sum_types.sum() / np.sqrt(self.sum_tokens.sum())
+
+    def get_guiraud_r(self):
+        """Get Guiraud (1954) per document.
+
+        Used formula is:
+        .. math::
+            \mbox
+        """
+        return self.sum_types / np.sqrt(self.sum_tokens)
 
     @property
     def herdan_c(self):
-        """Herdan (1960, 1964)"""
+        """Herdan (1960, 1964).
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
         return np.log(self.sum_types.sum()) / np.log(self.sum_tokens.sum())
+
+    def get_herdan_c(self):
+        """Get Herdan (1960, 1964) per document.
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
+        return np.log(self.sum_types) / np.log(self.sum_tokens)
 
     @property
     def dugast_k(self):
-        """Dugast (1979)"""
-        return np.log(self.sum_types.sum()) / np.log(np.log(self.sum_tokens))
+        """Dugast (1979).
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
+        return np.log(self.sum_types.sum()) / np.log(np.log(self.sum_tokens.sum()))
+
+    def get_dugast_k(self):
+        """Get Dugast (1979) per document.
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
+        return np.log(self.sum_types) / np.log(np.log(self.sum_tokens))
 
     @property
     def maas_a2(self):
-        """Maas (1972)"""
-        return (np.log(self.sum_tokens) - np.log(self.sum_types.sum())) / (np.log(self.sum_tokens) ** 2)
+        """Maas (1972).
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
+        return (np.log(self.sum_tokens.sum()) - np.log(self.sum_types.sum())) / (np.log(self.sum_tokens.sum()) ** 2)
 
-    @property
-    def dugast_u(self):
-        """Dugast (1978, 1979)"""
-        return (np.log(self.sum_tokens.sum()) ** 2) / (np.log(self.sum_tokens.sum()) - np.log(self.sum_types.sum()))
+    def get_maas_a2(self):
+        """Get Maas (1972) per document.
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
+        return (np.log(self.sum_tokens) - np.log(self.sum_types)) / (np.log(self.sum_tokens) ** 2)
 
     @property
     def tuldava_ln(self):
-        """Tuldava (1977)"""
+        """Tuldava (1977).
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
         return (1 - (self.sum_types.sum() ** 2)) / ((self.sum_types.sum() ** 2) * np.log(self.sum_tokens.sum()))
+
+    def get_tuldava_ln(self):
+        """Get Tuldava (1977) per document.
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
+        return (1 - (self.sum_types ** 2)) / ((self.sum_types ** 2) * np.log(self.sum_tokens))
 
     @property
     def brunet_w(self):
-        """Brunet (1978)"""
+        """Brunet (1978).
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
         return self.sum_tokens.sum() ** (self.sum_types.sum() ** 0.172)
+
+    def get_brunet_w(self):
+        """Get Brunet (1978) per document.
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
+        return self.sum_tokens ** (self.sum_types ** 0.172)
 
     @property
     def cttr(self):
-        """Carroll's Corrected Type-Token Ration"""
+        """Carroll's Corrected Type-Token Ration.
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
         return self.sum_types.sum() / np.sqrt(2 * self.sum_tokens.sum())
+
+    def get_cttr(self):
+        """Get Carroll's Corrected Type-Token Ration per document.
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
+        return self.sum_types / np.sqrt(2 * self.sum_tokens)
 
     @property
     def summer_s(self):
-        """Summer's S index"""
+        """Summer's S index.
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
         return np.log(np.log(self.sum_types.sum())) / np.log(np.log(self.sum_tokens.sum()))
+
+    def get_summer_s(self):
+        """Get Summer's S index per document.
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
+        return np.log(np.log(self.sum_types)) / np.log(np.log(self.sum_tokens))
 
     @property
     def entropy(self):
+        """Entropy.
+
+        Used formula is:
+        .. math::
+            \mbox
+        """
         a = -np.log(self.freq_spectrum.index / self.sum_tokens.sum())
         b = self.freq_spectrum / self.sum_tokens.sum()
         return (self.freq_spectrum * a * b).sum()
 
     @property
     def yule_k(self):
-        """Yule (1944)"""
+        """Yule (1944).
+        
+        Used formula is:
+        .. math::
+            \mbox
+        """
         a = self.freq_spectrum.index / self.sum_tokens.sum()
         b = 1 / self.sum_tokens.sum()
         return 10000 * ((self.freq_spectrum * a ** 2) - b).sum()
 
     @property
     def simpson_d(self):
+        """Simpson.
+
+        Used formula is:
+        .. math::
+            \mbox
+        """
         a = self.freq_spectrum / self.sum_tokens.sum()
         b = self.freq_spectrum.index - 1
         return (self.freq_spectrum * a * (b / (self.sum_tokens.sum() - 1))).sum()
 
+    @property
+    def herdan_vm(self):
+        """Herdan (1955).
 
-    def herdan_vm(text_length, vocabulary_size, frequency_spectrum):
-        """Herdan (1955)"""
-        a = c.freq_spectrum / c.sum_tokens.sum()
-        b = 1 / c.sum_types.sum()
-        return np.sqrt(((c.freq_spectrum * a ** 2) - b).sum())
-
-'''
-def orlov_z(text_length, vocabulary_size, frequency_spectrum, max_iterations=100, min_tolerance=1):
-    """Orlov (1983)
-    Approximation via Newton's method.
-    """
-    def function(text_length, vocabulary_size, p_star, z):
-        return (z / math.log(p_star * z)) * (text_length / (text_length - z)) * math.log(text_length / z) - vocabulary_size
-
-    def derivative(text_length, vocabulary_size, p_star, z):
-        """Derivative obtained from WolframAlpha:
-        https://www.wolframalpha.com/input/?x=0&y=0&i=(x+%2F+(log(p+*+x)))+*+(n+%2F+(n+-+x))+*+log(n+%2F+x)+-+v
+        Used formula is:
+        .. math::
+            \mbox
         """
-        return (text_length * ((z - text_length) * math.log(p_star * z) + math.log(text_length / z) * (text_length * math.log(p_star * z) - text_length + z))) / (((text_length - z) ** 2) * (math.log(p_star * z) ** 2))
-    most_frequent = max(frequency_spectrum.keys())
-    p_star = most_frequent / text_length
-    z = text_length / 2         # our initial guess
-    for i in range(def orlov_z(text_length, vocabulary_size, frequency_spectrum, max_iterations=100, min_tolerance=1):
-    """Orlov (1983)
-    Approximation via Newton's method.
-    """
-    def function(text_length, vocabulary_size, p_star, z):
-        return (z / math.log(p_star * z)) * (text_length / (text_length - z)) * math.log(text_length / z) - vocabulary_size
-
-    def derivative(text_length, vocabulary_size, p_star, z):
-        """Derivative obtained from WolframAlpha:
-        https://www.wolframalpha.com/input/?x=0&y=0&i=(x+%2F+(log(p+*+x)))+*+(n+%2F+(n+-+x))+*+log(n+%2F+x)+-+v
-        """
-        return (text_length * ((z - text_length) * math.log(p_star * z) + math.log(text_length / z) * (text_length * math.log(p_star * z) - text_length + z))) / (((text_length - z) ** 2) * (math.log(p_star * z) ** 2))
-    most_frequent = max(frequency_spectrum.keys())
-    p_star = most_frequent / text_length
-    z = text_length / 2         # our initial guess
-    for i in range(max_iterations):
-        # print(i, text_length, vocabulary_size, p_star, z)
-        next_z = z - (function(text_length, vocabulary_size, p_star, z) / derivative(text_length, vocabulary_size, p_star, z))
-        abs_diff = abs(z - next_z)
-        z = next_z
-        if abs_diff <= min_tolerance:
-            break
-    else:
-        warnings.warn("Exceeded max_iterations")
-return zmax_iterations):
-        # print(i, text_length, vocabulary_size, p_star, z)
-        next_z = z - (function(text_length, vocabulary_size, p_star, z) / derivative(text_length, vocabulary_size, p_star, z))
-        abs_diff = abs(z - next_z)
-        z = next_z
-        if abs_diff <= min_tolerance:
-            break
-    else:
-        warnings.warn("Exceeded max_iterations")
-return z
-'''
+        a = self.freq_spectrum / self.sum_tokens.sum()
+        b = 1 / self.sum_types.sum()
+        return np.sqrt(((self.freq_spectrum * a ** 2) - b).sum())

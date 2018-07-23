@@ -244,26 +244,3 @@ def _list_mfw_large_corpus_model(document_term_matrix, type_ids, most_frequent_t
     document_term_matrix_collapsed = document_term_matrix.groupby(document_term_matrix.index.get_level_values('type_id')).sum()
     stopwords = document_term_matrix_collapsed[0].nlargest(most_frequent_tokens)
     return [id2type[token] for token in stopwords.index.get_level_values('type_id')]
-
-
-def _token2id(tokens):
-    """Creates a dictionary of tokens as keys and identifier as keys.
-
-    This private function is wrapped in :func:`_create_bag_of_words()`.
-
-    Args:
-        tokens (list): Iterable of tokens.
-
-    Returns:
-        A dictionary.
-
-    Example:
-        >>> _token2id(['token'])
-        {'token': 1}
-        >>> _token2id([['token']])
-        {'token': 1}
-    """
-    log.debug("Creating dictionary of tokens as keys and identifier as keys ...")
-    if all(isinstance(element, list) for element in tokens):
-        tokens = {token for element in tokens for token in element}
-    return {token: id_ for id_, token in enumerate(set(tokens), 1)}
