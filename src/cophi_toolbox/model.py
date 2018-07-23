@@ -42,7 +42,7 @@ class Textfile:
         self.parent = str(self.filepath.parent)
 
     def __enter__(self):
-        return self.content
+        return self
 
     def __exit__(self, exc_type, exc_value, tb):
         pass
@@ -89,6 +89,10 @@ class Document:
             tokens = utils.get_ngrams(tokens, self.ngrams)
         return tokens
 
+    @property
+    def ttr(self):
+        return len(set(self.tokens)) / len(self.tokens)
+
     @staticmethod
     def drop(tokens, features: List[str]):
         return (token for token in tokens if token not in features)
@@ -113,64 +117,52 @@ class Document:
 
 
 @dataclass
-class Corpus(pd.DataFrame):
-    tokens: Optional[Iterable[pd.Series]] = None
+class Corpus:
+    tokens: Iterable[pd.Series]
+    sparse: bool = False
+
+    def __post_init__(self):
+        if self.sparse:
+            matrix = pd.SparseDataFrame
+        else:
+            matrix = pd.DataFrame
+        self.dtm = matrix({document.name: utils.count_tokens(document)
+                           for document in self.tokens}).T.fillna(0)
 
     @property
     def size(self):
-        return len(self.tokens) if self.tokens is not None else 0
-
-    def dtm(self, sparse: bool = False):
-        """Create classic document-term matrix, construct model object.
-
-        Parameters:
-            dense: If True, create dense document-term matrix.
-        """
-        self.model = pd.DataFrame({document.name: utils.count_tokens(document)
-                                   for document in self.tokens}).T.fillna(0)
-        if sparse:
-            self.model = self.model.to_sparse()
-
-    def sort(self, ascending: bool = False):
-        """Sort corpus model by frequency.
-        """
-        self.model = self.model.loc[:, self.model.sum().sort_values(ascending=ascending).index]
-
-    def mfw(self, threshold: int = 100):
-        """Get the most frequent words from corpus object.
-        """
-        self.sort()
-        self.mfw = list(self.model.iloc[:, :threshold].columns)
+        return self.dtm.shape
 
     @property
-    def hl(self):
-        """Get hapax legomena from corpus object.
+    def freq_spectrum(self):
+        return self.dtm.sum(axis=0).value_counts()
 
-        Returns:
-            Hapax legomena of the corpus.
-        """
-        return list(self.model.loc[:, self.model.max() == 1].columns)
+    def get_vocabulary(self):
+        return list(self.dtm.columns)
 
-    def drop(self, features: Iterable[str]):
-        """Drop features (tokens, or words) from model object.
+    def get_sorted(self):
+        return self.dtm.iloc[:, (-self.dtm.sum()).argsort()]
 
-        Parameters:
-            features: Tokens to remove from the tokens object.
-        """
+    def get_mfw(self, n: int = 100):
+        return list(self.dtm.iloc[:, :n].columns)
+
+    def get_hl(self):
+        return list(self.dtm.loc[:, self.dtm.max() == 1].columns)
+
+    @staticmethod
+    def drop(dtm, features: Iterable[str]):
         features = [token for token in features if token in self.model.columns]
-        self.model = self.model.drop(features, axis=1)
+        return drop(features, axis=1)
 
-    @property
-    def zscores(self):
+    def get_zscores(self):
         """Calculate z-scores for word frequencies.
 
         Returns:
             A document-term matrix with z-scores.
         """
-        return (self.model - self.model.mean()) / self.model.std()
+        return (self.dtm - self.dtm.mean()) / self.dtm.std()
 
-    @property
-    def rel_freqs(self):
+    def get_rel_freqs(self):
         """Calculate relative word frequencies.
 
         Returns:
@@ -178,8 +170,7 @@ class Corpus(pd.DataFrame):
         """
         return self.model.div(self.model.sum(axis=1), axis=0)
 
-    @property
-    def tfidf(self):
+    def get_tfidf(self):
         """Calculate TF-IDF.
 
         Used formula is:
@@ -190,24 +181,144 @@ class Corpus(pd.DataFrame):
         Returns:
             A document-term matrix with TF-IDF weighted tokens.
         """
-        tf = self.rel_freqs
-        idf = np.log(self.size / self.model.astype(bool).sum(axis=0))
+        tf = self.get_rel_freqs()
+        idf = np.log(self.size[0] / self.dtm.astype(bool).sum(axis=0))
         return tf * idf
 
-    def to_disk(self, filepath: str, **kwargs: str):
-        """Write corpus model object to disk.
+    @property
+    def sum_tokens(self):
+        return self.dtm.sum(axis=1)
 
-        Parameters:
-            filepath: Path to text file.
-            **kwargs: See :func:`pd.DataFrame().to_csv()`.
+    @property
+    def sum_types(self):
+        return self.dtm.replace(0, np.nan).count(axis=1)
+
+    def get_ttr(self):
+        return self.sum_types / self.sum_tokens
+
+    @property
+    def ttr(self):
+        return self.sum_types.sum() / self.sum_tokens.sum()
+
+    @property
+    def guiraud_r(self):
+        """Guiraud (1954)"""
+        return self.sum_types.sum() / np.sqrt(self.sum_tokens.sum())
+
+    @property
+    def herdan_c(self):
+        """Herdan (1960, 1964)"""
+        return np.log(self.sum_types.sum()) / np.log(self.sum_tokens.sum())
+
+    @property
+    def dugast_k(self):
+        """Dugast (1979)"""
+        return np.log(self.sum_types.sum()) / np.log(np.log(self.sum_tokens))
+
+    @property
+    def maas_a2(self):
+        """Maas (1972)"""
+        return (np.log(self.sum_tokens) - np.log(self.sum_types.sum())) / (np.log(self.sum_tokens) ** 2)
+
+    @property
+    def dugast_u(self):
+        """Dugast (1978, 1979)"""
+        return (np.log(self.sum_tokens.sum()) ** 2) / (np.log(self.sum_tokens.sum()) - np.log(self.sum_types.sum()))
+
+    @property
+    def tuldava_ln(self):
+        """Tuldava (1977)"""
+        return (1 - (self.sum_types.sum() ** 2)) / ((self.sum_types.sum() ** 2) * np.log(self.sum_tokens.sum()))
+
+    @property
+    def brunet_w(self):
+        """Brunet (1978)"""
+        return self.sum_tokens.sum() ** (self.sum_types.sum() ** 0.172)
+
+    @property
+    def cttr(self):
+        """Carroll's Corrected Type-Token Ration"""
+        return self.sum_types.sum() / np.sqrt(2 * self.sum_tokens.sum())
+
+    @property
+    def summer_s(self):
+        """Summer's S index"""
+        return np.log(np.log(self.sum_types.sum())) / np.log(np.log(self.sum_tokens.sum()))
+
+    @property
+    def entropy(self):
+        a = -np.log(self.freq_spectrum.index / self.sum_tokens.sum())
+        b = self.freq_spectrum / self.sum_tokens.sum()
+        return (self.freq_spectrum * a * b).sum()
+
+    @property
+    def yule_k(self):
+        """Yule (1944)"""
+        a = self.freq_spectrum.index / self.sum_tokens.sum()
+        b = 1 / self.sum_tokens.sum()
+        return 10000 * ((self.freq_spectrum * a ** 2) - b).sum()
+
+    @property
+    def simpson_d(self):
+        a = self.freq_spectrum / self.sum_tokens.sum()
+        b = self.freq_spectrum.index - 1
+        return (self.freq_spectrum * a * (b / (self.sum_tokens.sum() - 1))).sum()
+
+
+    def herdan_vm(text_length, vocabulary_size, frequency_spectrum):
+        """Herdan (1955)"""
+        a = c.freq_spectrum / c.sum_tokens.sum()
+        b = 1 / c.sum_types.sum()
+        return np.sqrt(((c.freq_spectrum * a ** 2) - b).sum())
+
+'''
+def orlov_z(text_length, vocabulary_size, frequency_spectrum, max_iterations=100, min_tolerance=1):
+    """Orlov (1983)
+    Approximation via Newton's method.
+    """
+    def function(text_length, vocabulary_size, p_star, z):
+        return (z / math.log(p_star * z)) * (text_length / (text_length - z)) * math.log(text_length / z) - vocabulary_size
+
+    def derivative(text_length, vocabulary_size, p_star, z):
+        """Derivative obtained from WolframAlpha:
+        https://www.wolframalpha.com/input/?x=0&y=0&i=(x+%2F+(log(p+*+x)))+*+(n+%2F+(n+-+x))+*+log(n+%2F+x)+-+v
         """
-        self.model.to_csv(filepath, **kwargs)
+        return (text_length * ((z - text_length) * math.log(p_star * z) + math.log(text_length / z) * (text_length * math.log(p_star * z) - text_length + z))) / (((text_length - z) ** 2) * (math.log(p_star * z) ** 2))
+    most_frequent = max(frequency_spectrum.keys())
+    p_star = most_frequent / text_length
+    z = text_length / 2         # our initial guess
+    for i in range(def orlov_z(text_length, vocabulary_size, frequency_spectrum, max_iterations=100, min_tolerance=1):
+    """Orlov (1983)
+    Approximation via Newton's method.
+    """
+    def function(text_length, vocabulary_size, p_star, z):
+        return (z / math.log(p_star * z)) * (text_length / (text_length - z)) * math.log(text_length / z) - vocabulary_size
 
-    def from_disk(self, filepath: str, **kwargs: str):
-        """Read corpus model object from disk.
-
-        Parameters:
-            filepath: Path to text file.
-            **kwargs: See :func:`pd.read_csv()`.
+    def derivative(text_length, vocabulary_size, p_star, z):
+        """Derivative obtained from WolframAlpha:
+        https://www.wolframalpha.com/input/?x=0&y=0&i=(x+%2F+(log(p+*+x)))+*+(n+%2F+(n+-+x))+*+log(n+%2F+x)+-+v
         """
-        self.model = pd.read_csv(filepath, index_col=0, **kwargs)
+        return (text_length * ((z - text_length) * math.log(p_star * z) + math.log(text_length / z) * (text_length * math.log(p_star * z) - text_length + z))) / (((text_length - z) ** 2) * (math.log(p_star * z) ** 2))
+    most_frequent = max(frequency_spectrum.keys())
+    p_star = most_frequent / text_length
+    z = text_length / 2         # our initial guess
+    for i in range(max_iterations):
+        # print(i, text_length, vocabulary_size, p_star, z)
+        next_z = z - (function(text_length, vocabulary_size, p_star, z) / derivative(text_length, vocabulary_size, p_star, z))
+        abs_diff = abs(z - next_z)
+        z = next_z
+        if abs_diff <= min_tolerance:
+            break
+    else:
+        warnings.warn("Exceeded max_iterations")
+return zmax_iterations):
+        # print(i, text_length, vocabulary_size, p_star, z)
+        next_z = z - (function(text_length, vocabulary_size, p_star, z) / derivative(text_length, vocabulary_size, p_star, z))
+        abs_diff = abs(z - next_z)
+        z = next_z
+        if abs_diff <= min_tolerance:
+            break
+    else:
+        warnings.warn("Exceeded max_iterations")
+return z
+'''
