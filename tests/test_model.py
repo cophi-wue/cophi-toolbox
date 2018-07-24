@@ -4,6 +4,22 @@ import pandas as pd
 
 
 @pytest.fixture
+def textfile_model_txt(tmpdir):
+    p = tmpdir.mkdir("sub").join("document.txt")
+    p.write("ABCDE")
+    return ct.Textfile(str(p), treat_as=".txt")
+
+@pytest.fixture
+def textfile_model_xml(tmpdir):
+    p = tmpdir.mkdir("sub").join("document.xml")
+    p.write("<xml>ABCDE</xml>")
+    return ct.Textfile(str(p), treat_as=".xml")
+
+@pytest.fixture
+def document_model():
+    return ct.Document(["A", "B", "C", "D", "E"])
+
+@pytest.fixture
 def corpus_model():
     a = pd.Series(["A", "B", "C", "D", "E"], name="a")
     b = pd.Series(["A", "B", "F", "G", "E"], name="b")
@@ -11,7 +27,42 @@ def corpus_model():
     d = pd.Series(["A", "K", "L", "D", "M"], name="d")
     e = pd.Series(["N", "O", "B", "A", "E"], name="e")
     documents = [a, b, c, d, e]
-    return ct.corpus(documents)
+    return ct.Corpus(documents)
+
+
+class TestTextfile:
+    def test_context_manager_txt(textfile_model_txt, tmpdir):
+        with textfile_model_txt as document:
+            assert document.content == "ABCDE"
+            assert str(document.filepath) == str(tmpdir.join("sub", "document.txt"))
+            assert document.title == "document"
+            assert document.suffix == ".txt"
+            assert document.treat_as == ".txt"
+            assert document.parent == str(tmpdir.join("sub"))
+
+    def test_context_manager_xml(textfile_model_xml, tmpdir):
+        with textfile_model_xml as document:
+            assert document.content == "ABCDE"
+            assert str(document.filepath) == str(tmpdir.join("sub", "document.xml"))
+            assert document.title == "document"
+            assert document.suffix == ".xml"
+            assert document.treat_as == ".xml"
+            assert document.parent == str(tmpdir.join("sub"))
+
+    def test_read_txt(textfile_model_txt):
+        assert textfile_model_txt.read_txt() == "ABCDE"
+
+    def test_parse_xml(textfile_model_xml):
+        assert isinstance(textfile_model_xml.parse_xml(), etree)
+
+    def test_stringify(textfile_model_xml):
+        tree = textfile_model_xml.parse_xml()
+        assert textfile_model_xml.stringify(tree) == "ABCDE"
+
+
+class TestDocument:
+    pass
+
 
 class TestCorpus:
     def test_size(corpus_model):
