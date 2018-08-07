@@ -4,9 +4,6 @@ cophi_toolbox.model
 
 This module provides low-level corpus model classes to manage and 
 process text data in Python.
-
-Complexity measures (:class:`Corpus`) implemented by Thomas Proisl,
-see https://github.com/tsproisl/Linguistic_and_Stylistic_Complexity
 """
 
 from . import utils
@@ -16,7 +13,7 @@ import pathlib
 import math
 import collections
 import itertools
-from typing import Optional, Iterable, Union, List, Generator, Filter
+from typing import Optional, Iterable, Union, List, Generator
 from dataclasses import dataclass, field
 
 from lxml import etree
@@ -37,7 +34,7 @@ class Textfile:
         if self.treat_as not in {".txt", ".xml"}:
             raise ValueError("The file format '{}' is not supported. "
                              "Try '.txt', or '.xml'.".format(self.treat_as))
-        if not isinstance(self.filepath, pathlib.Path):
+        if isinstance(self.filepath, str):
             self.filepath = pathlib.Path(self.filepath)
         self.title = self.filepath.stem
         self.suffix = self.filepath.suffix
@@ -54,7 +51,7 @@ class Textfile:
         """
         return self.filepath.read_text(encoding=self.encoding)
 
-    def parse_xml(self, parser: etree.XMLParser=etree.XMLParser()) -> etree._ElemenTree:
+    def parse_xml(self, parser: etree.XMLParser=etree.XMLParser()) -> etree._ElementTree:
         """Parse a XML file.
         """
         return etree.parse(str(self.filepath), parser=parser)
@@ -86,7 +83,7 @@ class Document:
     maximum: Optional[int] = None
 
     @property
-    def unprocessed_tokens(self) -> Generator[str]:
+    def unprocessed_tokens(self) -> Generator[str, None, None]:
         """Raw, case sensitive (if any) tokens.
         """
         return utils.find_tokens(self.text,
@@ -94,7 +91,7 @@ class Document:
                                  self.maximum)
 
     @property
-    def tokens(self) -> Generator[str]:
+    def tokens(self) -> Generator[str, None, None]:
         """Processed, lowered (if any) ngrams.
         """
         tokens = self.unprocessed_tokens
@@ -115,7 +112,7 @@ class Document:
         return len(set(self.tokens)) / len(list(self.tokens))
 
     @staticmethod
-    def drop(tokens, features: Iterable[str]) -> Generator[str]:
+    def drop(tokens, features: Iterable[str]) -> Generator[str, None, None]:
         """Drop features from tokens.
         """
         return (token for token in tokens if token not in features)
@@ -156,6 +153,21 @@ class Corpus:
         self.dtm = matrix({document.name: utils.count_tokens(document)
                            for document in self.documents}).T.fillna(0)
 
+    @staticmethod
+    def map_metadata(dtm: pd.DataFrame, metadata: pd.DataFrame, uuid: str = "uuid",
+                     fields: Union[str, List[str]] = ["title"], sep: str = "_"):
+        if isinstance(fields, str):
+            fields = [fields]
+        dtm = dtm.copy()  # do not work on Corpus class object
+        document_id = metadata[uuid]
+        ix = metadata[fields[0]].astype(str)
+        if len(fields) > 1:
+            for field in fields[1:]:
+                ix = ix + sep + metadata[field].astype(str)
+        document_id.index = ix
+        dtm.index = document_id.to_dict()
+        return dtm
+
     @property
     def size(self) -> pd.Series:
         """Number of documents and types.
@@ -169,23 +181,27 @@ class Corpus:
         return self.dtm.sum(axis=0).value_counts()
 
     @property
-    def vocabulary(self) -> List[str]:
+    def types(self) -> List[str]:
         """Corpus vocabulary.
         """
         return list(self.dtm.columns)
 
-    @property
-    def sorted_dtm(self) -> pd.DataFrame:
+    @staticmethod
+    def sort(dtm) -> pd.DataFrame:
         """Descending sorted document-term matrix.
         """
-        return self.dtm.iloc[:, (-self.dtm.sum()).argsort()]
+        return dtm.iloc[:, (-dtm.sum()).argsort()]
 
-    def get_mfw(self, n: int = 100) -> List[str]:
+    def mfw(self, n: int = 100, rel_freqs=True) -> List[str]:
         """Get the `n` most frequent words.
         """
-        return list(self.sorted_dtm.iloc[:, :n].columns)
+        if rel_freqs:
+            dtm = self.rel_freqs
+        else:
+            dtm = self.dtm
+        return list(self.sort(dtm).iloc[:, :n].columns)
 
-    def get_hl(self) -> List[str]:
+    def hapax(self) -> List[str]:
         """Get hapax legomena.
         """
         return list(self.dtm.loc[:, self.dtm.max() == 1].columns)
@@ -194,8 +210,8 @@ class Corpus:
     def drop(dtm, features: Iterable[str]) -> pd.DataFrame:
         """Drop features from document-term matrix.
         """
-        features = [token for token in features if token in self.dtm.columns]
-        return self.dtm.drop(features, axis=1)
+        features = [token for token in features if token in dtm.columns]
+        return dtm.drop(features, axis=1)
 
     @property
     def zscores(self) -> pd.DataFrame:
@@ -219,11 +235,11 @@ class Corpus:
 
         Used formula:
         .. math::
-            \mbox{tf-idf}_{t,d} = (1 +\log \mbox{tf}_{t,d}) \cdot \log \frac{N}{\mbox{idf}_t}
+            tf-idf_{t,d} \; = \; tf_{t,d} \times idf_t \; = \; tf_{t,d} \times log(\frac{N}{df_t})
         """
         tf = self.rel_freqs
         idf = self.size["documents"] / self.dtm.astype(bool).sum(axis=0)
-        return (1 + np.log(tf)) * np.log(df)
+        return tf * np.log(idf)
 
     def get_sum_types(self) -> pd.Series:
         """Get summed type frequencies per document.
@@ -407,7 +423,7 @@ class Corpus:
         .. math::
             S = \frac{\log{\log{V}}}{\log{\log{N}}}
         """
-        return np.log(np.log(self.sum_types.sum())) / np.log(np.log(self.sum_tokens.sum()))
+        return np.log(np.log(self.sum_types)) / np.log(np.log(self.sum_tokens))
 
     def get_summer_s(self):
         """Get Summer's index of lexical richness per document.
@@ -416,7 +432,7 @@ class Corpus:
         .. math::
             S = \frac{\log{\log{V}}}{\log{\log{N}}}
         """
-        return np.log(np.log(self.sum_types)) / np.log(np.log(self.sum_tokens))
+        return np.log(np.log(self.get_sum_types()) / np.log(np.log(self.get_sum_tokens())))
 
     @property
     def entropy(self):
@@ -424,7 +440,7 @@ class Corpus:
 
         Used formula:
         .. math::
-            
+            https://docs.quanteda.io/reference/textstat_lexdiv.html
         """
         a = -np.log(self.freq_spectrum.index / self.sum_tokens.sum())
         b = self.freq_spectrum / self.sum_tokens.sum()
@@ -434,13 +450,13 @@ class Corpus:
     def yule_k(self):
         """Yule (1944).
         
-        Used formula (where :math:`N` is the number of tokens, and :math:`V` the number of types):
+        Used formula:
         .. math::
-            \mbox
+            K = 10^4 \times \frac{(\sum_{X=1}^{X}{{f_X}X^2}) - N}{N^2}
         """
         a = self.freq_spectrum.index / self.sum_tokens.sum()
         b = 1 / self.sum_tokens.sum()
-        return 10000 * ((self.freq_spectrum * a ** 2) - b).sum()
+        return 10 ** 4 * ((self.freq_spectrum * a ** 2) - b).sum()
 
     @property
     def simpson_d(self):

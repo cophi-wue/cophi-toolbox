@@ -6,49 +6,36 @@ This module provides low-level helper functions to manage and
 process text data in Python.
 """
 
-from typing import Iterable, Generator, Optional, Dict
+from typing import Iterable, Generator, Optional, Dict, List, Iterator
 import collections
+
 import pandas as pd
 import regex as re
 
 
-def get_ngrams(tokens: Iterable[str], n: int = 2, sep: str = " ") -> Generator[str, None, None]:
-    """Construct ngrams.
-
+def construct_ngrams(tokens: List[str], n: int = 2, sep: str = " ") -> Iterator[str]:
+    """
     Parameters:
         tokens: The tokenized document.
-        n: Treat `n` words as one token.
-        sep: Separator between words within ngrams.
-
-    Returns:
-        Ngrams.
+        n: Number of tokens per ngram.
+        sep: Separator between words within an ngram.
     """
-    if isinstance(tokens, Generator):
-        tokens = list(tokens)
     return (sep.join(ngram) for ngram in zip(*[tokens[i:] for i in range(n)]))
 
 def count_tokens(tokens: Iterable[str]) -> pd.Series:
-    """Count tokens.
-
+    """
     Parameters:
         tokens: Tokens to count.
-
-    Returns:
-        Counted tokens.
     """
     return pd.Series(collections.Counter(tokens))
 
 def find_tokens(document: str, pattern: str = r"\p{L}+\p{P}?\p{L}+",
                 maximum: Optional[int] = None) -> Generator[str, None, None]:
-    """Find tokens from a pattern.
-
+    """
     Parameters:
-        document: The text document.
-        pattern: The token pattern.
+        document: The content of a text document.
+        pattern: A regex pattern for one token.
         maximum: Stop tokenizing after that much tokens.
-
-    Yields:
-        Tokens of a text document.
     """
     count = 0
     for match in re.compile(pattern).finditer(document):
@@ -57,7 +44,7 @@ def find_tokens(document: str, pattern: str = r"\p{L}+\p{P}?\p{L}+",
         if maximum is not None and count >= maximum:
             return
 
-def segment_fuzzy(paragraphs: Iterable[Iterable], segment_size: int = 1000,
+def segment_fuzzy(paragraphs: Iterable[Iterable[str]], segment_size: int = 1000,
                   tolerance: float = 0.05) -> Generator[list, None, None]:
     """Segment a string, respecting paragraphs.
 
@@ -65,18 +52,15 @@ def segment_fuzzy(paragraphs: Iterable[Iterable], segment_size: int = 1000,
         paragraphs: Paragraphs of a text document as separated entities.
         segment_size: The target length of each segment in tokens.
         tolerance: How much may the actual segment size differ from the `segment_size`? 
-            If ``0 < tolerance < 1``, this is interpreted as a fraction of the ``segment_size``, 
+            If ``0 < tolerance < 1``, this is interpreted as a fraction of the `segment_size`, 
             otherwise it is interpreted as an absolute number. If ``tolerance < 0``, paragraphs 
             are never split apart.
-
-    Yields:
-        Segments of a text document.
     """
     if tolerance > 0 and tolerance < 1:
         tolerance = round(segment_size * tolerance)
     current_segment = []
-    current_size = 0
     carry = None
+    current_size = 0
     doc_iter = iter(paragraphs)
     try:
         while True:
@@ -100,18 +84,3 @@ def segment_fuzzy(paragraphs: Iterable[Iterable], segment_size: int = 1000,
         pass
     if current_segment:
         yield current_segment
-
-def type2id(tokens: Iterable[str], bow: dict = dict()) -> Dict[str, int]:
-    """
-
-    Parameters:
-        tokens:
-        bow:
-
-    Returns:
-
-    """
-    for token in set(tokens):
-        if token not in bow:
-            bow[token] = len(bow)
-    return bow
