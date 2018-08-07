@@ -2,7 +2,7 @@
 cophi_toolbox.api
 ~~~~~~~~~~~~~~~~~
 
-This module implements the high-level cophi_toolbox API.
+This module implements the high-level API.
 """
 
 from . import model

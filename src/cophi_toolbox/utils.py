@@ -6,7 +6,7 @@ This module provides low-level helper functions to manage and
 process text data in Python.
 """
 
-from typing import Iterable, Generator, Optional, Dict, List, Iterator
+from typing import Iterable, Generator, Optional, List, Iterator
 import collections
 
 import pandas as pd

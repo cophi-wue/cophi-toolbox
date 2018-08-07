@@ -2,8 +2,7 @@
 cophi_toolbox
 ~~~~~~~~~~~~~
 
-`cophi_toolbox` is an NLP preprocessing library for handling and processing text data.
-
+This is an NLP preprocessing library for handling, processing and modeling text data.
 """
 
 from .api import pipe

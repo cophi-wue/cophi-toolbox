@@ -2,7 +2,7 @@
 cophi_toolbox.model
 ~~~~~~~~~~~~~~~~~~~
 
-This module provides low-level corpus model classes to manage and 
+This module provides low-level model classes to manage and 
 process text data in Python.
 """
 
@@ -10,18 +10,15 @@ from . import utils
 
 import logging
 import pathlib
-import math
 import collections
 import itertools
 from typing import Optional, Iterable, Union, List, Generator
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from lxml import etree
 import pandas as pd
 import numpy as np
 import regex as re
-
-logger = logging.getLogger("cophi_toolbox.model")
 
 
 @dataclass
@@ -66,7 +63,6 @@ class Textfile:
     def content(self) -> str:
         """Content of textfile.
         """
-        logger.debug("Treating '{}' as {}-file ...".format(self.title + self.suffix, self.treat_as))
         if self.treat_as == ".txt":
             return self.read_txt()
         elif self.treat_as == ".xml":
@@ -154,19 +150,19 @@ class Corpus:
                            for document in self.documents}).T.fillna(0)
 
     @staticmethod
-    def map_metadata(dtm: pd.DataFrame, metadata: pd.DataFrame, uuid: str = "uuid",
-                     fields: Union[str, List[str]] = ["title"], sep: str = "_"):
+    def map_metadata(matrix: Union[pd.DataFrame, pd.Series], metadata: pd.DataFrame, uuid: str = "uuid",
+                     fields: Union[str, List[str]] = ["title"], sep: str = "_") -> pd.DataFrame:
         if isinstance(fields, str):
             fields = [fields]
-        dtm = dtm.copy()  # do not work on Corpus class object
+        matrix = matrix.copy()  # do not work on original object itself
         document_id = metadata[uuid]
         ix = metadata[fields[0]].astype(str)
         if len(fields) > 1:
             for field in fields[1:]:
                 ix = ix + sep + metadata[field].astype(str)
         document_id.index = ix
-        dtm.index = document_id.to_dict()
-        return dtm
+        matrix.index = document_id.to_dict()
+        return matrix
 
     @property
     def size(self) -> pd.Series:
@@ -241,36 +237,80 @@ class Corpus:
         idf = self.size["documents"] / self.dtm.astype(bool).sum(axis=0)
         return tf * np.log(idf)
 
-    def get_sum_types(self) -> pd.Series:
-        """Get summed type frequencies per document.
+    def sum_types(self, window=None) -> pd.Series:
+        """Summed type frequencies per document.
         """
-        return self.dtm.replace(0, np.nan).count(axis=1)
+        if window:
+            w = self.dtm.copy()  # do not work on original object itself
+            w = w.replace(0, np.nan).T.rolling(window).count().T
+            w.columns = ["window_{}".format(n) for n in range(self.size["types"])]
+            return w
+        else:
+            return self.dtm.replace(0, np.nan).count(axis=1)
 
-    def get_sum_tokens(self) -> pd.Series:
-        """Get summed token frequencies per document.
+    def sum_tokens(self, window=None) -> pd.Series:
+        """Summed token frequencies per document.
         """
-        return self.dtm.sum(axis=1)
+        if window:
+            w = self.dtm.copy()  # do not work on original object itself
+            w = w.rolling(window, min_periods=1, axis=1).sum()
+            w.columns = ["window_{}".format(n) for n in range(self.size["types"])]
+            return w
+        else:
+            return self.dtm.sum(axis=1)
+
+    def complexity(self, measure="ttr", window=1000):
+        if measure == "ttr":
+            if window:
+                sttr = self.sum_types(window) / self.sum_tokens(window)
+                return sttr.mean(axis=1)
+            else:
+                logging.warning("It is not a good idea to compare unstandardized TTR values "
+                                "of several texts, because the TTR is strongly influenced by "
+                                "text length. By the way, the standard deviation of the text "
+                                "lengths in your corpus is {}, and it would be 0 if all texts "
+                                "were of equal length. To calculate the standardized TTR, define "
+                                "a value for `window`, so that a window of `n` tokens slides over "
+                                "the text and calculates multiple TTRs, from which the mean value "
+                                "is taken at the end.".format(self.sum_tokens().std()))
+                return self.sum_types() / self.sum_tokens()
+        elif measure == "guiraud_r":
+            if window is not None:
+                guiraud_r = self.sum_types(window) / np.sqrt(self.sum_tokens(window))
+                return guiraud_r.mean(axis=1)
+            else:
+                return self.sum_types() / np.sqrt(self.sum_tokens())
+        elif measure == "herdan_c":
+            return np.log(self.sum_types) / np.log(self.sum_tokens)
+        elif measure == "dugast_k":
+            return np.log(self.sum_types) / np.log(np.log(self.sum_tokens))
+        elif measure == "maas_a2":
+            return (np.log(self.sum_tokens) - np.log(self.sum_types)) / (np.log(self.sum_tokens) ** 2)
+        elif measure == "tuldava_ln":
+            return (1 - (self.sum_types ** 2)) / ((self.sum_types ** 2) * np.log(self.sum_tokens))
+        elif measure == "brunet_w":
+            return self.sum_tokens ** (self.sum_types ** 0.172)
+        elif measure == "cttr":
+            return self.sum_types / np.sqrt(2 * self.sum_tokens)
+        elif measure == "summers_s":
+            return np.log(np.log(self.sum_types) / np.log(np.log(self.sum_tokens)))
+        else:
+            raise NotImplementedError("The measure '{}' is not implemented.".format(measure))
 
     @property
-    def sum_tokens(self) -> float:
-        """Summed token frequencies.
-        """
-        return self.get_sum_tokens().sum()
+    def sichel_s(self):
+        """Sichel (1975)"""
+        return self.freq_spectrum[2] / self.sum_types.sum()
 
     @property
-    def sum_types(self) -> float:
-        """Summed type frequencies.
-        """
-        return self.get_sum_types().sum()
+    def michea_m(self):
+        """Michéa (1969, 1971)"""
+        return self.sum_types.sum() / self.freq_spectrum[2]
 
-    def get_ttr(self) -> pd.Series:
-        """Get type-token ratio per document.
-
-        Used formula:
-        .. math::
-            TTR = \frac{V}{N}
-        """
-        return self.get_sum_types() / self.get_sum_tokens()
+    @property
+    def honore_h(self):
+        """Honoré (1979)"""
+        return 100 * (np.log(self.sum_tokens.sum()) / (1 - (self.freq_spectrum[1] / self.sum_types.sum())))
 
     @property
     def ttr(self) -> float:
@@ -280,7 +320,7 @@ class Corpus:
         .. math::
             TTR = \frac{V}{N}
         """
-        return self.sum_types / self.sum_tokens
+        return self.sum_types.sum() / self.sum_tokens.sum()
 
     @property
     def guiraud_r(self) -> float:
@@ -290,16 +330,7 @@ class Corpus:
         .. math::
             r = \frac{V}{\sqrt{N}}
         """
-        return self.sum_types / np.sqrt(self.sum_tokens)
-
-    def get_guiraud_r(self) -> pd.Series:
-        """Get Guiraud's index of lexical richness (1954) per document.
-
-        Used formula:
-        .. math::
-            r = \frac{V}{\sqrt{N}}
-        """
-        return self.get_sum_types() / np.sqrt(self.get_sum_tokens())
+        return self.sum_types.sum() / np.sqrt(self.sum_tokens.sum())
 
     @property
     def herdan_c(self) -> float:
@@ -309,16 +340,7 @@ class Corpus:
         .. math::
             c = \frac{\log{V}}{\log{N}}
         """
-        return np.log(self.sum_types) / np.log(self.sum_tokens)
-
-    def get_herdan_c(self) -> pd.Series:
-        """Get Herdan's index of lexical richness (1960, 1964) per document.
-
-        Used formula:
-        .. math::
-            c = \frac{\log{V}}{\log{N}}
-        """
-        return np.log(self.get_sum_types()) / np.log(self.get_sum_tokens())
+        return np.log(self.sum_types) / np.log(self.sum_tokens.sum())
 
     @property
     def dugast_k(self) -> float:
@@ -328,16 +350,7 @@ class Corpus:
         .. math::
             k = \frac{\log{V}}{\log{\log{N}}}
         """
-        return np.log(self.sum_types) / np.log(np.log(self.sum_tokens))
-
-    def get_dugast_k(self) -> pd.Series:
-        """Get Dugast's uber index (1979) per document.
-
-        Used formula:
-        .. math::
-            k = \frac{\log{V}}{\log{\log{N}}}
-        """
-        return np.log(self.get_sum_types()) / np.log(np.log(self.get_sum_tokens()))
+        return np.log(self.sum_types.sum()) / np.log(np.log(self.sum_tokens.sum()))
 
     @property
     def maas_a2(self) -> float:
@@ -347,16 +360,7 @@ class Corpus:
         .. math::
             a^2 = \frac{\log{N} \; - \; \log{V}}{\log{N}^2}
         """
-        return (np.log(self.sum_tokens) - np.log(self.sum_types)) / (np.log(self.sum_tokens) ** 2)
-
-    def get_maas_a2(self) -> pd.Series:
-        """Get Maas' index of lexical richness (1972) per document.
-        
-        Used formula:
-        .. math::
-            a^2 = \frac{\log{N} \; - \; \log{V}}{\log{N}^2}
-        """
-        return (np.log(self.get_sum_tokens()) - np.log(self.get_sum_types())) / (np.log(self.get_sum_tokens()) ** 2)
+        return (np.log(self.sum_tokens.sum()) - np.log(self.sum_types.sum())) / (np.log(self.sum_tokens.sum()) ** 2)
 
     @property
     def tuldava_ln(self):
@@ -366,16 +370,7 @@ class Corpus:
         .. math::
             LN = \frac{1 \; - \; V^2}{V^2 \; \cdot \; \log{N}}
         """
-        return (1 - (self.sum_types ** 2)) / ((self.sum_types ** 2) * np.log(self.sum_tokens))
-
-    def get_tuldava_ln(self):
-        """Get Tuldava's index of lexical richness (1977) per document.
-        
-        Used formula:
-        .. math::
-            LN = \frac{1 \; - \; V^2}{V^2 \; \cdot \; \log{N}}
-        """
-        return (1 - (self.get_sum_types() ** 2)) / ((self.get_sum_types() ** 2) * np.log(self.get_sum_tokens()))
+        return (1 - (self.sum_types.sum() ** 2)) / ((self.sum_types.sum() ** 2) * np.log(self.sum_tokens.sum()))
 
     @property
     def brunet_w(self):
@@ -385,16 +380,7 @@ class Corpus:
         .. math::
             w = V^{V^{0.172}}
         """
-        return self.sum_tokens ** (self.sum_types ** 0.172)
-
-    def get_brunet_w(self):
-        """Get Brunet's index of lexical richness (1978) per document.
-        
-        Used formula:
-        .. math::
-            w = V^{V^{0.172}}
-        """
-        return self.get_sum_tokens() ** (self.get_sum_types() ** 0.172)
+        return self.sum_tokens.sum() ** (self.sum_types.sum() ** 0.172)
 
     @property
     def cttr(self):
@@ -404,16 +390,7 @@ class Corpus:
         .. math::
             CTTR = \frac{V}{\sqrt{2 \; \cdot \; N}}
         """
-        return self.sum_types / np.sqrt(2 * self.sum_tokens)
-
-    def get_cttr(self):
-        """Get Carroll's corrected type-token ratio per document.
-        
-        Used formula:
-        .. math::
-            CTTR = \frac{V}{\sqrt{2 \; \cdot \; N}}
-        """
-        return self.get_sum_types() / np.sqrt(2 * self.get_sum_tokens())
+        return self.sum_types.sum() / np.sqrt(2 * self.sum_tokens.sum())
 
     @property
     def summer_s(self):
@@ -423,16 +400,7 @@ class Corpus:
         .. math::
             S = \frac{\log{\log{V}}}{\log{\log{N}}}
         """
-        return np.log(np.log(self.sum_types)) / np.log(np.log(self.sum_tokens))
-
-    def get_summer_s(self):
-        """Get Summer's index of lexical richness per document.
-        
-        Used formula:
-        .. math::
-            S = \frac{\log{\log{V}}}{\log{\log{N}}}
-        """
-        return np.log(np.log(self.get_sum_types()) / np.log(np.log(self.get_sum_tokens())))
+        return np.log(np.log(self.sum_types.sum())) / np.log(np.log(self.sum_tokens.sum()))
 
     @property
     def entropy(self):
@@ -479,5 +447,5 @@ class Corpus:
             \mbox
         """
         a = self.freq_spectrum / self.sum_tokens.sum()
-        b = 1 / self.sum_types.sum()
+        b = 1 / self.sum_types.sum().sum()
         return np.sqrt(((self.freq_spectrum * a ** 2) - b).sum())
