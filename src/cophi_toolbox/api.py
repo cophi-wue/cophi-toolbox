@@ -46,10 +46,8 @@ def pipe(directory: Union[str, pathlib.Path], pathname_pattern: str = "*.*",
     for textfile in lazy_reading(filepaths):
         document_id = str(uuid.uuid1())
         text = textfile.content
-        d = model.Document(text, lowercase, ngrams, token_pattern, maximum)
-        tokens = pd.Series(d.tokens)
-        tokens.name = document_id
-        documents[document_id] = tokens
+        d = model.Document(text, document_id, lowercase, ngrams, token_pattern, maximum)
+        documents[document_id] = d
         metadata = metadata.append({"uuid": document_id,
                                     "filepath": textfile.filepath,
                                     "parent": textfile.parent,

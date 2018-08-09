@@ -84,3 +84,12 @@ def segment_fuzzy(paragraphs: Iterable[Iterable[str]], segment_size: int = 1000,
         pass
     if current_segment:
         yield current_segment
+
+def _counts(text, measure):
+    types = text.shape[0]
+    tokens = text.sum()
+    if measure in {"sichel_s", "michea_m", "honore_h", "entropy",
+                   "yule_k", "simpson_d", "herdan_vm", "orlov_z"}:
+        return {"types": types, "tokens": tokens, "freq_spectrum": text.value_counts()}
+    else:
+        return {"types": types, "tokens": tokens}

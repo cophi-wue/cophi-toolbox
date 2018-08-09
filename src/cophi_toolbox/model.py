@@ -7,6 +7,7 @@ process text data in Python.
 """
 
 from . import utils
+from . import complexity
 
 import logging
 import pathlib
@@ -69,10 +70,14 @@ class Textfile:
             tree = self.parse_xml()
             return self.stringify(tree)
 
+    @property
+    def size(self):
+        return pd.Series([len(self.content)], index=["characters"])
 
 @dataclass
 class Document:
     text: str
+    title: Optional[str] = None
     lowercase: bool = True
     ngrams: int = 1
     pattern: str = r"\p{L}+\p{P}?\p{L}+"
@@ -98,14 +103,44 @@ class Document:
         return tokens
 
     @property
-    def ttr(self) -> float:
-        """Type-token ratio.
+    def types(self):
+        return set(self.tokens)
 
-        Used formula:
-        .. math::
-            TTR = \frac{V}{N}
-        """
-        return len(set(self.tokens)) / len(list(self.tokens))
+    @property
+    def len(self):
+        return np.array([len(token) for token in self.tokens])
+
+    @property
+    def sum_tokens(self):
+        return len(list(self.tokens))
+
+    @property
+    def sum_types(self):
+        return len(self.types)
+
+    @property
+    def bow(self):
+        return utils.count_tokens(self.tokens)
+
+    def mfw(self, n=10):
+        return self.bow.sort_values(ascending=False)[:n]
+
+    @property
+    def hapax(self):
+        freqs = self.bow
+        return list(freqs[freqs == 1].index)
+
+    def window(self, n=1000):
+        tokens = list(self.tokens)
+        if n > self.sum_tokens:
+            n = self.sum_tokens
+            print("warning")
+        for i in range(int(self.sum_tokens / n)):
+            yield utils.count_tokens(tokens[i * n:(i * n) + n])
+
+    @property
+    def freq_spectrum(self):
+        return self.bow.value_counts()
 
     @staticmethod
     def drop(tokens, features: Iterable[str]) -> Generator[str, None, None]:
@@ -113,7 +148,7 @@ class Document:
         """
         return (token for token in tokens if token not in features)
 
-    def get_paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")) -> Iterable[str]:
+    def paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")) -> Iterable[str]:
         """Get paragraphs as separate entities.
         """
         if not hasattr(sep, "match"):
@@ -121,7 +156,7 @@ class Document:
         splitted = sep.split(self.text)
         return filter(None, splitted)
 
-    def get_segments(self, segment_size: int = 1000, tolerance: float = 0.05,
+    def segments(self, segment_size: int = 1000, tolerance: float = 0.05,
                      flatten_chunks: bool = True) -> Iterable[List[str]]:
         """Get segments as separate entities.
         """
@@ -135,10 +170,136 @@ class Document:
             segments = map(flatten_chunks, segments)
         return segments
 
+    def bootstrap(self, measure="ttr", window=1000, **kwargs):
+        for chunk in self.window(window):
+            count = utils._counts(chunk, measure)
+            if measure == "ttr":
+                yield complexity.ttr(**count)
+            elif measure == "guiraud_r":
+                yield complexity.guiraud_r(**count)
+            elif measure == "herdan_c":
+                yield complexity.herdan_c(**count)
+            elif measure == "dugast_k":
+                yield complexity.dugast_k(**count)
+            elif measure == "maas_a2":
+                yield complexity.maas_a2(**count)
+            elif measure == "tuldava_ln":
+                yield complexity.tuldava_ln(**count)
+            elif measure == "brunet_w":
+                yield complexity.brunet_w(**count)
+            elif measure == "cttr":
+                yield complexity.cttr(**count)
+            elif measure == "summer_s":
+                yield complexity.summer_s(**count)
+            elif measure == "sichel_s":
+                yield complexity.sichel_s(**count)
+            elif measure == "michea_m":
+                yield complexity.michea_m(**count)
+            elif measure == "honore_h":
+                yield complexity.honore_h(**count)
+            elif measure == "entropy":
+                yield complexity.entropy(**count)
+            elif measure == "yule_k":
+                yield complexity.yule_k(**count)
+            elif measure == "simpson_d":
+                yield complexity.simpson_d(**count)
+            elif measure == "herdan_vm":
+                yield complexity.herdan_vm(**count)
+            elif measure == "orlov_z":
+                yield complexity.orlov_z(**count, **kwargs)
+            else:
+                raise NotImplementedError("The measure '{}' is not implemented.".format(measure))
+
+    def complexity(self, measure="ttr", window=None):
+        if not window:
+            count = utils._counts(self.bow, measure)
+        if measure == "ttr":
+            if window:
+                sttr = list(self.bootstrap(measure, window))
+                return np.array(sttr).mean(), complexity.ci(sttr)
+            else:
+                return complexity.ttr(**count)
+        elif measure == "guiraud_r":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.guiraud_r(**count)
+        elif measure == "herdan_c":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.herdan_c(**count)
+        elif measure == "dugast_k":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.dugast_k(**count)
+        elif measure == "maas_a2":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.maas_a2(**count)
+        elif measure == "tuldava_ln":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.tuldava_ln(**count)
+        elif measure == "brunet_w":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.brunet_w(**count)
+        elif measure == "cttr":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.cttr(**count)
+        elif measure == "summer_s":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.summer_s(**count)
+        elif measure == "sichel_s":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.sichel_s(**count)
+        elif measure == "michea_m":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.michea_m(**count)
+        elif measure == "honore_h":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.honore_h(**count)
+        elif measure == "entropy":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.entropy(**count)
+        elif measure == "yule_k":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.yule_k(**count)
+        elif measure == "simpson_d":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.simpson_d(**count)
+        elif measure == "herdan_vm":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.herdan_vm(**count)
+        else:
+            raise NotImplementedError("The measure '{}' is not implemented.".format(measure))
 
 @dataclass
 class Corpus:
-    documents: Iterable[pd.Series]
+    documents: Iterable[Document]
     sparse: bool = False
 
     def __post_init__(self):
@@ -146,22 +307,20 @@ class Corpus:
             raise NotImplementedError
         else:
             matrix = pd.DataFrame
-        self.dtm = matrix({document.name: utils.count_tokens(document)
-                           for document in self.documents}).T.fillna(0)
+        self.dtm = matrix({document.title: document.bow
+                           for document in self.documents}).T.fillna(0).astype(int)
 
     @staticmethod
     def map_metadata(matrix: Union[pd.DataFrame, pd.Series], metadata: pd.DataFrame, uuid: str = "uuid",
-                     fields: Union[str, List[str]] = ["title"], sep: str = "_") -> pd.DataFrame:
-        if isinstance(fields, str):
-            fields = [fields]
+                     fields: List[str] = ["title"], sep: str = "_") -> pd.DataFrame:
         matrix = matrix.copy()  # do not work on original object itself
-        document_id = metadata[uuid]
-        ix = metadata[fields[0]].astype(str)
+        document_uuid = metadata[uuid]
+        index = metadata[fields[0]].astype(str)
         if len(fields) > 1:
             for field in fields[1:]:
-                ix = ix + sep + metadata[field].astype(str)
-        document_id.index = ix
-        matrix.index = document_id.to_dict()
+                index = index + sep + metadata[field].astype(str)
+        document_uuid.index = index
+        matrix.index = document_uuid.to_dict()
         return matrix
 
     @property
@@ -188,15 +347,20 @@ class Corpus:
         """
         return dtm.iloc[:, (-dtm.sum()).argsort()]
 
-    def mfw(self, n: int = 100, rel_freqs=True) -> List[str]:
+    def mfw(self, n: int = 100, rel_freqs=True, as_list=True) -> List[str]:
         """Get the `n` most frequent words.
         """
         if rel_freqs:
             dtm = self.rel_freqs
         else:
             dtm = self.dtm
-        return list(self.sort(dtm).iloc[:, :n].columns)
+        mfw = self.sort(dtm).iloc[:, :n]
+        if as_list:
+            return list(mfw.columns)
+        else:
+            return mfw.sum()
 
+    @property
     def hapax(self) -> List[str]:
         """Get hapax legomena.
         """
@@ -237,90 +401,52 @@ class Corpus:
         idf = self.size["documents"] / self.dtm.astype(bool).sum(axis=0)
         return tf * np.log(idf)
 
-    def sum_types(self, window=None) -> pd.Series:
+    @property
+    def sum_types(self) -> pd.Series:
         """Summed type frequencies per document.
         """
-        if window:
-            w = self.dtm.copy()  # do not work on original object itself
-            w = w.replace(0, np.nan).T.rolling(window).count().T
-            w.columns = ["window_{}".format(n) for n in range(self.size["types"])]
-            return w
-        else:
-            return self.dtm.replace(0, np.nan).count(axis=1)
+        return self.dtm.replace(0, np.nan).count(axis=1)
 
-    def sum_tokens(self, window=None) -> pd.Series:
+    @property
+    def sum_tokens(self) -> pd.Series:
         """Summed token frequencies per document.
         """
-        if window:
-            w = self.dtm.copy()  # do not work on original object itself
-            w = w.rolling(window, min_periods=1, axis=1).sum()
-            w.columns = ["window_{}".format(n) for n in range(self.size["types"])]
-            return w
-        else:
-            return self.dtm.sum(axis=1)
+        return self.dtm.sum(axis=1)
 
     def complexity(self, measure="ttr", window=1000):
         if measure == "ttr":
-            if window:
-                sttr = self.sum_types(window) / self.sum_tokens(window)
-                return sttr.mean(axis=1)
-            else:
-                logging.warning("It is not a good idea to compare unstandardized TTR values "
-                                "of several texts, because the TTR is strongly influenced by "
-                                "text length. By the way, the standard deviation of the text "
-                                "lengths in your corpus is {}, and it would be 0 if all texts "
-                                "were of equal length. To calculate the standardized TTR, define "
-                                "a value for `window`, so that a window of `n` tokens slides over "
-                                "the text and calculates multiple TTRs, from which the mean value "
-                                "is taken at the end.".format(self.sum_tokens().std()))
-                return self.sum_types() / self.sum_tokens()
-        elif measure == "guiraud_r":
-            if window is not None:
-                guiraud_r = self.sum_types(window) / np.sqrt(self.sum_tokens(window))
-                return guiraud_r.mean(axis=1)
-            else:
-                return self.sum_types() / np.sqrt(self.sum_tokens())
-        elif measure == "herdan_c":
-            return np.log(self.sum_types) / np.log(self.sum_tokens)
-        elif measure == "dugast_k":
-            return np.log(self.sum_types) / np.log(np.log(self.sum_tokens))
-        elif measure == "maas_a2":
-            return (np.log(self.sum_tokens) - np.log(self.sum_types)) / (np.log(self.sum_tokens) ** 2)
-        elif measure == "tuldava_ln":
-            return (1 - (self.sum_types ** 2)) / ((self.sum_types ** 2) * np.log(self.sum_tokens))
-        elif measure == "brunet_w":
-            return self.sum_tokens ** (self.sum_types ** 0.172)
-        elif measure == "cttr":
-            return self.sum_types / np.sqrt(2 * self.sum_tokens)
-        elif measure == "summers_s":
-            return np.log(np.log(self.sum_types) / np.log(np.log(self.sum_tokens)))
+            c = pd.DataFrame()
         else:
-            raise NotImplementedError("The measure '{}' is not implemented.".format(measure))
+            c = pd.Series()
+        for document in self.documents:
+            if window:
+                if measure == "ttr":
+                    sttr, ci = document.complexity(measure, window)
+                    c = c.append(pd.DataFrame({"sttr": sttr, "ci": ci}, index=[document.title]))
+                else:
+                    c[document.title] = document.complexity(measure, window)
+            else:
+                c[document.title] = document.complexity(measure)
+        return c
+
+    @property
+    def ttr(self):
+        return complexity.ttr(self.size["types"], self.sum_tokens.sum())
 
     @property
     def sichel_s(self):
         """Sichel (1975)"""
-        return self.freq_spectrum[2] / self.sum_types.sum()
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
     def michea_m(self):
         """Michéa (1969, 1971)"""
-        return self.sum_types.sum() / self.freq_spectrum[2]
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
     def honore_h(self):
         """Honoré (1979)"""
-        return 100 * (np.log(self.sum_tokens.sum()) / (1 - (self.freq_spectrum[1] / self.sum_types.sum())))
-
-    @property
-    def ttr(self) -> float:
-        """Type-token ratio.
-
-        Used formula:
-        .. math::
-            TTR = \frac{V}{N}
-        """
-        return self.sum_types.sum() / self.sum_tokens.sum()
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
     def guiraud_r(self) -> float:
@@ -330,7 +456,7 @@ class Corpus:
         .. math::
             r = \frac{V}{\sqrt{N}}
         """
-        return self.sum_types.sum() / np.sqrt(self.sum_tokens.sum())
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
     def herdan_c(self) -> float:
@@ -340,7 +466,7 @@ class Corpus:
         .. math::
             c = \frac{\log{V}}{\log{N}}
         """
-        return np.log(self.sum_types) / np.log(self.sum_tokens.sum())
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
     def dugast_k(self) -> float:
@@ -350,7 +476,7 @@ class Corpus:
         .. math::
             k = \frac{\log{V}}{\log{\log{N}}}
         """
-        return np.log(self.sum_types.sum()) / np.log(np.log(self.sum_tokens.sum()))
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
     def maas_a2(self) -> float:
@@ -360,7 +486,7 @@ class Corpus:
         .. math::
             a^2 = \frac{\log{N} \; - \; \log{V}}{\log{N}^2}
         """
-        return (np.log(self.sum_tokens.sum()) - np.log(self.sum_types.sum())) / (np.log(self.sum_tokens.sum()) ** 2)
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
     def tuldava_ln(self):
@@ -370,7 +496,7 @@ class Corpus:
         .. math::
             LN = \frac{1 \; - \; V^2}{V^2 \; \cdot \; \log{N}}
         """
-        return (1 - (self.sum_types.sum() ** 2)) / ((self.sum_types.sum() ** 2) * np.log(self.sum_tokens.sum()))
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
     def brunet_w(self):
@@ -380,7 +506,7 @@ class Corpus:
         .. math::
             w = V^{V^{0.172}}
         """
-        return self.sum_tokens.sum() ** (self.sum_types.sum() ** 0.172)
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
     def cttr(self):
@@ -390,7 +516,7 @@ class Corpus:
         .. math::
             CTTR = \frac{V}{\sqrt{2 \; \cdot \; N}}
         """
-        return self.sum_types.sum() / np.sqrt(2 * self.sum_tokens.sum())
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
     def summer_s(self):
@@ -400,7 +526,7 @@ class Corpus:
         .. math::
             S = \frac{\log{\log{V}}}{\log{\log{N}}}
         """
-        return np.log(np.log(self.sum_types.sum())) / np.log(np.log(self.sum_tokens.sum()))
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
     def entropy(self):
@@ -449,3 +575,6 @@ class Corpus:
         a = self.freq_spectrum / self.sum_tokens.sum()
         b = 1 / self.sum_types.sum().sum()
         return np.sqrt(((self.freq_spectrum * a ** 2) - b).sum())
+
+    def orlov_z(self, max_iterations=100, min_tolerance=1):
+        return complexity.orlov_z(self.sum_tokens, self.size["types"], self.freq_spectrum, max_iterations, min_tolerance)
