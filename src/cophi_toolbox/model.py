@@ -25,11 +25,11 @@ import regex as re
 @dataclass
 class Textfile:
     filepath: Union[str, pathlib.Path]
-    treat_as: str = ".txt"
+    treat_as: Optional[str] = None
     encoding: str = "utf-8"
 
     def __post_init__(self):
-        if self.treat_as not in {".txt", ".xml"}:
+        if self.treat_as and self.treat_as not in {".txt", ".xml"}:
             raise ValueError("The file format '{}' is not supported. "
                              "Try '.txt', or '.xml'.".format(self.treat_as))
         if isinstance(self.filepath, str):
@@ -50,7 +50,7 @@ class Textfile:
         return self.filepath.read_text(encoding=self.encoding)
 
     def parse_xml(self, parser: etree.XMLParser=etree.XMLParser()) -> etree._ElementTree:
-        """Parse a XML file.
+        """Parse an XML file.
         """
         return etree.parse(str(self.filepath), parser=parser)
 
@@ -64,15 +64,17 @@ class Textfile:
     def content(self) -> str:
         """Content of textfile.
         """
-        if self.treat_as == ".txt":
+        if (not self.treat_as and self.suffix == ".txt") or self.treat_as == ".txt":
             return self.read_txt()
-        elif self.treat_as == ".xml":
+        elif (not self.treat_as and self.suffix == ".xml") or self.treat_as == ".xml":
             tree = self.parse_xml()
             return self.stringify(tree)
 
     @property
     def size(self):
-        return pd.Series([len(self.content)], index=["characters"])
+        """Size of document in characters.
+        """
+        return len(self.content)
 
 @dataclass
 class Document:
@@ -85,7 +87,7 @@ class Document:
 
     @property
     def unprocessed_tokens(self) -> Generator[str, None, None]:
-        """Raw, case sensitive (if any) tokens.
+        """Raw tokens.
         """
         return utils.find_tokens(self.text,
                                  self.pattern,
@@ -93,7 +95,7 @@ class Document:
 
     @property
     def tokens(self) -> Generator[str, None, None]:
-        """Processed, lowered (if any) ngrams.
+        """Processed ngrams.
         """
         tokens = self.unprocessed_tokens
         if self.lowercase:
@@ -104,42 +106,89 @@ class Document:
 
     @property
     def types(self):
+        """Document vocabulary.
+        """
         return set(self.tokens)
 
     @property
     def len(self):
+        """Token lengths.
+        """
         return np.array([len(token) for token in self.tokens])
 
     @property
+    def mean_len(self):
+        """Arithmetic mean of token lengths.
+        """
+        return self.len.mean()
+
+    @property
     def sum_tokens(self):
+        """Number of tokens.
+        """
         return len(list(self.tokens))
 
     @property
     def sum_types(self):
+        """Number of types.
+        """
         return len(self.types)
 
     @property
     def bow(self):
+        """Bag-of-words representation.
+        """
         return utils.count_tokens(self.tokens)
 
-    def mfw(self, n=10):
-        return self.bow.sort_values(ascending=False)[:n]
+    @property
+    def rel_freqs(self):
+        """Bag-of-words representation with relative frequencies.
+        """
+        return self.bow / self.sum_tokens
+
+    def mfw(self, n: int = 10, rel_freqs: bool = False, as_list: bool = True) -> Union[List[str], pd.Series]:
+        """Most frequent words.
+
+        Parameters:
+            n: Number of most frequent words.
+            rel_freqs: If True, use relative frequencies for sorting.
+            as_list: If True, return as a list, otherwise as pandas Series
+                with frequencies.
+        """
+        freqs = self.bow.sort_values(ascending=False)
+        if rel_freqs:
+            freqs = freqs.iloc[:n] / self.sum_tokens
+        else:
+            freqs = freqs.iloc[:n]
+        if as_list:
+            return list(freqs.index)
+        else:
+            return freqs
 
     @property
     def hapax(self):
+        """Hapax legomena.
+        """
         freqs = self.bow
         return list(freqs[freqs == 1].index)
 
-    def window(self, n=1000):
+    def window(self, n: int = 1000) -> Generator[pd.Series, None, None]:
+        """Iterate with a sliding window over tokens.
+
+        Parameters:
+            n: Window size.
+        """
         tokens = list(self.tokens)
         if n > self.sum_tokens:
             n = self.sum_tokens
-            print("warning")
+            logger.warning("{} > number of tokens in document. Setting n = number of tokens.")
         for i in range(int(self.sum_tokens / n)):
             yield utils.count_tokens(tokens[i * n:(i * n) + n])
 
     @property
     def freq_spectrum(self):
+        """Counted occurring frequencies.
+        """
         return self.bow.value_counts()
 
     @staticmethod
@@ -149,7 +198,7 @@ class Document:
         return (token for token in tokens if token not in features)
 
     def paragraphs(self, sep: Union[re.compile, str] = re.compile(r"\n")) -> Iterable[str]:
-        """Get paragraphs as separate entities.
+        """Paragraphs as separate entities.
         """
         if not hasattr(sep, "match"):
             sep = re.compile(sep)
@@ -158,7 +207,7 @@ class Document:
 
     def segments(self, segment_size: int = 1000, tolerance: float = 0.05,
                      flatten_chunks: bool = True) -> Iterable[List[str]]:
-        """Get segments as separate entities.
+        """Segments as separate entities.
         """
         segments = utils.segment_fuzzy([self.tokens],
                                        segment_size,
@@ -170,9 +219,17 @@ class Document:
             segments = map(flatten_chunks, segments)
         return segments
 
-    def bootstrap(self, measure="ttr", window=1000, **kwargs):
+    def bootstrap(self, measure: str = "ttr", window: int = 1000, **kwargs) -> Generator[int, None, None]:
+        """Iterate with sliding window over tokens and apply a complexity measure.
+
+        Parameters:
+            measure: Use `help(cophi_toolbox)` for an extensive description 
+                on available complexity measures.
+            window: Window size.
+            **kwargs: Additional parameter for :func:`complexity.orlov_z`.
+        """
         for chunk in self.window(window):
-            count = utils._counts(chunk, measure)
+            count = utils._count(chunk, measure)
             if measure == "ttr":
                 yield complexity.ttr(**count)
             elif measure == "guiraud_r":
@@ -210,9 +267,17 @@ class Document:
             else:
                 raise NotImplementedError("The measure '{}' is not implemented.".format(measure))
 
-    def complexity(self, measure="ttr", window=None):
+    def complexity(self, measure: str = "ttr", window: Optional[int]=None, **kwargs):
+        """Calculate complexity, optionally with a sliding window.
+
+        Parameters:
+            measure: Use `help(cophi_toolbox)` for an extensive description 
+                on available complexity measures.
+            window: Window size.
+            **kwargs: Additional parameter for :func:`complexity.orlov_z`.
+        """
         if not window:
-            count = utils._counts(self.bow, measure)
+            count = utils._count(self.bow, measure)
         if measure == "ttr":
             if window:
                 sttr = list(self.bootstrap(measure, window))
@@ -294,6 +359,11 @@ class Document:
                 return np.array(list(self.bootstrap(measure, window))).mean()
             else:
                 return complexity.herdan_vm(**count)
+        elif measure == "orlov_z":
+            if window:
+                return np.array(list(self.bootstrap(measure, window, **kwargs))).mean()
+            else:
+                return complexity.orlov_z(**count, **kwargs)
         else:
             raise NotImplementedError("The measure '{}' is not implemented.".format(measure))
 
@@ -313,6 +383,15 @@ class Corpus:
     @staticmethod
     def map_metadata(matrix: Union[pd.DataFrame, pd.Series], metadata: pd.DataFrame, uuid: str = "uuid",
                      fields: List[str] = ["title"], sep: str = "_") -> pd.DataFrame:
+        """Map metadata with a UUID.
+
+        Parameters:
+            matrix: Matrix to map with.
+            metadata: Matrix with metadata, one row corresponds to one document.
+            uuid: The connecting UUID between `matrix` and `metadata`.
+            fields: One or more columns of `metadata`.
+            sep: Glue multiple `fields` with this separator together.
+        """
         matrix = matrix.copy()  # do not work on original object itself
         document_uuid = metadata[uuid]
         index = metadata[fields[0]].astype(str)
@@ -324,19 +403,19 @@ class Corpus:
         return matrix
 
     @property
-    def size(self) -> pd.Series:
+    def size(self):
         """Number of documents and types.
         """
         return pd.Series(self.dtm.shape, index=["documents", "types"])
 
     @property
-    def freq_spectrum(self) -> pd.Series:
+    def freq_spectrum(self):
         """Frequency spectrum of types.
         """
         return self.dtm.sum(axis=0).value_counts()
 
     @property
-    def types(self) -> List[str]:
+    def types(self):
         """Corpus vocabulary.
         """
         return list(self.dtm.columns)
@@ -347,34 +426,40 @@ class Corpus:
         """
         return dtm.iloc[:, (-dtm.sum()).argsort()]
 
-    def mfw(self, n: int = 100, rel_freqs=True, as_list=True) -> List[str]:
-        """Get the `n` most frequent words.
+    def mfw(self, n: int = 100, rel_freqs: bool = True, as_list: bool = True) -> Union[List[str], pd.Series]:
+        """Most frequent words.
+
+        Parameters:
+            n: Number of most frequent words.
+            rel_freqs: If True, use relative frequencies for sorting.
+            as_list: If True, return as a list, otherwise as pandas Series
+                with frequencies.
         """
+        dtm = self.sort(self.dtm)
         if rel_freqs:
-            dtm = self.rel_freqs
+            mfw = dtm.iloc[:, :n].div(self.dtm.sum(axis=1), axis=0)
         else:
-            dtm = self.dtm
-        mfw = self.sort(dtm).iloc[:, :n]
+            mfw = dtm.iloc[:, :n]
         if as_list:
             return list(mfw.columns)
         else:
             return mfw.sum()
 
     @property
-    def hapax(self) -> List[str]:
-        """Get hapax legomena.
+    def hapax(self):
+        """Hapax legomena.
         """
         return list(self.dtm.loc[:, self.dtm.max() == 1].columns)
 
     @staticmethod
-    def drop(dtm, features: Iterable[str]) -> pd.DataFrame:
+    def drop(dtm: pd.DataFrame, features: Iterable[str]) -> pd.DataFrame:
         """Drop features from document-term matrix.
         """
         features = [token for token in features if token in dtm.columns]
         return dtm.drop(features, axis=1)
 
     @property
-    def zscores(self) -> pd.DataFrame:
+    def zscores(self):
         """Standardized document-term matrix.
 
         Used formula:
@@ -384,13 +469,13 @@ class Corpus:
         return (self.dtm - self.dtm.mean()) / self.dtm.std()
 
     @property
-    def rel_freqs(self) -> pd.DataFrame:
+    def rel_freqs(self):
         """Document-term matrix with relative word frequencies.
         """
         return self.dtm.div(self.dtm.sum(axis=1), axis=0)
 
     @property
-    def tfidf(self) -> pd.DataFrame:
+    def tfidf(self):
         """TF-IDF normalized document-term matrix.
 
         Used formula:
@@ -402,55 +487,47 @@ class Corpus:
         return tf * np.log(idf)
 
     @property
-    def sum_types(self) -> pd.Series:
+    def sum_types(self):
         """Summed type frequencies per document.
         """
         return self.dtm.replace(0, np.nan).count(axis=1)
 
     @property
-    def sum_tokens(self) -> pd.Series:
+    def sum_tokens(self):
         """Summed token frequencies per document.
         """
         return self.dtm.sum(axis=1)
 
-    def complexity(self, measure="ttr", window=1000):
+    def complexity(self, window: int, measure: str = "ttr"):
+        """Calculate complexity for each document with a sliding window.
+
+        Parameters:
+            window: Window size.
+            measure: Use `help(cophi_toolbox)` for an extensive description 
+                on available complexity measures.
+            **kwargs: Additional parameter for :func:`complexity.orlov_z`.
+        """
         if measure == "ttr":
             c = pd.DataFrame()
         else:
             c = pd.Series()
         for document in self.documents:
-            if window:
-                if measure == "ttr":
-                    sttr, ci = document.complexity(measure, window)
-                    c = c.append(pd.DataFrame({"sttr": sttr, "ci": ci}, index=[document.title]))
-                else:
-                    c[document.title] = document.complexity(measure, window)
+            if measure == "ttr":
+                sttr, ci = document.complexity(measure, window)
+                c = c.append(pd.DataFrame({"sttr": sttr, "ci": ci}, index=[document.title]))
             else:
-                c[document.title] = document.complexity(measure)
+                c[document.title] = document.complexity(measure, window)
         return c
 
     @property
     def ttr(self):
+        """Type-Token Ratio.
+        """
         return complexity.ttr(self.size["types"], self.sum_tokens.sum())
 
     @property
-    def sichel_s(self):
-        """Sichel (1975)"""
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
-
-    @property
-    def michea_m(self):
-        """Michéa (1969, 1971)"""
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
-
-    @property
-    def honore_h(self):
-        """Honoré (1979)"""
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
-
-    @property
     def guiraud_r(self) -> float:
-        """Guiraud's index of lexical richness (1954).
+        """Guiraud’s index of lexical richness (1954).
 
         Used formula:
         .. math::
@@ -460,7 +537,7 @@ class Corpus:
 
     @property
     def herdan_c(self) -> float:
-        """Herdan's index of lexical richness (1960, 1964).
+        """Herdan’s index of lexical richness (1960, 1964).
 
         Used formula:
         .. math::
@@ -470,7 +547,7 @@ class Corpus:
 
     @property
     def dugast_k(self) -> float:
-        """Dugast's uber index (1979).
+        """Dugast’s uber index (1979).
 
         Used formula:
         .. math::
@@ -480,7 +557,7 @@ class Corpus:
 
     @property
     def maas_a2(self) -> float:
-        """Maas' index of lexical richness (1972).
+        """Maas’ index of lexical richness (1972).
         
         Used formula:
         .. math::
@@ -490,7 +567,7 @@ class Corpus:
 
     @property
     def tuldava_ln(self):
-        """Tuldava's index of lexical richness (1977).
+        """Tuldava’s index of lexical richness (1977).
         
         Used formula:
         .. math::
@@ -500,7 +577,7 @@ class Corpus:
 
     @property
     def brunet_w(self):
-        """Get Brunet's index of lexical richness (1978).
+        """Get Brunet’s index of lexical richness (1978).
         
         Used formula:
         .. math::
@@ -510,7 +587,7 @@ class Corpus:
 
     @property
     def cttr(self):
-        """Carroll's corrected type-token ratio.
+        """Carroll’s corrected type-token ratio.
         
         Used formula:
         .. math::
@@ -520,12 +597,27 @@ class Corpus:
 
     @property
     def summer_s(self):
-        """Summer's index of lexical richness.
+        """Summer’s index of lexical richness.
         
         Used formula:
         .. math::
             S = \frac{\log{\log{V}}}{\log{\log{N}}}
         """
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+
+    @property
+    def sichel_s(self):
+        """Sichel’s S (1975)"""
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+
+    @property
+    def michea_m(self):
+        """Michéa’s M (1969, 1971)"""
+        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+
+    @property
+    def honore_h(self):
+        """Honoré's H (1979)"""
         return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
 
     @property
@@ -542,7 +634,7 @@ class Corpus:
 
     @property
     def yule_k(self):
-        """Yule (1944).
+        """Yule’s K (1944).
         
         Used formula:
         .. math::
@@ -554,7 +646,7 @@ class Corpus:
 
     @property
     def simpson_d(self):
-        """Simpson.
+        """Simpson’s D.
 
         Used formula (where :math:`N` is the number of tokens, and :math:`V` the number of types):
         .. math::
@@ -566,7 +658,7 @@ class Corpus:
 
     @property
     def herdan_vm(self):
-        """Herdan (1955).
+        """Herdan’s VM (1955).
 
         Used formula (where :math:`N` is the number of tokens, and :math:`V` the number of types):
         .. math::
@@ -576,5 +668,7 @@ class Corpus:
         b = 1 / self.sum_types.sum().sum()
         return np.sqrt(((self.freq_spectrum * a ** 2) - b).sum())
 
-    def orlov_z(self, max_iterations=100, min_tolerance=1):
+    def orlov_z(self, max_iterations: int = 100, min_tolerance: int = 1) -> pd.Series:
+        """Orlov’s Z.
+        """
         return complexity.orlov_z(self.sum_tokens, self.size["types"], self.freq_spectrum, max_iterations, min_tolerance)

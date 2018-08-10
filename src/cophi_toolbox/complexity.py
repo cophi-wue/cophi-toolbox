@@ -2,144 +2,220 @@
 cophi_toolbox.complexity
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-This module provides 
+This module provides measures that assess the linguistic 
+and stylistic complexity of (literary) texts.
 """
 
+from typing import Union, Dict, List
 import numpy as np
 
 
-# types + tokens:
+# use sum_types + sum_tokens:
 
-def ttr(tokens, types):
-    """"""
-    return types / tokens
+def ttr(sum_types: int, sum_tokens: int) -> Union[int, float]:
+    """Calculate Type-Token Ratio.
 
+    Parameters:
+        sum_types: Number of types.
+        sum_tokens: Number of tokens.
+    """
+    return sum_types / sum_tokens
 
-def guiraud_r(tokens, types):
-    """Guiraud (1954)"""
-    return types / np.sqrt(tokens)
+def guiraud_r(sum_types: int, sum_tokens: int) -> Union[int, float]:
+    """Calculate Guiraud’s R (1954)
 
+    Parameters:
+            sum_types: Number of types.
+            sum_tokens: Number of tokens.
+        """
+    return sum_types / np.sqrt(sum_tokens)
 
-def herdan_c(tokens, types):
-    """Herdan (1960, 1964)"""
-    return np.log(types) / np.log(tokens)
+def herdan_c(sum_types: int, sum_tokens: int) -> Union[int, float]:
+    """Calculate Herdan’s C (1960, 1964).
 
+    Parameters:
+        sum_types: Number of types.
+        sum_tokens: Number of tokens.
+    """
+    return np.log(sum_types) / np.log(sum_tokens)
 
-def dugast_k(tokens, types):
-    """Dugast (1979)"""
-    return np.log(types) / np.log(np.log(tokens))
+def dugast_k(sum_types: int, sum_tokens: int) -> Union[int, float]:
+    """Calculate Dugast’s k (1979).
 
+    Parameters:
+        sum_types: Number of types.
+        sum_tokens: Number of tokens.
+    """
+    return np.log(sum_types) / np.log(np.log(sum_tokens))
 
-def maas_a2(tokens, types):
-    """Maas (1972)"""
-    return (np.log(tokens) - np.log(types)) / (np.log(tokens) ** 2)
+def maas_a2(sum_types: int, sum_tokens: int) -> Union[int, float]:
+    """Calculate Maas’ a^2 (1972).
 
+    Parameters:
+        sum_types: Number of types.
+        sum_tokens: Number of tokens.
+    """
+    return (np.log(sum_tokens) - np.log(sum_types)) / (np.log(sum_tokens) ** 2)
 
-def dugast_u(tokens, types):
-    """Dugast (1978, 1979)"""
-    return (np.log(tokens) ** 2) / (np.log(tokens) - np.log(types))
+def dugast_u(sum_types: int, sum_tokens: int) -> Union[int, float]:
+    """Calculate Dugast’s U (1978, 1979).
 
+    Parameters:
+        sum_types: Number of types.
+        sum_tokens: Number of tokens.
+    """
+    return (np.log(sum_tokens) ** 2) / (np.log(sum_tokens) - np.log(sum_types))
 
-def tuldava_ln(tokens, types):
-    """Tuldava (1977)"""
-    return (1 - (types ** 2)) / ((types ** 2) * np.log(tokens))
+def tuldava_ln(sum_types: int, sum_tokens: int) -> Union[int, float]:
+    """Calculate Tuldava’s LN (1977).
 
+    Parameters:
+        sum_types: Number of types.
+        sum_tokens: Number of tokens.
+    """
+    return (1 - (sum_types ** 2)) / ((sum_types ** 2) * np.log(sum_tokens))
 
-def brunet_w(tokens, types):
-    """Brunet (1978)"""
+def brunet_w(sum_types: int, sum_tokens: int) -> Union[int, float]:
+    """Calculate Brunet’s W (1978)
+
+    Parameters:
+        sum_types: Number of types.
+        sum_tokens: Number of tokens.
+    """
     a = -0.172
-    return tokens ** (types ** -a)
+    return sum_tokens ** (sum_types ** -a)
+
+def cttr(sum_types: int, sum_tokens: int) -> Union[int, float]:
+    """Calculate Carroll’s Corrected Type-Token Ration (1964).
+
+    Parameters:
+        sum_types: Number of types.
+        sum_tokens: Number of tokens.
+    """
+    return sum_types / np.sqrt(2 * sum_tokens)
+
+def summer_s(sum_types: int, sum_tokens: int) -> Union[int, float]:
+    """Calculate Summer’s S.
+
+    Parameters:
+        sum_types: Number of types.
+        sum_tokens: Number of tokens.
+    """
+    return np.log(np.log(sum_types)) / np.log(np.log(sum_tokens))
 
 
-def cttr(tokens, types):
-    """Carroll's Corrected Type-Token Ration"""
-    return types / np.sqrt(2 * tokens)
+# use sum_types + part of the frequency spectrum:
+
+def sichel_s(sum_types: int, freq_spectrum: Dict[int, int]) -> Union[int, float]:
+    """Calculate Sichel’s S (1975).
+
+    Parameters:
+        sum_types: Number of types.
+        freq_spectrum: Counted occurring frequencies.
+    """
+    return freq_spectrum[2] / sum_types
+
+def michea_m(sum_types: int, freq_spectrum: Dict[int, int]) -> Union[int, float]:
+    """Calculate Michéa’s M (1969, 1971).
+
+    Parameters:
+        sum_types: Number of types.
+        freq_spectrum: Counted occurring frequencies.
+    """
+    return sum_types / freq_spectrum[2]
+
+def honore_h(sum_tokens: int, sum_types: int, freq_spectrum: Dict[int, int]) -> Union[int, float]:
+    """Calculate Honoré’s H (1979).
+
+    Parameters:
+        sum_types: Number of types.
+        freq_spectrum: Counted occurring frequencies.
+    """
+    return 100 * (np.log(sum_tokens) / (1 - ((freq_spectrum[1]) / (sum_types))))
 
 
-def summer_s(tokens, types):
-    """Summer's S index"""
-    return np.log(np.log(types)) / np.log(np.log(tokens))
+# use sum_tokens + frequency spectrum:
 
+def entropy(sum_tokens: int, freq_spectrum: Dict[int, int]) -> Union[int, float]:
+    """Calculate entropy.
 
-# types + part of the frequency spectrum:
-
-def sichel_s(types, freq_spectrum):
-    """Sichel (1975)"""
-    return freq_spectrum[2] / types
-
-
-def michea_m(types, freq_spectrum):
-    """Michéa (1969, 1971)"""
-    return types / freq_spectrum[2]
-
-
-def honore_h(tokens, types, freq_spectrum):
-    """Honoré (1979)"""
-    return 100 * (np.log(tokens) / (1 - ((freq_spectrum[1]) / (types))))
-
-
-# tokens + frequency spectrum:
-
-def entropy(tokens, freq_spectrum):
-    """"""
-    a = -np.log(freq_spectrum.index / tokens)
-    b = freq_spectrum / tokens
+    Parameters:
+        sum_tokens: Number of tokens.
+        freq_spectrum: Counted occurring frequencies.
+    """
+    a = -np.log(freq_spectrum.index / sum_tokens)
+    b = freq_spectrum / sum_tokens
     return (freq_spectrum * a * b).sum()
 
-def yule_k(tokens, freq_spectrum):
-    """Yule (1944)"""
-    a = freq_spectrum.index / tokens
-    b = 1 / tokens
+def yule_k(sum_tokens: int, freq_spectrum: Dict[int, int]) -> Union[int, float]:
+    """Calculate Yule’s K (1944).
+
+    Parameters:
+        sum_tokens: Number of tokens.
+        freq_spectrum: Counted occurring frequencies.
+    """
+    a = freq_spectrum.index / sum_tokens
+    b = 1 / sum_tokens
     return 10 ** 4 * ((freq_spectrum * a ** 2) - b).sum()
 
-def simpson_d(tokens, freq_spectrum):
-    """"""
-    a = freq_spectrum / tokens
-    b = freq_spectrum.index - 1
-    return (freq_spectrum * a * (b / (tokens - 1))).sum()
+def simpson_d(sum_tokens: int, freq_spectrum: Dict[int, int]) -> Union[int, float]:
+    """Calculate Simpson’s D.
 
-def herdan_vm(tokens, types, freq_spectrum):
-    """Herdan (1955)"""
-    a = freq_spectrum / tokens
-    b = 1 / types
+    Parameters:
+        sum_tokens: Number of tokens.
+        freq_spectrum: Counted occurring frequencies.
+    """
+    a = freq_spectrum / sum_tokens
+    b = freq_spectrum.index - 1
+    return (freq_spectrum * a * (b / (sum_tokens - 1))).sum()
+
+def herdan_vm(sum_types: int, sum_tokens: int, freq_spectrum: Dict[int, int]) -> Union[int, float]:
+    """Calculate Herdan (1955)
+
+    Parameters:
+        sum_types: Number of types.
+        sum_tokens: Number of tokens.
+        freq_spectrum: Counted occurring frequencies.
+    """
+    a = freq_spectrum / sum_tokens
+    b = 1 / sum_types
     return np.sqrt(((freq_spectrum * a ** 2) - b).sum())
 
-'''
-def hdd(tokens, freq_spectrum, sample_size=42):
-    """McCarthy and Jarvis (2010)"""
-    return sum(((1 - scipy.stats.hypergeom.pmf(0, tokens, freq, sample_size)) / sample_size for word, freq in freq_spectrum.items()))
-'''
 
-# probabilistic models:
+# use probabilistic models:
 
-def orlov_z(tokens, types, freq_spectrum, max_iterations=100, min_tolerance=1):
-    """Orlov (1983)
+def orlov_z(sum_tokens: int, sum_types: int, freq_spectrum: Dict[int, int],
+            max_iterations: int = 100, min_tolerance: int = 1) -> Union[int, float]:
+    """Calculate Orlov’s Z (1983), approximated via Newton’s method.
 
-    Approximation via Newton's method.
-
+    Parameters:
+        sum_types: Number of types.
+        sum_tokens: Number of tokens.
+        freq_spectrum: Counted occurring frequencies.
     """
-    def function(tokens, types, p_star, z):
-        return (z / np.log(p_star * z)) * (tokens / (tokens - z)) * np.log(tokens / z) - types
+    def function(sum_tokens: int, sum_types: int, p_star, z) -> Union[int, float]:
+        return (z / np.log(p_star * z)) * (sum_tokens / (sum_tokens - z)) * np.log(sum_tokens / z) - sum_types
 
-    def derivative(tokens, types, p_star, z):
-        """Derivative obtained from WolframAlpha:
-        https://www.wolframalpha.com/input/?x=0&y=0&i=(x+%2F+(log(p+*+x)))+*+(n+%2F+(n+-+x))+*+log(n+%2F+x)+-+v
-
-        """
-        return (tokens * ((z - tokens) * np.log(p_star * z) + np.log(tokens / z) * (tokens * np.log(p_star * z) - tokens + z))) / (((tokens - z) ** 2) * (np.log(p_star * z) ** 2))
+    def derivative(sum_tokens: int, sum_types: int, p_star, z) -> Union[int, float]:
+        return (sum_tokens * ((z - sum_tokens) * np.log(p_star * z) + np.log(sum_tokens / z) * (sum_tokens * np.log(p_star * z) - sum_tokens + z))) / (((sum_tokens - z) ** 2) * (np.log(p_star * z) ** 2))
     most_frequent = freq_spectrum.max()
-    p_star = most_frequent / tokens
-    z = tokens / 2
+    p_star = most_frequent / sum_tokens
+    z = sum_tokens / 2
     for i in range(max_iterations):
-        next_z = z - (function(tokens, types, p_star, z) / derivative(tokens, types, p_star, z))
+        next_z = z - (function(sum_tokens, sum_types, p_star, z) / derivative(sum_tokens, sum_types, p_star, z))
         abs_diff = abs(z - next_z)
         z = next_z
         if abs_diff <= min_tolerance:
             break
-    else:
-        print("Exceeded max_iterations")
     return z
 
-def ci(results):
-    """calculate the confidence interval for sttr """
+
+# other:
+
+def ci(results: List[Union[int, float]]) -> Union[int, float]:
+    """Calculate  the confidence interval for standardized TTR.
+
+    Parameters:
+        results: Bootstrapped TTRs.
+    """
     return 1.96 * np.std(results) / np.sqrt(len(results))
