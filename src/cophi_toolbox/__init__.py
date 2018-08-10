@@ -9,3 +9,7 @@ from .api import *
 from .model import *
 from .complexity import *
 from .utils import *
+
+# todo
+# namenskonvention für bestimmte gruppe von maßen
+# performance: pandas und z. b. listen statt irgendwelchen anderen standarddatentypen
