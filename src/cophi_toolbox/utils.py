@@ -6,7 +6,7 @@ This module provides low-level helper functions to manage and
 process text data in Python.
 """
 
-from typing import Iterable, Generator, Optional, List, Iterator
+from typing import Iterable, Generator, Optional, List, Iterator, Dict, Union
 import collections
 
 import pandas as pd
@@ -85,7 +85,7 @@ def segment_fuzzy(paragraphs: Iterable[Iterable[str]], segment_size: int = 1000,
     if current_segment:
         yield current_segment
 
-def _count(tokens, measure):
+def _count(tokens, measure: str) -> Dict[str, Union[int, float]]:
     """Count types, tokens and occuring frequencies.
 
     Parameters:
