@@ -1,0 +1,4 @@
+.. automodule:: cophi_toolbox.model
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,546 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cophi_toolbox.model &#8212; cophi-toolbox  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cophi_toolbox.complexity" href="complexity.html" />
+    <link rel="prev" title="cophi_toolbox.api" href="api.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-cophi_toolbox.model"></span><div class="section" id="cophi-toolbox-model">
+<h1>cophi_toolbox.model<a class="headerlink" href="#cophi-toolbox-model" title="Permalink to this headline">¶</a></h1>
+<p>This module provides low-level model classes to manage and 
+process text data in Python.</p>
+<dl class="class">
+<dt id="cophi_toolbox.model.Corpus">
+<em class="property">class </em><code class="descclassname">cophi_toolbox.model.</code><code class="descname">Corpus</code><span class="sig-paren">(</span><em>documents:Iterable[cophi_toolbox.model.Document], sparse:bool=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cophi_toolbox/model.html#Corpus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Corpus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.brunet_w">
+<code class="descname">brunet_w</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.brunet_w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Brunet’s W (1978).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cophi_toolbox.model.Corpus.complexity">
+<code class="descname">complexity</code><span class="sig-paren">(</span><em>window: int</em>, <em>measure: str = 'ttr'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cophi_toolbox/model.html#Corpus.complexity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Corpus.complexity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate complexity for each document with a sliding window.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>window: Window size.
+measure: Use <cite>help(cophi_toolbox.complexity)</cite> for used formula.
+<a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs: Additional parameter for <code class="xref py py-func docutils literal notranslate"><span class="pre">complexity.orlov_z()</span></code>.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.cttr">
+<code class="descname">cttr</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.cttr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Carroll’s Corrected Type-Token Ratio (CTTR).</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="cophi_toolbox.model.Corpus.drop">
+<em class="property">static </em><code class="descname">drop</code><span class="sig-paren">(</span><em>dtm: pandas.core.frame.DataFrame, features: Iterable[str]</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="reference internal" href="_modules/cophi_toolbox/model.html#Corpus.drop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Corpus.drop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drop features from document-term matrix.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.dugast_k">
+<code class="descname">dugast_k</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.dugast_k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dugast’s k (1979).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.dugast_u">
+<code class="descname">dugast_u</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.dugast_u" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dugast’s U (1978, 1979).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.entropy">
+<code class="descname">entropy</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entropy S.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.freq_spectrum">
+<code class="descname">freq_spectrum</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.freq_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frequency spectrum of types.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.guiraud_r">
+<code class="descname">guiraud_r</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.guiraud_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Guiraud’s R (1954).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.hapax">
+<code class="descname">hapax</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.hapax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hapax legomena.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.herdan_c">
+<code class="descname">herdan_c</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.herdan_c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Herdan’s C (1960, 1964).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.herdan_vm">
+<code class="descname">herdan_vm</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.herdan_vm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Herdan’s VM (1955).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.honore_h">
+<code class="descname">honore_h</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.honore_h" title="Permalink to this definition">¶</a></dt>
+<dd><p>Honoré’s H (1979).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.maas_a2">
+<code class="descname">maas_a2</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.maas_a2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maas’ a^2 (1972).</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="cophi_toolbox.model.Corpus.map_metadata">
+<em class="property">static </em><code class="descname">map_metadata</code><span class="sig-paren">(</span><em>matrix: Union[pandas.core.frame.DataFrame, pandas.core.series.Series], metadata: pandas.core.frame.DataFrame, uuid: str = 'uuid', fields: List[str] = ['title'], sep: str = '_'</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="reference internal" href="_modules/cophi_toolbox/model.html#Corpus.map_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Corpus.map_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map metadata with a UUID.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>matrix: Matrix to map with.
+metadata: Matrix with metadata, one row corresponds to one document.
+uuid: The connecting UUID between <cite>matrix</cite> and <cite>metadata</cite>.
+fields: One or more columns of <cite>metadata</cite>.
+sep: Glue multiple <cite>fields</cite> with this separator together.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="cophi_toolbox.model.Corpus.mfw">
+<code class="descname">mfw</code><span class="sig-paren">(</span><em>n: int = 100</em>, <em>rel_freqs: bool = True</em>, <em>as_list: bool = True</em><span class="sig-paren">)</span> &#x2192; Union[typing.List[str], pandas.core.series.Series]<a class="reference internal" href="_modules/cophi_toolbox/model.html#Corpus.mfw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Corpus.mfw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Most frequent words.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">n: Number of most frequent words.
+rel_freqs: If True, use relative frequencies for sorting.
+as_list: If True, return as a list, otherwise as pandas Series</p>
+<blockquote class="last">
+<div>with frequencies.</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.michea_m">
+<code class="descname">michea_m</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.michea_m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Michéa’s M (1969, 1971).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.num_tokens">
+<code class="descname">num_tokens</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.num_tokens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of tokens.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.num_types">
+<code class="descname">num_types</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.num_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of types.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cophi_toolbox.model.Corpus.orlov_z">
+<code class="descname">orlov_z</code><span class="sig-paren">(</span><em>max_iterations: int = 100</em>, <em>min_tolerance: int = 1</em><span class="sig-paren">)</span> &#x2192; pandas.core.series.Series<a class="reference internal" href="_modules/cophi_toolbox/model.html#Corpus.orlov_z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Corpus.orlov_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Orlov’s Z (1983).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.rel_freqs">
+<code class="descname">rel_freqs</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.rel_freqs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Document-term matrix with relative word frequencies.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.sichel_s">
+<code class="descname">sichel_s</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.sichel_s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sichel’s S (1975).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.simpson_d">
+<code class="descname">simpson_d</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.simpson_d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simpson’s D (1949).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.size">
+<code class="descname">size</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of documents and types.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="cophi_toolbox.model.Corpus.sort">
+<em class="property">static </em><code class="descname">sort</code><span class="sig-paren">(</span><em>dtm</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="reference internal" href="_modules/cophi_toolbox/model.html#Corpus.sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Corpus.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Descending sorted document-term matrix.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.sparse">
+<code class="descname">sparse</code><em class="property"> = False</em><a class="headerlink" href="#cophi_toolbox.model.Corpus.sparse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.summer_s">
+<code class="descname">summer_s</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.summer_s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summer’s S.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.tfidf">
+<code class="descname">tfidf</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.tfidf" title="Permalink to this definition">¶</a></dt>
+<dd><p>TF-IDF normalized document-term matrix.</p>
+<blockquote>
+<div><p>Used formula:
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tf</span><span class="o">-</span><span class="n">idf_</span><span class="p">{</span><span class="n">t</span><span class="p">,</span><span class="n">d</span><span class="p">}</span> \<span class="p">;</span> <span class="o">=</span> \<span class="p">;</span> <span class="n">tf_</span><span class="p">{</span><span class="n">t</span><span class="p">,</span><span class="n">d</span><span class="p">}</span>       <span class="n">imes</span> <span class="n">idf_t</span> \<span class="p">;</span> <span class="o">=</span> \<span class="p">;</span> <span class="n">tf_</span><span class="p">{</span><span class="n">t</span><span class="p">,</span><span class="n">d</span><span class="p">}</span>     <span class="n">imes</span> <span class="n">log</span><span class="p">(</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>rac{N}{df_t})</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.ttr">
+<code class="descname">ttr</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.ttr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type-Token Ratio (TTR).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.tuldava_ln">
+<code class="descname">tuldava_ln</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.tuldava_ln" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tuldava’s LN (1977).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.types">
+<code class="descname">types</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Corpus vocabulary.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.yule_k">
+<code class="descname">yule_k</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.yule_k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yule’s K (1944).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Corpus.zscores">
+<code class="descname">zscores</code><a class="headerlink" href="#cophi_toolbox.model.Corpus.zscores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standardized document-term matrix.</p>
+<blockquote>
+<div><p>Used formula:
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">z_x</span> <span class="o">=</span> 
+</pre></div>
+</div>
+</div></blockquote>
+<p>rac{x - mu}{sigma}</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cophi_toolbox.model.Document">
+<em class="property">class </em><code class="descclassname">cophi_toolbox.model.</code><code class="descname">Document</code><span class="sig-paren">(</span><em>text:str</em>, <em>title:Union[str</em>, <em>NoneType]=None</em>, <em>lowercase:bool=True</em>, <em>ngrams:int=1</em>, <em>pattern:str='\p{L}+\p{P}?\p{L}+'</em>, <em>maximum:Union[int</em>, <em>NoneType]=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cophi_toolbox/model.html#Document"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Document" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="cophi_toolbox.model.Document.bootstrap">
+<code class="descname">bootstrap</code><span class="sig-paren">(</span><em>measure: str = 'ttr'</em>, <em>window: int = 1000</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; Generator[[int, NoneType], NoneType]<a class="reference internal" href="_modules/cophi_toolbox/model.html#Document.bootstrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Document.bootstrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate with sliding window over tokens and apply a complexity measure.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>measure: Use <cite>help(cophi_toolbox.complexity)</cite> for used formula.
+window: Window size.
+<a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: Additional parameter for <code class="xref py py-func docutils literal notranslate"><span class="pre">complexity.orlov_z()</span></code>.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.bow">
+<code class="descname">bow</code><a class="headerlink" href="#cophi_toolbox.model.Document.bow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bag-of-words representation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cophi_toolbox.model.Document.complexity">
+<code class="descname">complexity</code><span class="sig-paren">(</span><em>measure: str = 'ttr'</em>, <em>window: Union[int</em>, <em>NoneType] = None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cophi_toolbox/model.html#Document.complexity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Document.complexity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate complexity, optionally with a sliding window.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>measure: Use <cite>help(cophi_toolbox.complexity)</cite> for used formula.
+window: Window size.
+<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs: Additional parameter for <code class="xref py py-func docutils literal notranslate"><span class="pre">complexity.orlov_z()</span></code>.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="cophi_toolbox.model.Document.drop">
+<em class="property">static </em><code class="descname">drop</code><span class="sig-paren">(</span><em>tokens, features: Iterable[str]</em><span class="sig-paren">)</span> &#x2192; Generator[[str, NoneType], NoneType]<a class="reference internal" href="_modules/cophi_toolbox/model.html#Document.drop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Document.drop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drop features from tokens.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.freq_spectrum">
+<code class="descname">freq_spectrum</code><a class="headerlink" href="#cophi_toolbox.model.Document.freq_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frequency spectrum.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.hapax">
+<code class="descname">hapax</code><a class="headerlink" href="#cophi_toolbox.model.Document.hapax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hapax legomena.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.len">
+<code class="descname">len</code><a class="headerlink" href="#cophi_toolbox.model.Document.len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Token lengths.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.lowercase">
+<code class="descname">lowercase</code><em class="property"> = True</em><a class="headerlink" href="#cophi_toolbox.model.Document.lowercase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.maximum">
+<code class="descname">maximum</code><em class="property"> = None</em><a class="headerlink" href="#cophi_toolbox.model.Document.maximum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.mean_len">
+<code class="descname">mean_len</code><a class="headerlink" href="#cophi_toolbox.model.Document.mean_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arithmetic mean of token lengths.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cophi_toolbox.model.Document.mfw">
+<code class="descname">mfw</code><span class="sig-paren">(</span><em>n: int = 10</em>, <em>rel_freqs: bool = False</em>, <em>as_list: bool = True</em><span class="sig-paren">)</span> &#x2192; Union[typing.List[str], pandas.core.series.Series]<a class="reference internal" href="_modules/cophi_toolbox/model.html#Document.mfw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Document.mfw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Most frequent words.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">n: Number of most frequent words.
+rel_freqs: If True, use relative frequencies for sorting.
+as_list: If True, return as a list, otherwise as pandas Series</p>
+<blockquote class="last">
+<div>with frequencies.</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.ngrams">
+<code class="descname">ngrams</code><em class="property"> = 1</em><a class="headerlink" href="#cophi_toolbox.model.Document.ngrams" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.num_tokens">
+<code class="descname">num_tokens</code><a class="headerlink" href="#cophi_toolbox.model.Document.num_tokens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of tokens.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.num_types">
+<code class="descname">num_types</code><a class="headerlink" href="#cophi_toolbox.model.Document.num_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of types.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cophi_toolbox.model.Document.paragraphs">
+<code class="descname">paragraphs</code><span class="sig-paren">(</span><em>sep: Union[compile</em>, <em>str] = regex.Regex('\\n'</em>, <em>flags=regex.V0)</em><span class="sig-paren">)</span> &#x2192; Iterable[str]<a class="reference internal" href="_modules/cophi_toolbox/model.html#Document.paragraphs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Document.paragraphs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Paragraphs as separate entities.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.pattern">
+<code class="descname">pattern</code><em class="property"> = '\\p{L}+\\p{P}?\\p{L}+'</em><a class="headerlink" href="#cophi_toolbox.model.Document.pattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.rel_freqs">
+<code class="descname">rel_freqs</code><a class="headerlink" href="#cophi_toolbox.model.Document.rel_freqs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bag-of-words representation with relative frequencies.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cophi_toolbox.model.Document.segments">
+<code class="descname">segments</code><span class="sig-paren">(</span><em>segment_size: int = 1000</em>, <em>tolerance: float = 0.05</em>, <em>flatten_chunks: bool = True</em><span class="sig-paren">)</span> &#x2192; Iterable[List[str]]<a class="reference internal" href="_modules/cophi_toolbox/model.html#Document.segments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Document.segments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Segments as separate entities.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.title">
+<code class="descname">title</code><em class="property"> = None</em><a class="headerlink" href="#cophi_toolbox.model.Document.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.tokens">
+<code class="descname">tokens</code><a class="headerlink" href="#cophi_toolbox.model.Document.tokens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processed ngrams.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.types">
+<code class="descname">types</code><a class="headerlink" href="#cophi_toolbox.model.Document.types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Document vocabulary.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Document.unprocessed_tokens">
+<code class="descname">unprocessed_tokens</code><a class="headerlink" href="#cophi_toolbox.model.Document.unprocessed_tokens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raw tokens.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cophi_toolbox.model.Document.window">
+<code class="descname">window</code><span class="sig-paren">(</span><em>n: int = 1000</em><span class="sig-paren">)</span> &#x2192; Generator[[pandas.core.series.Series, NoneType], NoneType]<a class="reference internal" href="_modules/cophi_toolbox/model.html#Document.window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Document.window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate with a sliding window over tokens.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>n: Window size.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cophi_toolbox.model.Textfile">
+<em class="property">class </em><code class="descclassname">cophi_toolbox.model.</code><code class="descname">Textfile</code><span class="sig-paren">(</span><em>filepath:Union[str, pathlib.Path], treat_as:Union[str, NoneType]=None, encoding:str='utf-8'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cophi_toolbox/model.html#Textfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Textfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Textfile.content">
+<code class="descname">content</code><a class="headerlink" href="#cophi_toolbox.model.Textfile.content" title="Permalink to this definition">¶</a></dt>
+<dd><p>Content of textfile.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Textfile.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#cophi_toolbox.model.Textfile.encoding" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cophi_toolbox.model.Textfile.parse_xml">
+<code class="descname">parse_xml</code><span class="sig-paren">(</span><em>parser: lxml.etree.XMLParser = &lt;lxml.etree.XMLParser object&gt;</em><span class="sig-paren">)</span> &#x2192; lxml.etree._ElementTree<a class="reference internal" href="_modules/cophi_toolbox/model.html#Textfile.parse_xml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Textfile.parse_xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse an XML file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cophi_toolbox.model.Textfile.read_txt">
+<code class="descname">read_txt</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="_modules/cophi_toolbox/model.html#Textfile.read_txt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Textfile.read_txt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a plain text file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Textfile.size">
+<code class="descname">size</code><a class="headerlink" href="#cophi_toolbox.model.Textfile.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of content in characters.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="cophi_toolbox.model.Textfile.stringify">
+<em class="property">static </em><code class="descname">stringify</code><span class="sig-paren">(</span><em>tree</em><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="_modules/cophi_toolbox/model.html#Textfile.stringify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.model.Textfile.stringify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stringify an lxml <code class="xref py py-class docutils literal notranslate"><span class="pre">etree._ElemenTree</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cophi_toolbox.model.Textfile.treat_as">
+<code class="descname">treat_as</code><em class="property"> = None</em><a class="headerlink" href="#cophi_toolbox.model.Textfile.treat_as" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="api.html" title="previous chapter">cophi_toolbox.api</a></li>
+      <li>Next: <a href="complexity.html" title="next chapter">cophi_toolbox.complexity</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/model.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Chair of Computer Philology and Modern German Literary History.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/model.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

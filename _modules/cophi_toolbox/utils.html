@@ -1,0 +1,179 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cophi_toolbox.utils &#8212; cophi-toolbox  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cophi_toolbox.utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">cophi_toolbox.utils</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="sd">This module provides low-level helper functions to manage and </span>
+<span class="sd">process text data in Python.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">regex</span> <span class="k">as</span> <span class="nn">re</span>
+
+
+<div class="viewcode-block" id="construct_ngrams"><a class="viewcode-back" href="../../utils.html#cophi_toolbox.utils.construct_ngrams">[docs]</a><span class="k">def</span> <span class="nf">construct_ngrams</span><span class="p">(</span><span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">sep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        tokens: The tokenized document.</span>
+<span class="sd">        n: Number of tokens per ngram.</span>
+<span class="sd">        sep: Separator between words within an ngram.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ngram</span><span class="p">)</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">tokens</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]))</span></div>
+
+<div class="viewcode-block" id="count_tokens"><a class="viewcode-back" href="../../utils.html#cophi_toolbox.utils.count_tokens">[docs]</a><span class="k">def</span> <span class="nf">count_tokens</span><span class="p">(</span><span class="n">tokens</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        tokens: The tokenized document.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="find_tokens"><a class="viewcode-back" href="../../utils.html#cophi_toolbox.utils.find_tokens">[docs]</a><span class="k">def</span> <span class="nf">find_tokens</span><span class="p">(</span><span class="n">document</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\p</span><span class="si">{L}</span><span class="s2">+\p</span><span class="si">{P}</span><span class="s2">?\p</span><span class="si">{L}</span><span class="s2">+&quot;</span><span class="p">,</span>
+                <span class="n">maximum</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        document: The text of a document.</span>
+<span class="sd">        pattern: A regex pattern for one token.</span>
+<span class="sd">        maximum: Stop tokenizing after that much tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">document</span><span class="p">):</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">yield</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">maximum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="n">maximum</span><span class="p">:</span>
+            <span class="k">return</span></div>
+
+<div class="viewcode-block" id="segment_fuzzy"><a class="viewcode-back" href="../../utils.html#cophi_toolbox.utils.segment_fuzzy">[docs]</a><span class="k">def</span> <span class="nf">segment_fuzzy</span><span class="p">(</span><span class="n">paragraphs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">segment_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+                  <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Segment a string, respecting paragraphs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        paragraphs: Paragraphs of a document as separated entities.</span>
+<span class="sd">        segment_size: The target length of each segment in tokens.</span>
+<span class="sd">        tolerance: How much may the actual segment size differ from the `segment_size`? </span>
+<span class="sd">            If ``0 &lt; tolerance &lt; 1``, this is interpreted as a fraction of the `segment_size`, </span>
+<span class="sd">            otherwise it is interpreted as an absolute number. If ``tolerance &lt; 0``, paragraphs </span>
+<span class="sd">            are never split apart.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">tolerance</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">tolerance</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">tolerance</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">segment_size</span> <span class="o">*</span> <span class="n">tolerance</span><span class="p">)</span>
+    <span class="n">current_segment</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">carry</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">current_size</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">doc_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">paragraphs</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">carry</span> <span class="k">if</span> <span class="n">carry</span> <span class="k">else</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc_iter</span><span class="p">))</span>
+            <span class="n">carry</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">current_segment</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+            <span class="n">current_size</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">current_size</span> <span class="o">&gt;=</span> <span class="n">segment_size</span><span class="p">:</span>
+                <span class="n">too_long</span> <span class="o">=</span> <span class="n">current_size</span> <span class="o">-</span> <span class="n">segment_size</span>
+                <span class="n">too_short</span> <span class="o">=</span> <span class="n">segment_size</span> <span class="o">-</span> <span class="p">(</span><span class="n">current_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">tolerance</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">min</span><span class="p">(</span><span class="n">too_long</span><span class="p">,</span> <span class="n">too_short</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">:</span>
+                    <span class="n">chunk_part0</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[:</span><span class="o">-</span><span class="n">too_long</span><span class="p">]</span>
+                    <span class="n">carry</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="o">-</span><span class="n">too_long</span><span class="p">:]</span>
+                    <span class="n">current_segment</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">chunk_part0</span>
+                <span class="k">elif</span> <span class="n">too_long</span> <span class="o">&gt;=</span> <span class="n">too_short</span><span class="p">:</span>
+                    <span class="n">carry</span> <span class="o">=</span> <span class="n">current_segment</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                <span class="k">yield</span> <span class="n">current_segment</span>
+                <span class="n">current_segment</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">current_size</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">current_segment</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">current_segment</span></div>
+
+<span class="k">def</span> <span class="nf">_count</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">measure</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Count types, tokens and occuring frequencies.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tokens: The tokenized document.</span>
+<span class="sd">        measure: Complexity measure you need the results to.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="n">tokens</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">tokens_</span> <span class="o">=</span> <span class="n">tokens</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">measure</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;sichel_s&quot;</span><span class="p">,</span> <span class="s2">&quot;michea_m&quot;</span><span class="p">,</span> <span class="s2">&quot;honore_h&quot;</span><span class="p">,</span> <span class="s2">&quot;entropy&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;yule_k&quot;</span><span class="p">,</span> <span class="s2">&quot;simpson_d&quot;</span><span class="p">,</span> <span class="s2">&quot;herdan_vm&quot;</span><span class="p">,</span> <span class="s2">&quot;orlov_z&quot;</span><span class="p">}:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;num_types&quot;</span><span class="p">:</span> <span class="n">types</span><span class="p">,</span> <span class="s2">&quot;num_tokens&quot;</span><span class="p">:</span> <span class="n">tokens_</span><span class="p">,</span> <span class="s2">&quot;freq_spectrum&quot;</span><span class="p">:</span> <span class="n">tokens</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;num_types&quot;</span><span class="p">:</span> <span class="n">types</span><span class="p">,</span> <span class="s2">&quot;num_tokens&quot;</span><span class="p">:</span> <span class="n">tokens_</span><span class="p">}</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Chair of Computer Philology and Modern German Literary History.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

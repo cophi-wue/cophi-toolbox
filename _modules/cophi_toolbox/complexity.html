@@ -1,0 +1,362 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cophi_toolbox.complexity &#8212; cophi-toolbox  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cophi_toolbox.complexity</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">cophi_toolbox.complexity</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="sd">This module provides measures that assess the linguistic and stylistic </span>
+<span class="sd">complexity of (literary) texts.</span>
+
+<span class="sd">Regarding the formulas, :math:`N` is the number of tokens, and :math:`V` </span>
+<span class="sd">the number of types. :math:`H` is the number of types occuring only once </span>
+<span class="sd">(hapax legomena), :math:`D` is the number of types occuring twice (dislegomena).</span>
+
+<span class="sd">This module was taken from `here &lt;https://github.com/tsproisl/Linguistic_and_Stylistic_Complexity&gt;`_.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="c1"># use num_types + num_tokens:</span>
+
+<div class="viewcode-block" id="ttr"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.ttr">[docs]</a><span class="k">def</span> <span class="nf">ttr</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Type-Token Ratio (TTR).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            TTR = \frac{V}{N}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">num_types</span> <span class="o">/</span> <span class="n">num_tokens</span></div>
+
+<div class="viewcode-block" id="guiraud_r"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.guiraud_r">[docs]</a><span class="k">def</span> <span class="nf">guiraud_r</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Guiraud’s R (1954).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            R = \frac{V}{\sqrt{N}}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">            num_types: Number of types.</span>
+<span class="sd">            num_tokens: Number of tokens.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">num_types</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="herdan_c"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.herdan_c">[docs]</a><span class="k">def</span> <span class="nf">herdan_c</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Herdan’s C (1960, 1964).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            C = \frac{\log{V}}{\log{N}}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_types</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="dugast_k"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.dugast_k">[docs]</a><span class="k">def</span> <span class="nf">dugast_k</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Dugast’s k (1979).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            k = \frac{\log{V}}{\log{\log{N}}}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_types</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="maas_a2"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.maas_a2">[docs]</a><span class="k">def</span> <span class="nf">maas_a2</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Maas’ a^2 (1972).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            a^2 = \frac{\log{N} \; - \; \log{V}}{\log{N}^2}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_types</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="dugast_u"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.dugast_u">[docs]</a><span class="k">def</span> <span class="nf">dugast_u</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Dugast’s U (1978, 1979).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            U = \frac{\log{N^2}}{\log{N} \; - \; \log{V}}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_types</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="tuldava_ln"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.tuldava_ln">[docs]</a><span class="k">def</span> <span class="nf">tuldava_ln</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Tuldava’s LN (1977).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            LN = \frac{1 \; - \; V^2}{V^2 \; \cdot \; \log{N}}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">num_types</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">((</span><span class="n">num_types</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="brunet_w"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.brunet_w">[docs]</a><span class="k">def</span> <span class="nf">brunet_w</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Brunet’s W (1978).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            W = V^{V^{0.172}}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.172</span>
+    <span class="k">return</span> <span class="n">num_tokens</span> <span class="o">**</span> <span class="p">(</span><span class="n">num_types</span> <span class="o">**</span> <span class="o">-</span><span class="n">a</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="cttr"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.cttr">[docs]</a><span class="k">def</span> <span class="nf">cttr</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Carroll’s Corrected Type-Token Ration (CTTR) (1964).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            CTTR = \frac{V}{\sqrt{2 \; \cdot \; N}}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">num_types</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">num_tokens</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="summer_s"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.summer_s">[docs]</a><span class="k">def</span> <span class="nf">summer_s</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Summer’s S.</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            S = \frac{\log{\log{V}}}{\log{\log{N}}}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_types</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">))</span></div>
+
+
+<span class="c1"># use num_types + part of freq_spectrum:</span>
+
+<div class="viewcode-block" id="sichel_s"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.sichel_s">[docs]</a><span class="k">def</span> <span class="nf">sichel_s</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">freq_spectrum</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Sichel’s S (1975).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            S = \frac{D}{V}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        freq_spectrum: Counted occurring frequencies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">freq_spectrum</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">num_types</span></div>
+
+<div class="viewcode-block" id="michea_m"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.michea_m">[docs]</a><span class="k">def</span> <span class="nf">michea_m</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">freq_spectrum</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Michéa’s M (1969, 1971).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            M = \frac{V}{D}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        freq_spectrum: Counted occurring frequencies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">num_types</span> <span class="o">/</span> <span class="n">freq_spectrum</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="honore_h"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.honore_h">[docs]</a><span class="k">def</span> <span class="nf">honore_h</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">freq_spectrum</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Honoré’s H (1979).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            H = 100 \cdot \frac{\log{N}}{1 - \frac{H}{V}}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        freq_spectrum: Counted occurring frequencies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">((</span><span class="n">freq_spectrum</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_types</span><span class="p">))))</span></div>
+
+
+<span class="c1"># use num_tokens + freq_spectrum:</span>
+
+<div class="viewcode-block" id="entropy"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.entropy">[docs]</a><span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">freq_spectrum</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate entropy S.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">        freq_spectrum: Counted occurring frequencies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">freq_spectrum</span><span class="o">.</span><span class="n">index</span> <span class="o">/</span> <span class="n">num_tokens</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">freq_spectrum</span> <span class="o">/</span> <span class="n">num_tokens</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">freq_spectrum</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="yule_k"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.yule_k">[docs]</a><span class="k">def</span> <span class="nf">yule_k</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">freq_spectrum</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Yule’s K (1944).</span>
+
+<span class="sd">    Used formula:</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            K = 10^4 \times \frac{(\sum_{X=1}^{X}{{f_X}X^2}) - N}{N^2}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">        freq_spectrum: Counted occurring frequencies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">freq_spectrum</span><span class="o">.</span><span class="n">index</span> <span class="o">/</span> <span class="n">num_tokens</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">num_tokens</span>
+    <span class="k">return</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">((</span><span class="n">freq_spectrum</span> <span class="o">*</span> <span class="n">a</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="simpson_d"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.simpson_d">[docs]</a><span class="k">def</span> <span class="nf">simpson_d</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">freq_spectrum</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Simpson’s D.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">        freq_spectrum: Counted occurring frequencies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">freq_spectrum</span> <span class="o">/</span> <span class="n">num_tokens</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">freq_spectrum</span><span class="o">.</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">freq_spectrum</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_tokens</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="herdan_vm"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.herdan_vm">[docs]</a><span class="k">def</span> <span class="nf">herdan_vm</span><span class="p">(</span><span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">freq_spectrum</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Herdan’s VM (1955).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">        freq_spectrum: Counted occurring frequencies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">freq_spectrum</span> <span class="o">/</span> <span class="n">num_tokens</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">num_types</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">freq_spectrum</span> <span class="o">*</span> <span class="n">a</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span></div>
+
+
+<span class="c1"># use probabilistic models:</span>
+
+<div class="viewcode-block" id="orlov_z"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.orlov_z">[docs]</a><span class="k">def</span> <span class="nf">orlov_z</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">freq_spectrum</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+            <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">min_tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Orlov’s Z (1983), approximated via Newton’s method.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_types: Number of types.</span>
+<span class="sd">        num_tokens: Number of tokens.</span>
+<span class="sd">        freq_spectrum: Counted occurring frequencies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">function</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">,</span> <span class="n">num_types</span><span class="p">,</span> <span class="n">p_star</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p_star</span> <span class="o">*</span> <span class="n">z</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_tokens</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_tokens</span> <span class="o">-</span> <span class="n">z</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_tokens</span> <span class="o">/</span> <span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="n">num_types</span>
+
+    <span class="k">def</span> <span class="nf">derivative</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">,</span> <span class="n">num_types</span><span class="p">,</span> <span class="n">p_star</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">num_tokens</span> <span class="o">*</span> <span class="p">((</span><span class="n">z</span> <span class="o">-</span> <span class="n">num_tokens</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p_star</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">num_tokens</span> <span class="o">/</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_tokens</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p_star</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="n">num_tokens</span> <span class="o">+</span> <span class="n">z</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(((</span><span class="n">num_tokens</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p_star</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">most_frequent</span> <span class="o">=</span> <span class="n">freq_spectrum</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">p_star</span> <span class="o">=</span> <span class="n">most_frequent</span> <span class="o">/</span> <span class="n">num_tokens</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">num_tokens</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iterations</span><span class="p">):</span>
+        <span class="n">next_z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">-</span> <span class="p">(</span><span class="n">function</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">,</span> <span class="n">num_types</span><span class="p">,</span> <span class="n">p_star</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">/</span> <span class="n">derivative</span><span class="p">(</span><span class="n">num_tokens</span><span class="p">,</span> <span class="n">num_types</span><span class="p">,</span> <span class="n">p_star</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span>
+        <span class="n">abs_diff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">next_z</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">next_z</span>
+        <span class="k">if</span> <span class="n">abs_diff</span> <span class="o">&lt;=</span> <span class="n">min_tolerance</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="k">return</span> <span class="n">z</span></div>
+
+
+<span class="c1"># other:</span>
+
+<div class="viewcode-block" id="ci"><a class="viewcode-back" href="../../complexity.html#cophi_toolbox.complexity.ci">[docs]</a><span class="k">def</span> <span class="nf">ci</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate  the confidence interval for standardized TTR.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        results: Bootstrapped TTRs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">1.96</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Chair of Computer Philology and Modern German Literary History.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,159 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Contents &#8212; cophi-toolbox  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cophi_toolbox.api" href="api.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-cophi_toolbox"></span><p><strong>cophi-toolbox</strong> is a Python library for handling, modeling and processing text. You
+can easily pipe a collection of text files using the high-level API:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">corpus</span><span class="p">,</span> <span class="n">metadata</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="s2">&quot;british-fiction-corpus&quot;</span><span class="p">,</span>
+                           <span class="n">pathname_pattern</span><span class="o">=</span><span class="s2">&quot;**/*.txt&quot;</span><span class="p">,</span>
+                           <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
+                           <span class="n">lowercase</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                           <span class="n">ngrams</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                           <span class="n">token_pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\p{L}+\p{P}?\p{L}+&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There are also a plenty of complexity metrics for measuring lexical richness of (literary) texts.</p>
+<dl class="docutils">
+<dt>Measures that use sample size and vocabulary size:</dt>
+<dd><ul class="first last simple">
+<li>Type-Token Ratio <span class="math notranslate nohighlight">\(TTR\)</span></li>
+<li>Guiraud’s <span class="math notranslate nohighlight">\(R\)</span></li>
+<li>Herdan’s <span class="math notranslate nohighlight">\(C\)</span></li>
+<li>Dugast’s <span class="math notranslate nohighlight">\(k\)</span></li>
+<li>Maas’ <span class="math notranslate nohighlight">\(a^2\)</span></li>
+<li>Dugast’s <span class="math notranslate nohighlight">\(U\)</span></li>
+<li>Tuldava’s <span class="math notranslate nohighlight">\(LN\)</span></li>
+<li>Brunet’s <span class="math notranslate nohighlight">\(W\)</span></li>
+<li>Carroll’s <span class="math notranslate nohighlight">\(CTTR\)</span></li>
+<li>Summer’s <span class="math notranslate nohighlight">\(S\)</span></li>
+</ul>
+</dd>
+<dt>Measures that use part of the frequency spectrum:</dt>
+<dd><ul class="first last simple">
+<li>Honoré’s <span class="math notranslate nohighlight">\(H\)</span></li>
+<li>Sichel’s <span class="math notranslate nohighlight">\(S\)</span></li>
+<li>Michéa’s <span class="math notranslate nohighlight">\(M\)</span></li>
+</ul>
+</dd>
+<dt>Measures that use the whole frequency spectrum:</dt>
+<dd><ul class="first last simple">
+<li>Entropy <span class="math notranslate nohighlight">\(S\)</span></li>
+<li>Yule’s <span class="math notranslate nohighlight">\(K\)</span></li>
+<li>Simpson’s <span class="math notranslate nohighlight">\(D\)</span></li>
+<li>Herdan’s <span class="math notranslate nohighlight">\(V_m\)</span></li>
+</ul>
+</dd>
+<dt>Parameters of probabilistic models:</dt>
+<dd><ul class="first last simple">
+<li>Orlov’s <span class="math notranslate nohighlight">\(Z\)</span></li>
+</ul>
+</dd>
+</dl>
+<div class="section" id="contents">
+<h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">cophi_toolbox.api</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">cophi_toolbox.model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complexity.html">cophi_toolbox.complexity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">cophi_toolbox.utils</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Contents</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="api.html" title="next chapter">cophi_toolbox.api</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Chair of Computer Philology and Modern German Literary History.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

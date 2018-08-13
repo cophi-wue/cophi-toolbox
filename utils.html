@@ -1,0 +1,140 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cophi_toolbox.utils &#8212; cophi-toolbox  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="cophi_toolbox.complexity" href="complexity.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-cophi_toolbox.utils"></span><div class="section" id="cophi-toolbox-utils">
+<h1>cophi_toolbox.utils<a class="headerlink" href="#cophi-toolbox-utils" title="Permalink to this headline">¶</a></h1>
+<p>This module provides low-level helper functions to manage and 
+process text data in Python.</p>
+<dl class="function">
+<dt id="cophi_toolbox.utils.construct_ngrams">
+<code class="descclassname">cophi_toolbox.utils.</code><code class="descname">construct_ngrams</code><span class="sig-paren">(</span><em>tokens: List[str], n: int = 2, sep: str = ' '</em><span class="sig-paren">)</span> &#x2192; Iterator[str]<a class="reference internal" href="_modules/cophi_toolbox/utils.html#construct_ngrams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.utils.construct_ngrams" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>tokens: The tokenized document.
+n: Number of tokens per ngram.
+sep: Separator between words within an ngram.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.utils.count_tokens">
+<code class="descclassname">cophi_toolbox.utils.</code><code class="descname">count_tokens</code><span class="sig-paren">(</span><em>tokens: Iterable[str]</em><span class="sig-paren">)</span> &#x2192; pandas.core.series.Series<a class="reference internal" href="_modules/cophi_toolbox/utils.html#count_tokens"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.utils.count_tokens" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>tokens: The tokenized document.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.utils.find_tokens">
+<code class="descclassname">cophi_toolbox.utils.</code><code class="descname">find_tokens</code><span class="sig-paren">(</span><em>document: str</em>, <em>pattern: str = '\\p{L}+\\p{P}?\\p{L}+'</em>, <em>maximum: Union[int</em>, <em>NoneType] = None</em><span class="sig-paren">)</span> &#x2192; Generator[[str, NoneType], NoneType]<a class="reference internal" href="_modules/cophi_toolbox/utils.html#find_tokens"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.utils.find_tokens" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>document: The text of a document.
+pattern: A regex pattern for one token.
+maximum: Stop tokenizing after that much tokens.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.utils.segment_fuzzy">
+<code class="descclassname">cophi_toolbox.utils.</code><code class="descname">segment_fuzzy</code><span class="sig-paren">(</span><em>paragraphs: Iterable[Iterable[str]], segment_size: int = 1000, tolerance: float = 0.05</em><span class="sig-paren">)</span> &#x2192; Generator[[list, NoneType], NoneType]<a class="reference internal" href="_modules/cophi_toolbox/utils.html#segment_fuzzy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.utils.segment_fuzzy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Segment a string, respecting paragraphs.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">paragraphs: Paragraphs of a document as separated entities.
+segment_size: The target length of each segment in tokens.
+tolerance: How much may the actual segment size differ from the <cite>segment_size</cite>?</p>
+<blockquote class="last">
+<div>If <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;</span> <span class="pre">tolerance</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>, this is interpreted as a fraction of the <cite>segment_size</cite>, 
+otherwise it is interpreted as an absolute number. If <code class="docutils literal notranslate"><span class="pre">tolerance</span> <span class="pre">&lt;</span> <span class="pre">0</span></code>, paragraphs 
+are never split apart.</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="complexity.html" title="previous chapter">cophi_toolbox.complexity</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/utils.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Chair of Computer Philology and Modern German Literary History.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/utils.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

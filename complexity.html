@@ -1,0 +1,456 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cophi_toolbox.complexity &#8212; cophi-toolbox  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cophi_toolbox.utils" href="utils.html" />
+    <link rel="prev" title="cophi_toolbox.model" href="model.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-cophi_toolbox.complexity"></span><div class="section" id="cophi-toolbox-complexity">
+<h1>cophi_toolbox.complexity<a class="headerlink" href="#cophi-toolbox-complexity" title="Permalink to this headline">¶</a></h1>
+<p>This module provides measures that assess the linguistic and stylistic 
+complexity of (literary) texts.</p>
+<p>Regarding the formulas, <span class="math notranslate nohighlight">\(N\)</span> is the number of tokens, and <span class="math notranslate nohighlight">\(V\)</span> 
+the number of types. <span class="math notranslate nohighlight">\(H\)</span> is the number of types occuring only once 
+(hapax legomena), <span class="math notranslate nohighlight">\(D\)</span> is the number of types occuring twice (dislegomena).</p>
+<p>This module was taken from <a class="reference external" href="https://github.com/tsproisl/Linguistic_and_Stylistic_Complexity">here</a>.</p>
+<dl class="function">
+<dt id="cophi_toolbox.complexity.brunet_w">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">brunet_w</code><span class="sig-paren">(</span><em>num_types: int</em>, <em>num_tokens: int</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#brunet_w"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.brunet_w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Brunet’s W (1978).</p>
+<dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[W = V^{V^{0.172}}\]</div>
+</dd>
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.ci">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">ci</code><span class="sig-paren">(</span><em>results: List[Union[int, float]]</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#ci"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.ci" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate  the confidence interval for standardized TTR.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>results: Bootstrapped TTRs.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.cttr">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">cttr</code><span class="sig-paren">(</span><em>num_types: int</em>, <em>num_tokens: int</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#cttr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.cttr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Carroll’s Corrected Type-Token Ration (CTTR) (1964).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[CTTR = \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{V}{sqrt{2 ; cdot ; N}}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.dugast_k">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">dugast_k</code><span class="sig-paren">(</span><em>num_types: int</em>, <em>num_tokens: int</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#dugast_k"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.dugast_k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Dugast’s k (1979).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[k = \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{log{V}}{log{log{N}}}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.dugast_u">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">dugast_u</code><span class="sig-paren">(</span><em>num_types: int</em>, <em>num_tokens: int</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#dugast_u"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.dugast_u" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Dugast’s U (1978, 1979).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[U = \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{log{N^2}}{log{N} ; - ; log{V}}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.entropy">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">entropy</code><span class="sig-paren">(</span><em>num_tokens: int, freq_spectrum: Dict[int, int]</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate entropy S.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>num_tokens: Number of tokens.
+freq_spectrum: Counted occurring frequencies.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.guiraud_r">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">guiraud_r</code><span class="sig-paren">(</span><em>num_types: int</em>, <em>num_tokens: int</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#guiraud_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.guiraud_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Guiraud’s R (1954).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[R = \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{V}{sqrt{N}}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.herdan_c">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">herdan_c</code><span class="sig-paren">(</span><em>num_types: int</em>, <em>num_tokens: int</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#herdan_c"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.herdan_c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Herdan’s C (1960, 1964).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[C = \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{log{V}}{log{N}}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.herdan_vm">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">herdan_vm</code><span class="sig-paren">(</span><em>num_types: int, num_tokens: int, freq_spectrum: Dict[int, int]</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#herdan_vm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.herdan_vm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Herdan’s VM (1955).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.
+freq_spectrum: Counted occurring frequencies.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.honore_h">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">honore_h</code><span class="sig-paren">(</span><em>num_tokens: int, num_types: int, freq_spectrum: Dict[int, int]</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#honore_h"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.honore_h" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Honoré’s H (1979).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[H = 100 \cdot \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{log{N}}{1 - 
+rac{H}{V}}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+freq_spectrum: Counted occurring frequencies.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.maas_a2">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">maas_a2</code><span class="sig-paren">(</span><em>num_types: int</em>, <em>num_tokens: int</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#maas_a2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.maas_a2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Maas’ a^2 (1972).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[a^2 = \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{log{N} ; - ; log{V}}{log{N}^2}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.michea_m">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">michea_m</code><span class="sig-paren">(</span><em>num_types: int, freq_spectrum: Dict[int, int]</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#michea_m"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.michea_m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Michéa’s M (1969, 1971).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[M = \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{V}{D}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+freq_spectrum: Counted occurring frequencies.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.orlov_z">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">orlov_z</code><span class="sig-paren">(</span><em>num_tokens: int, num_types: int, freq_spectrum: Dict[int, int], max_iterations: int = 100, min_tolerance: int = 1</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#orlov_z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.orlov_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Orlov’s Z (1983), approximated via Newton’s method.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.
+freq_spectrum: Counted occurring frequencies.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.sichel_s">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">sichel_s</code><span class="sig-paren">(</span><em>num_types: int, freq_spectrum: Dict[int, int]</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#sichel_s"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.sichel_s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Sichel’s S (1975).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[S = \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{D}{V}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+freq_spectrum: Counted occurring frequencies.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.simpson_d">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">simpson_d</code><span class="sig-paren">(</span><em>num_tokens: int, freq_spectrum: Dict[int, int]</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#simpson_d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.simpson_d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Simpson’s D.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>num_tokens: Number of tokens.
+freq_spectrum: Counted occurring frequencies.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.summer_s">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">summer_s</code><span class="sig-paren">(</span><em>num_types: int</em>, <em>num_tokens: int</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#summer_s"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.summer_s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Summer’s S.</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[S = \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{log{log{V}}}{log{log{N}}}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.ttr">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">ttr</code><span class="sig-paren">(</span><em>num_types: int</em>, <em>num_tokens: int</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#ttr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.ttr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Type-Token Ratio (TTR).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[TTR = \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{V}{N}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.tuldava_ln">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">tuldava_ln</code><span class="sig-paren">(</span><em>num_types: int</em>, <em>num_tokens: int</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#tuldava_ln"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.tuldava_ln" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Tuldava’s LN (1977).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[LN = \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{1 ; - ; V^2}{V^2 ; cdot ; log{N}}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_types: Number of types.
+num_tokens: Number of tokens.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="cophi_toolbox.complexity.yule_k">
+<code class="descclassname">cophi_toolbox.complexity.</code><code class="descname">yule_k</code><span class="sig-paren">(</span><em>num_tokens: int, freq_spectrum: Dict[int, int]</em><span class="sig-paren">)</span> &#x2192; Union[int, float]<a class="reference internal" href="_modules/cophi_toolbox/complexity.html#yule_k"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cophi_toolbox.complexity.yule_k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Yule’s K (1944).</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Used formula:</dt>
+<dd><div class="first last math notranslate nohighlight">
+\[K = 10^4    imes \]</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>rac{(sum_{X=1}^{X}{{f_X}X^2}) - N}{N^2}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>num_tokens: Number of tokens.
+freq_spectrum: Counted occurring frequencies.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="model.html" title="previous chapter">cophi_toolbox.model</a></li>
+      <li>Next: <a href="utils.html" title="next chapter">cophi_toolbox.utils</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/complexity.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Chair of Computer Philology and Modern German Literary History.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/complexity.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
