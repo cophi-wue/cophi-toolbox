@@ -21,6 +21,8 @@ import pandas as pd
 import numpy as np
 import regex as re
 
+logger = logging.getLogger("cophi_toolbox")
+
 
 @dataclass
 class Textfile:
@@ -72,7 +74,7 @@ class Textfile:
 
     @property
     def size(self):
-        """Size of document in characters.
+        """Size of content in characters.
         """
         return len(self.content)
 
@@ -123,13 +125,13 @@ class Document:
         return self.len.mean()
 
     @property
-    def sum_tokens(self):
+    def num_tokens(self):
         """Number of tokens.
         """
         return len(list(self.tokens))
 
     @property
-    def sum_types(self):
+    def num_types(self):
         """Number of types.
         """
         return len(self.types)
@@ -144,7 +146,7 @@ class Document:
     def rel_freqs(self):
         """Bag-of-words representation with relative frequencies.
         """
-        return self.bow / self.sum_tokens
+        return self.bow / self.num_tokens
 
     def mfw(self, n: int = 10, rel_freqs: bool = False, as_list: bool = True) -> Union[List[str], pd.Series]:
         """Most frequent words.
@@ -157,7 +159,7 @@ class Document:
         """
         freqs = self.bow.sort_values(ascending=False)
         if rel_freqs:
-            freqs = freqs.iloc[:n] / self.sum_tokens
+            freqs = freqs.iloc[:n] / self.num_tokens
         else:
             freqs = freqs.iloc[:n]
         if as_list:
@@ -179,15 +181,15 @@ class Document:
             n: Window size.
         """
         tokens = list(self.tokens)
-        if n > self.sum_tokens:
-            n = self.sum_tokens
-            logger.warning("{} > number of tokens in document. Setting n = number of tokens.")
-        for i in range(int(self.sum_tokens / n)):
+        if n > self.num_tokens:
+            n = self.num_tokens
+            logger.warning("{} is greater than number of tokens in document, no sliding window possible.")
+        for i in range(int(self.num_tokens / n)):
             yield utils.count_tokens(tokens[i * n:(i * n) + n])
 
     @property
     def freq_spectrum(self):
-        """Counted occurring frequencies.
+        """Frequency spectrum.
         """
         return self.bow.value_counts()
 
@@ -223,8 +225,7 @@ class Document:
         """Iterate with sliding window over tokens and apply a complexity measure.
 
         Parameters:
-            measure: Use `help(cophi_toolbox)` for an extensive description 
-                on available complexity measures.
+            measure: Use `help(cophi_toolbox.complexity)` for used formula.
             window: Window size.
             **kwargs: Additional parameter for :func:`complexity.orlov_z`.
         """
@@ -238,6 +239,8 @@ class Document:
                 yield complexity.herdan_c(**count)
             elif measure == "dugast_k":
                 yield complexity.dugast_k(**count)
+            elif measure == "dugast_u":
+                yield complexity.dugast_u(**count)
             elif measure == "maas_a2":
                 yield complexity.maas_a2(**count)
             elif measure == "tuldava_ln":
@@ -271,8 +274,7 @@ class Document:
         """Calculate complexity, optionally with a sliding window.
 
         Parameters:
-            measure: Use `help(cophi_toolbox)` for an extensive description 
-                on available complexity measures.
+            measure: Use `help(cophi_toolbox.complexity)` for used formula.
             window: Window size.
             **kwargs: Additional parameter for :func:`complexity.orlov_z`.
         """
@@ -299,6 +301,11 @@ class Document:
                 return np.array(list(self.bootstrap(measure, window))).mean()
             else:
                 return complexity.dugast_k(**count)
+        elif measure == "dugast_u":
+            if window:
+                return np.array(list(self.bootstrap(measure, window))).mean()
+            else:
+                return complexity.dugast_u(**count)
         elif measure == "maas_a2":
             if window:
                 return np.array(list(self.bootstrap(measure, window))).mean()
@@ -487,14 +494,14 @@ class Corpus:
         return tf * np.log(idf)
 
     @property
-    def sum_types(self):
-        """Summed type frequencies per document.
+    def num_types(self):
+        """Number of types.
         """
         return self.dtm.replace(0, np.nan).count(axis=1)
 
     @property
-    def sum_tokens(self):
-        """Summed token frequencies per document.
+    def num_tokens(self):
+        """Number of tokens.
         """
         return self.dtm.sum(axis=1)
 
@@ -503,8 +510,7 @@ class Corpus:
 
         Parameters:
             window: Window size.
-            measure: Use `help(cophi_toolbox)` for an extensive description 
-                on available complexity measures.
+            measure: Use `help(cophi_toolbox.complexity)` for used formula.
             **kwargs: Additional parameter for :func:`complexity.orlov_z`.
         """
         if measure == "ttr":
@@ -521,154 +527,107 @@ class Corpus:
 
     @property
     def ttr(self):
-        """Type-Token Ratio.
+        """Type-Token Ratio (TTR).
         """
-        return complexity.ttr(self.size["types"], self.sum_tokens.sum())
+        return complexity.ttr(self.size["types"], self.num_tokens.sum())
 
     @property
     def guiraud_r(self) -> float:
-        """Guiraud’s index of lexical richness (1954).
-
-        Used formula:
-        .. math::
-            r = \frac{V}{\sqrt{N}}
+        """Guiraud’s R (1954).
         """
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+        return complexity.guiraud_r(self.size["types"], self.num_tokens.sum())
 
     @property
     def herdan_c(self) -> float:
-        """Herdan’s index of lexical richness (1960, 1964).
-
-        Used formula:
-        .. math::
-            c = \frac{\log{V}}{\log{N}}
+        """Herdan’s C (1960, 1964).
         """
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+        return complexity.herdan_c(self.size["types"], self.num_tokens.sum())
 
     @property
     def dugast_k(self) -> float:
-        """Dugast’s uber index (1979).
-
-        Used formula:
-        .. math::
-            k = \frac{\log{V}}{\log{\log{N}}}
+        """Dugast’s k (1979).
         """
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+        return complexity.dugast_k(self.size["types"], self.num_tokens.sum())
+
+    @property
+    def dugast_u(self) -> float:
+        """Dugast’s U (1978, 1979).
+        """
+        return complexity.dugast_k(self.size["types"], self.num_tokens.sum())
 
     @property
     def maas_a2(self) -> float:
-        """Maas’ index of lexical richness (1972).
-        
-        Used formula:
-        .. math::
-            a^2 = \frac{\log{N} \; - \; \log{V}}{\log{N}^2}
+        """Maas’ a^2 (1972).
         """
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+        return complexity.maas_a2(self.size["types"], self.num_tokens.sum())
 
     @property
     def tuldava_ln(self):
-        """Tuldava’s index of lexical richness (1977).
-        
-        Used formula:
-        .. math::
-            LN = \frac{1 \; - \; V^2}{V^2 \; \cdot \; \log{N}}
+        """Tuldava’s LN (1977).
         """
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+        return complexity.tuldava_ln(self.size["types"], self.num_tokens.sum())
 
     @property
     def brunet_w(self):
-        """Get Brunet’s index of lexical richness (1978).
-        
-        Used formula:
-        .. math::
-            w = V^{V^{0.172}}
+        """Brunet’s W (1978).
         """
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+        return complexity.brunet_w(self.size["types"], self.num_tokens.sum())
 
     @property
     def cttr(self):
-        """Carroll’s corrected type-token ratio.
-        
-        Used formula:
-        .. math::
-            CTTR = \frac{V}{\sqrt{2 \; \cdot \; N}}
+        """Carroll’s Corrected Type-Token Ratio (CTTR).
         """
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+        return complexity.cttr(self.size["types"], self.num_tokens.sum())
 
     @property
     def summer_s(self):
-        """Summer’s index of lexical richness.
-        
-        Used formula:
-        .. math::
-            S = \frac{\log{\log{V}}}{\log{\log{N}}}
+        """Summer’s S.
         """
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+        return complexity.summer_s(self.size["types"], self.num_tokens.sum())
 
     @property
     def sichel_s(self):
-        """Sichel’s S (1975)"""
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+        """Sichel’s S (1975).
+        """
+        return complexity.sichel_s(self.size["types"], self.num_tokens.sum())
 
     @property
     def michea_m(self):
-        """Michéa’s M (1969, 1971)"""
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+        """Michéa’s M (1969, 1971).
+        """
+        return complexity.michea_m(self.size["types"], self.num_tokens.sum())
 
     @property
     def honore_h(self):
-        """Honoré's H (1979)"""
-        return complexity.sichel_s(self.size["types"], self.sum_tokens.sum())
+        """Honoré's H (1979).
+        """
+        return complexity.honore_h(self.size["types"], self.num_tokens.sum())
 
     @property
     def entropy(self):
-        """Entropy.
-
-        Used formula:
-        .. math::
-            https://docs.quanteda.io/reference/textstat_lexdiv.html
+        """Entropy S.
         """
-        a = -np.log(self.freq_spectrum.index / self.sum_tokens.sum())
-        b = self.freq_spectrum / self.sum_tokens.sum()
-        return (self.freq_spectrum * a * b).sum()
+        return complexity.entropy(self.num_tokens, self.freq_spectrum)
 
     @property
     def yule_k(self):
         """Yule’s K (1944).
-        
-        Used formula:
-        .. math::
-            K = 10^4 \times \frac{(\sum_{X=1}^{X}{{f_X}X^2}) - N}{N^2}
         """
-        a = self.freq_spectrum.index / self.sum_tokens.sum()
-        b = 1 / self.sum_tokens.sum()
-        return 10 ** 4 * ((self.freq_spectrum * a ** 2) - b).sum()
+        return complexity.yule_k(self.num_tokens, self.freq_spectrum)
 
     @property
     def simpson_d(self):
-        """Simpson’s D.
-
-        Used formula (where :math:`N` is the number of tokens, and :math:`V` the number of types):
-        .. math::
-            \mbox
+        """Simpson’s D (1949).
         """
-        a = self.freq_spectrum / self.sum_tokens.sum()
-        b = self.freq_spectrum.index - 1
-        return (self.freq_spectrum * a * (b / (self.sum_tokens.sum() - 1))).sum()
+        return complexity.simpson_d(self.num_tokens, self.freq_spectrum)
 
     @property
     def herdan_vm(self):
         """Herdan’s VM (1955).
-
-        Used formula (where :math:`N` is the number of tokens, and :math:`V` the number of types):
-        .. math::
-            \mbox
         """
-        a = self.freq_spectrum / self.sum_tokens.sum()
-        b = 1 / self.sum_types.sum().sum()
-        return np.sqrt(((self.freq_spectrum * a ** 2) - b).sum())
+        return complexity.herdan_vm(self.size["types"], self.num_tokens, self.freq_spectrum)
 
     def orlov_z(self, max_iterations: int = 100, min_tolerance: int = 1) -> pd.Series:
-        """Orlov’s Z.
+        """Orlov’s Z (1983).
         """
-        return complexity.orlov_z(self.sum_tokens, self.size["types"], self.freq_spectrum, max_iterations, min_tolerance)
+        return complexity.orlov_z(self.num_tokens, self.size["types"], self.freq_spectrum, max_iterations, min_tolerance)
