@@ -1,5 +1,5 @@
 """
-**cophi-toolbox** is a Python library for handling, modeling and processing text. You
+**cophi-toolbox** is a Python library for handling, modeling and processing text corpora. You
 can easily pipe a collection of text files using the high-level API:
 
 .. code-block:: python

@@ -12,8 +12,25 @@ corpus, metadata = ct.pipe(directory="british-fiction-corpus",
                            token_pattern=r"\p{L}+\p{P}?\p{L}+")
 ```
 
-There are also a plenty of complexity metrics for measuring lexical richness of (literary) texts.
+## Requirements
 
+This library requires Python 3.6 or higher, and some additional packages (pandas, numpy, lxml, regex).
+
+## Getting started
+
+To install the latest development version:
+```
+$ pip install git+https://github.com/cophi-wue/cophi-toolbox.git@oop
+```
+
+## Contents
+- [`api`](src/cophi_toolbox/api.py): Implements the high-level API.
+- [`model`](src/cophi_toolbox/model.py): Low-level model classes
+- [`complexity`](src/cophi_toolbox/complexity.py): Measures that assess the linguistic and stylistic complexity of (literary) texts.
+- [`utils`](src/cophi_toolbox/utils.py): Low-level helper functions
+
+
+## Available complexity measures
 Measures that use sample size and vocabulary size:
   * Type-Token Ratio TTR
   * Guiraud’s R
