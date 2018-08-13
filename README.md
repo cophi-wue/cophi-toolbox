@@ -3,7 +3,7 @@
 **cophi-toolbox** is a Python library for handling, modeling and processing text corpora. You
 can easily pipe a collection of text files using the high-level API:
 
-```
+```python
 corpus, metadata = ct.pipe(directory="british-fiction-corpus",
                            pathname_pattern="**/*.txt",
                            encoding="utf-8",
