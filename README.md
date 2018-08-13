@@ -15,27 +15,27 @@ corpus, metadata = ct.pipe(directory="british-fiction-corpus",
 There are also a plenty of complexity metrics for measuring lexical richness of (literary) texts.
 
 Measures that use sample size and vocabulary size:
-  * Type-Token Ratio $TTR$
-  * Guiraud’s $R$
-  * Herdan’s $C$
-  * Dugast’s $k$
-  * Maas’ $a^2$
-  * Dugast’s $U$
-  * Tuldava’s $LN$
-  * Brunet’s $W$
-  * Carroll’s $CTTR$
-  * Summer’s $S$
+  * Type-Token Ratio TTR
+  * Guiraud’s R
+  * Herdan’s C
+  * Dugast’s k
+  * Maas’ a<sup>2</sup>
+  * Dugast’s U
+  * Tuldava’s LN
+  * Brunet’s W
+  * Carroll’s CTTR
+  * Summer’s S
 
 Measures that use part of the frequency spectrum:
-  * Honoré’s $H$
-  * Sichel’s $S$
-  * Michéa’s $M$
+  * Honoré’s H
+  * Sichel’s S
+  * Michéa’s M
 
 Measures that use the whole frequency spectrum:
-  * Entropy $S$
-  * Yule’s $K$
-  * Simpson’s $D$
-  * Herdan’s $V_m$
+  * Entropy S
+  * Yule’s K
+  * Simpson’s D
+  * Herdan’s V<sub>m</sub>
 
 Parameters of probabilistic models:
-  * Orlov’s $Z$
+  * Orlov’s Z
