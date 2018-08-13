@@ -25,9 +25,9 @@ $ pip install git+https://github.com/cophi-wue/cophi-toolbox.git@oop
 
 ## Contents
 - [`api`](src/cophi_toolbox/api.py): Implements the high-level API.
-- [`model`](src/cophi_toolbox/model.py): Low-level model classes
+- [`model`](src/cophi_toolbox/model.py): Low-level model classes.
 - [`complexity`](src/cophi_toolbox/complexity.py): Measures that assess the linguistic and stylistic complexity of (literary) texts.
-- [`utils`](src/cophi_toolbox/utils.py): Low-level helper functions
+- [`utils`](src/cophi_toolbox/utils.py): Low-level helper functions.
 
 
 ## Available complexity measures
