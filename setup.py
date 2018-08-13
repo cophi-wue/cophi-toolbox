@@ -19,6 +19,9 @@ REQUIRED = [
     "pandas>=0.23.4", "numpy>=1.15.0", "lxml>=4.2.4", "regex>=2018.07.11"
 ]
 
+if sys.version_info.minor < 7:
+    REQUIRED.append("dataclasses")
+
 here = os.path.abspath(os.path.dirname(__file__))
 
 try:
