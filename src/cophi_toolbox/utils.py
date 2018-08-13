@@ -25,7 +25,7 @@ def construct_ngrams(tokens: List[str], n: int = 2, sep: str = " ") -> Iterator[
 def count_tokens(tokens: Iterable[str]) -> pd.Series:
     """
     Parameters:
-        tokens: Tokens to count.
+        tokens: The tokenized document.
     """
     return pd.Series(collections.Counter(tokens))
 
@@ -33,7 +33,7 @@ def find_tokens(document: str, pattern: str = r"\p{L}+\p{P}?\p{L}+",
                 maximum: Optional[int] = None) -> Generator[str, None, None]:
     """
     Parameters:
-        document: The content of a text document.
+        document: The text of a document.
         pattern: A regex pattern for one token.
         maximum: Stop tokenizing after that much tokens.
     """
@@ -49,7 +49,7 @@ def segment_fuzzy(paragraphs: Iterable[Iterable[str]], segment_size: int = 1000,
     """Segment a string, respecting paragraphs.
 
     Parameters:
-        paragraphs: Paragraphs of a text document as separated entities.
+        paragraphs: Paragraphs of a document as separated entities.
         segment_size: The target length of each segment in tokens.
         tolerance: How much may the actual segment size differ from the `segment_size`? 
             If ``0 < tolerance < 1``, this is interpreted as a fraction of the `segment_size`, 
@@ -85,13 +85,17 @@ def segment_fuzzy(paragraphs: Iterable[Iterable[str]], segment_size: int = 1000,
     if current_segment:
         yield current_segment
 
-def _count(text, measure):
+def _count(tokens, measure):
     """Count types, tokens and occuring frequencies.
+
+    Parameters:
+        tokens: The tokenized document.
+        measure: Complexity measure you need the results to.
     """
-    types = text.shape[0]
-    tokens = text.sum()
+    types = tokens.shape[0]
+    tokens_ = tokens.sum()
     if measure in {"sichel_s", "michea_m", "honore_h", "entropy",
                    "yule_k", "simpson_d", "herdan_vm", "orlov_z"}:
-        return {"sum_types": types, "sum_tokens": tokens, "freq_spectrum": text.value_counts()}
+        return {"num_types": types, "num_tokens": tokens_, "freq_spectrum": tokens.value_counts()}
     else:
-        return {"sum_types": types, "sum_tokens": tokens}
+        return {"num_types": types, "num_tokens": tokens_}
