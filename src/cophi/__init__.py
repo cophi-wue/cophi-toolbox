@@ -4,12 +4,12 @@ can easily pipe a collection of text files using the high-level API:
 
 .. code-block:: python
 
-   corpus, metadata = ct.pipe(directory="british-fiction-corpus",
-                              pathname_pattern="**/*.txt",
-                              encoding="utf-8",
-                              lowercase=True,
-                              ngrams=1,
-                              token_pattern=r"\p{L}+\p{P}?\p{L}+")
+   corpus, metadata = cophi.corpus(directory="british-fiction-corpus",
+                                   pathname_pattern="**/*.txt",
+                                   encoding="utf-8",
+                                   lowercase=True,
+                                   n=1,
+                                   token_pattern=r"\p{L}+\p{P}?\p{L}+")
 
 
 There are also a plenty of complexity metrics for measuring lexical richness of (literary) texts.
@@ -44,7 +44,9 @@ For a more detailed description and the used formula, have a look at the :mod:`c
 """
 
 
-from cophi.api import document, pipe
-from cophi.model import *
-from cophi.complexity import *
-from cophi.utils import *
+from cophi.api import document, corpus
+from cophi.model import Textfile, Document, Corpus, Metadata
+from cophi.complexity import (ttr, guiraud_r, herdan_c, dugast_k,
+                              maas_a2, dugast_u, tuldava_ln, brunet_w,
+                              cttr, summer_s, sichel_s, michea_m, honore_h,
+                              entropy, yule_k, simpson_d, herdan_vm, orlov_z, ci)
