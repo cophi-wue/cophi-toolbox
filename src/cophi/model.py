@@ -7,6 +7,7 @@ This module implements low-level model classes.
 
 import collections
 import itertools
+import math
 import pathlib
 
 import lxml.etree
@@ -410,6 +411,29 @@ class Corpus:
         """
         features = [token for token in features if token in dtm.columns]
         return dtm.drop(features, axis=1)
+
+    @staticmethod
+    def cull(dtm, ratio=None, threshold=None, keepna=False):
+        """Remove features that do not appear in a minimum of documents.
+
+        Parameters:
+            dtm (pd.DataFrame): Document-term matrix.
+            ratio (float): Minimum ratio of documents a word must occur in.
+            threshold (int): Minimum number of documents a word must occur in.
+            keepna (bool): If True, keep missing words as NaN instead of 0.
+        """
+        if ratio is not None:
+            if ratio > 1:
+                threshold = ratio
+            else:
+                threshold = math.ceil(ratio * dtm.index.size)
+        elif threshold is None:
+            return dtm
+
+        culled = dtm.replace(0, np.nan).dropna(thresh=threshold, axis=1)
+        if not keepna:
+            culled = culled.fillna(0)
+        return culled
 
     @property
     def zscores(self):
