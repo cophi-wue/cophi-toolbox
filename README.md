@@ -3,17 +3,11 @@
 can easily pipe a collection of text files using the high-level API:
 
 ```python
->>> corpus, metadata = cophi.corpus(directory="british-fiction-corpus",
-                                    filepath_pattern="**/*.txt",
-                                    encoding="utf-8",
-                                    lowercase=True,
-                                    token_pattern=r"\p{L}+\p{P}?\p{L}+")
->>> corpus.stats
-documents         10
-types          33050
-tokens       1310189
-hapax          16495
-dtype: int64
+corpus, metadata = cophi.corpus(directory="british-fiction-corpus",
+                                filepath_pattern="**/*.txt",
+                                encoding="utf-8",
+                                lowercase=True,
+                                token_pattern=r"\p{L}+\p{P}?\p{L}+")
 ```
 
 ## Requirements
