@@ -27,7 +27,7 @@ def document(filepath, **kwargs):
     Returns:
         A Document object.
     """
-    textfile = model.Textfile(filepath)
+    textfile = cophi.model.Textfile(filepath)
     return cophi.model.Document(textfile.content, **kwargs)
 
 

@@ -1,30 +1,32 @@
 # A library for preprocessing
-
-**cophi-toolbox** is a Python library for handling, modeling and processing text corpora. You
+**cophi** is a Python library for handling, modeling and processing text corpora. You
 can easily pipe a collection of text files using the high-level API:
 
 ```python
-corpus, metadata = ct.pipe(directory="british-fiction-corpus",
-                           pathname_pattern="**/*.txt",
-                           encoding="utf-8",
-                           lowercase=True,
-                           ngrams=1,
-                           token_pattern=r"\p{L}+\p{P}?\p{L}+")
+>>> corpus, metadata = cophi.corpus(directory="british-fiction-corpus",
+                                    filepath_pattern="**/*.txt",
+                                    encoding="utf-8",
+                                    lowercase=True,
+                                    token_pattern=r"\p{L}+\p{P}?\p{L}+")
+>>> corpus.stats
+documents         10
+types          33050
+tokens       1310189
+hapax          16495
+dtype: int64
 ```
 
 ## Requirements
-
-This library requires Python 3.6 or higher, and some additional packages (pandas, numpy, lxml, regex).
+This library is tested on Python 3.4 and higher. Some additional packages (pandas, numpy, lxml, regex) are required.
 
 ## Getting started
-
 To install the latest development version:
 ```
 $ pip install git+https://github.com/cophi-wue/cophi-toolbox.git@oop
 ```
 
 ## Contents
-- [`api`](src/cophi_toolbox/api.py): Implements the high-level API.
+- [`api`](src/cophi_toolbox/api.py): High-level API.
 - [`model`](src/cophi_toolbox/model.py): Low-level model classes.
 - [`complexity`](src/cophi_toolbox/complexity.py): Measures that assess the linguistic and stylistic complexity of (literary) texts.
 - [`utils`](src/cophi_toolbox/utils.py): Low-level helper functions.

@@ -54,17 +54,16 @@ class Textfile:
     def __exit__(self, exc_type, exc_value, tb):
         pass
 
-    def parse_xml(self, parser=lxml.etree.XMLParser(), base_url=None):
+    def parse_xml(self, parser=lxml.etree.XMLParser()):
         """Parse an XML file.
 
         Parameters:
             parser: XML parser object.
-            base_url (str): Looking up external entities with relative paths.
 
         Returns:
             An :class:`etree._ElemenTree` object.
         """
-        return etree.parse(str(self.filepath), parser=parser, base_url=url)
+        return lxml.etree.parse(str(self.filepath), parser=parser)
 
     @staticmethod
     def stringify(tree):
@@ -74,7 +73,7 @@ class Textfile:
             tree: An :class:`etree._ElemenTree`.
             encoding: Encoding to use when serializing.
         """
-        return etree.tostring(tree, method="text", encoding=str)
+        return lxml.etree.tostring(tree, method="text", encoding=str)
 
     @property
     def content(self):
@@ -132,7 +131,7 @@ class Document:
         """Constructed ngrams.
         """
         try:
-            if n > 1:
+            if self.n > 1:
                 return cophi.utils.construct_ngrams(self.tokens, self.n)
             else:
                 return self.tokens
@@ -266,11 +265,11 @@ class Document:
         Parameters:
             measure (str): Measure to use, see `help(cophi)` for available metrics (optional).
             window (int): Size of sliding window (optional).
-            **kwargs: Additional parameters for :func:`complexity.orlov_z` (optional).
+            **kwargs: Additional parameters for :func:`cophi.complexity.orlov_z` (optional).
         """
         for chunk in self.window(window):
             parameter = cophi.utils._parameter(chunk, measure)
-            calculate_complexity = complexity.wrapper(measure)
+            calculate_complexity = cophi.complexity.wrapper(measure)
             yield calculate_complexity(**parameter, **kwargs)
 
     def complexity(self, measure="ttr", window=None, **kwargs):
@@ -279,14 +278,14 @@ class Document:
         Parameters:
             measure (str): Measure to use, see `help(cophi)` for available metrics (optional).
             window (int): Size of sliding window (optional).
-            **kwargs: Additional parameters for :func:`complexity.orlov_z` (optional).
+            **kwargs: Additional parameters for :func:`cophi.complexity.orlov_z` (optional).
         """
         if measure == "ttr":
             if window:
                 sttr = list(self.bootstrap(measure, window))
-                return np.array(sttr).mean(), complexity.ci(sttr)
+                return np.array(sttr).mean(), cophi.complexity.ci(sttr)
             else:
-                calculate_complexity = complexity.wrapper(measure)
+                calculate_complexity = cophi.complexity.wrapper(measure)
                 parameter = cophi.utils._parameter(self.tokens, measure)
                 return calculate_complexity(**parameter)
         elif measure == "orlov_z":
@@ -294,7 +293,7 @@ class Document:
                 orlov = list(self.bootstrap(measure, window, **kwargs))
                 return np.array(orlov).mean()
             else:
-                calculate_complexity = complexity.wrapper(measure)
+                calculate_complexity = cophi.complexity.wrapper(measure)
                 parameter = cophi.utils._parameter(self.tokens, measure)
                 return calculate_complexity(**parameter, **kwargs)
         else:
@@ -302,7 +301,7 @@ class Document:
                 results = list(self.bootstrap(measure, window))
                 return np.array(results).mean()
             else:
-                calculate_complexity = complexity.wrapper(measure)
+                calculate_complexity = cophi.complexity.wrapper(measure)
                 parameter = cophi.utils._parameter(self.tokens, measure)
                 return calculate_complexity(**parameter)
 
@@ -437,7 +436,7 @@ class Corpus:
             tf-idf_{t,d} \; = \; tf_{t,d} \times idf_t \; = \; tf_{t,d} \times log(\frac{N}{df_t})
         """
         tf = self.rel
-        idf = self.size["documents"] / self.dtm.astype(bool).sum(axis=0)
+        idf = self.stats["documents"] / self.dtm.astype(bool).sum(axis=0)
         return tf * np.log(idf)
 
     @property
@@ -458,7 +457,7 @@ class Corpus:
         Parameters:
             measure (str): Measure to use, see `help(cophi)` for available metrics (optional).
             window (int): Size of sliding window (optional).
-            **kwargs: Additional parameters for :func:`complexity.orlov_z` (optional).
+            **kwargs: Additional parameters for :func:`cophi.complexity.orlov_z` (optional).
         """
         if measure == "ttr":
             results = pd.DataFrame()
@@ -478,108 +477,108 @@ class Corpus:
     def ttr(self):
         """Type-Token Ratio (TTR).
         """
-        return complexity.ttr(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.ttr(self.stats["types"], self.num_tokens.sum())
 
     @property
     def guiraud_r(self):
         """Guiraud’s R (1954).
         """
-        return complexity.guiraud_r(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.guiraud_r(self.stats["types"], self.num_tokens.sum())
 
     @property
     def herdan_c(self):
         """Herdan’s C (1960, 1964).
         """
-        return complexity.herdan_c(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.herdan_c(self.stats["types"], self.num_tokens.sum())
 
     @property
     def dugast_k(self):
         """Dugast’s k (1979).
         """
-        return complexity.dugast_k(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.dugast_k(self.stats["types"], self.num_tokens.sum())
 
     @property
     def dugast_u(self):
         """Dugast’s U (1978, 1979).
         """
-        return complexity.dugast_k(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.dugast_k(self.stats["types"], self.num_tokens.sum())
 
     @property
     def maas_a2(self):
         """Maas’ a^2 (1972).
         """
-        return complexity.maas_a2(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.maas_a2(self.stats["types"], self.num_tokens.sum())
 
     @property
     def tuldava_ln(self):
         """Tuldava’s LN (1977).
         """
-        return complexity.tuldava_ln(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.tuldava_ln(self.stats["types"], self.num_tokens.sum())
 
     @property
     def brunet_w(self):
         """Brunet’s W (1978).
         """
-        return complexity.brunet_w(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.brunet_w(self.stats["types"], self.num_tokens.sum())
 
     @property
     def cttr(self):
         """Carroll’s Corrected Type-Token Ratio (CTTR).
         """
-        return complexity.cttr(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.cttr(self.stats["types"], self.num_tokens.sum())
 
     @property
     def summer_s(self):
         """Summer’s S.
         """
-        return complexity.summer_s(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.summer_s(self.stats["types"], self.num_tokens.sum())
 
     @property
     def sichel_s(self):
         """Sichel’s S (1975).
         """
-        return complexity.sichel_s(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.sichel_s(self.stats["types"], self.num_tokens.sum())
 
     @property
     def michea_m(self):
         """Michéa’s M (1969, 1971).
         """
-        return complexity.michea_m(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.michea_m(self.stats["types"], self.num_tokens.sum())
 
     @property
     def honore_h(self):
         """Honoré's H (1979).
         """
-        return complexity.honore_h(self.size["types"], self.num_tokens.sum())
+        return cophi.complexity.honore_h(self.stats["types"], self.num_tokens.sum())
 
     @property
     def entropy(self):
         """Entropy S.
         """
-        return complexity.entropy(self.num_tokens, self.freq_spectrum)
+        return cophi.complexity.entropy(self.num_tokens, self.freq_spectrum)
 
     @property
     def yule_k(self):
         """Yule’s K (1944).
         """
-        return complexity.yule_k(self.num_tokens, self.freq_spectrum)
+        return cophi.complexity.yule_k(self.num_tokens, self.freq_spectrum)
 
     @property
     def simpson_d(self):
         """Simpson’s D (1949).
         """
-        return complexity.simpson_d(self.num_tokens, self.freq_spectrum)
+        return cophi.complexity.simpson_d(self.num_tokens, self.freq_spectrum)
 
     @property
     def herdan_vm(self):
         """Herdan’s VM (1955).
         """
-        return complexity.herdan_vm(self.size["types"], self.num_tokens, self.freq_spectrum)
+        return cophi.complexity.herdan_vm(self.stats["types"], self.num_tokens, self.freq_spectrum)
 
     def orlov_z(self, max_iterations=100, min_tolerance=1):
         """Orlov’s Z (1983).
         """
-        return complexity.orlov_z(self.num_tokens, self.size["types"], self.freq_spectrum, max_iterations, min_tolerance)
+        return cophi.complexity.orlov_z(self.num_tokens, self.stats["types"], self.freq_spectrum, max_iterations, min_tolerance)
 
 
 class Metadata(pd.DataFrame):

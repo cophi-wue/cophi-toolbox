@@ -40,7 +40,7 @@ Measures that use the whole frequency spectrum:
 Parameters of probabilistic models:
   * Orlov’s :math:`Z`
 
-For a more detailed description and the used formula, have a look at the :mod:`complexity` module.
+For a more detailed description and the used formulas, have a look at the :module:`complexity` module.
 """
 
 

@@ -7,20 +7,20 @@ from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
 
-NAME = "cophi_toolbox"
+NAME = "cophi"
 DESCRIPTION = "A library for preprocessing."
 URL = "https://github.com/cophi-wue/cophi-toolbox"
 AUTHOR = "Chair of Computer Philology and Modern German Literary History"
 EMAIL = None
-REQUIRES_PYTHON = ">=3.6.0"
+REQUIRES_PYTHON = ">=3.4.0"
 VERSION = None
 
 REQUIRED = [
-    "pandas>=0.23.4", "numpy>=1.15.0", "lxml>=4.2.4", "regex>=2018.07.11"
+    "pandas>=0.23.4",
+    "numpy>=1.15.0",
+    "lxml>=4.2.4",
+    "regex>=2018.07.11"
 ]
-
-if sys.version_info.minor < 7:
-    REQUIRED.append("dataclasses")
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -94,6 +94,8 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy"

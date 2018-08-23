@@ -46,14 +46,14 @@ def segment_fuzzy(paragraphs, size=1000, tolerance=0.05):
 
     Parameters:
         paragraphs: Paragraphs of a document as separated entities.
-        segment_size: The target length of each segment in tokens.
-        tolerance: How much may the actual segment size differ from the `segment_size`? 
-            If ``0 < tolerance < 1``, this is interpreted as a fraction of the `segment_size`, 
+        size: The target length of each segment in tokens.
+        tolerance: How much may the actual segment size differ from the `size`? 
+            If ``0 < tolerance < 1``, this is interpreted as a fraction of the `size`, 
             otherwise it is interpreted as an absolute number. If ``tolerance < 0``, paragraphs 
             are never split apart.
     """
     if tolerance > 0 and tolerance < 1:
-        tolerance = round(segment_size * tolerance)
+        tolerance = round(size * tolerance)
     current_segment = []
     carry = None
     current_size = 0
@@ -64,9 +64,9 @@ def segment_fuzzy(paragraphs, size=1000, tolerance=0.05):
             carry = None
             current_segment.append(chunk)
             current_size += len(chunk)
-            if current_size >= segment_size:
-                too_long = current_size - segment_size
-                too_short = segment_size - (current_size - len(chunk))
+            if current_size >= size:
+                too_long = current_size - size
+                too_short = size - (current_size - len(chunk))
                 if tolerance >= 0 and min(too_long, too_short) > tolerance:
                     chunk_part0 = chunk[:-too_long]
                     carry = chunk[-too_long:]
