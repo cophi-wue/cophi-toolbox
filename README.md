@@ -1,5 +1,5 @@
 # A library for preprocessing
-**cophi** is a Python library for handling, modeling and processing text corpora. You
+`cophi` is a Python library for handling, modeling and processing text corpora. You
 can easily pipe a collection of text files using the high-level API:
 
 ```python
