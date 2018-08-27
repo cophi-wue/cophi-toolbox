@@ -14,9 +14,14 @@ corpus, metadata = cophi.corpus(directory="british-fiction-corpus",
 This library is tested on Python 3.4 and higher. Some additional packages (pandas, numpy, lxml, regex) are required.
 
 ## Getting started
-To install the latest development version:
+To install the latest **stable** version:
 ```
-$ pip install git+https://github.com/cophi-wue/cophi-toolbox.git@oop
+$ pip install git+https://github.com/cophi-wue/cophi-toolbox.git
+```
+
+To install the latest **development** version:
+```
+$ pip install --upgrade git+https://github.com/cophi-wue/cophi-toolbox.git@testing
 ```
 
 ## Contents
