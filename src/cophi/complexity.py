@@ -13,7 +13,6 @@ This module was taken from `here <https://github.com/tsproisl/Linguistic_and_Sty
 """
 
 import math
-
 import numpy as np
 
 

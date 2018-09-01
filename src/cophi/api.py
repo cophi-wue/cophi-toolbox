@@ -7,9 +7,7 @@ This module implements the high-level API.
 
 import pathlib
 import uuid
-
 import pandas as pd
-
 import cophi.model
 
 
@@ -49,7 +47,7 @@ def corpus(directory, filepath_pattern="*.*", treat_as=None, encoding="utf-8",
     Returns:
         A Corpus model object and a Metadata object.
     """
-    if isinstance(directory, str):
+    if not isinstance(directory, pathlib.Path):
         directory = pathlib.Path(directory)
     filepaths = directory.glob(filepath_pattern)
 
