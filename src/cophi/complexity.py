@@ -190,7 +190,7 @@ def michea_m(num_types, freq_spectrum):
     return num_types / freq_spectrum[2]
 
 
-def honore_h(num_tokens, num_types, freq_spectrum):
+def honore_h(num_types, num_tokens, freq_spectrum):
     """Calculate Honoré’s H (1979).
 
     Used formula:
@@ -255,7 +255,7 @@ def herdan_vm(num_types, num_tokens, freq_spectrum):
         num_tokens (int): Absolute number of tokens.
         freq_spectrum (dict): Counted occurring frequencies.
     """
-    a = freq_spectrum.index / num_tokens
+    a = freq_spectrum.index.values / num_tokens
     b = 1 / num_types
     return math.sqrt((freq_spectrum * a ** 2).sum() - b)
 
