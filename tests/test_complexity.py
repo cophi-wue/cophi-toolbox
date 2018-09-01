@@ -3,25 +3,16 @@ import collections
 import pandas as pd
 import pytest
 
+import cophi
+
+P_STAR = 1
+Z = 2
 NUM_TYPES = 5
 NUM_TOKENS = 8
-MEASURES = {"ttr", "guiraud_r",
-                "herdan_c",
-                "dugast_k",
-                "maas_a2",
-                "dugast_u",
-                "tuldava_ln",
-                "brunet_w",
-                "cttr",
-                "summer_s",
-                "sichel_s",
-                "michea_m",
-                "honore_h",
-                "entropy",
-                "yule_k",
-                "simpson_d",
-                "herdan_vm",
-                "orlov_z"}
+MEASURES = {"ttr", "guiraud_r", "herdan_c", "dugast_k", "maas_a2", "dugast_u",
+            "tuldava_ln", "brunet_w", "cttr", "summer_s", "sichel_s", "michea_m",
+            "honore_h", "entropy", "yule_k", "simpson_d", "herdan_vm", "orlov_z"}
+
 
 @pytest.fixture
 def frequency_spectrum():
@@ -29,7 +20,6 @@ def frequency_spectrum():
     freqs = collections.Counter(tokens)
     freq_spectrum = collections.Counter(freqs.values())
     return pd.Series(freq_spectrum)
-
 
 def test_ttr():
     ttr = cophi.complexity.ttr(NUM_TYPES, NUM_TOKENS)
@@ -102,6 +92,14 @@ def test_herdan_vm(frequency_spectrum):
 def test_orlov_z(frequency_spectrum):
     orlov_z = cophi.complexity.orlov_z(NUM_TYPES, NUM_TOKENS, frequency_spectrum)
     assert orlov_z == 2.583892154363366
+
+def test_get_z():
+    z = cophi.complexity._get_z(NUM_TOKENS, NUM_TYPES, P_STAR, Z)
+    assert z == 0.33333333333333304
+
+def test_derivative():
+    d = cophi.complexity._derivative(NUM_TOKENS, NUM_TYPES, P_STAR, Z)
+    assert d == -2.2152246080002977
 
 def test_ci():
     results = [1, 2, 3, 4, 5]
