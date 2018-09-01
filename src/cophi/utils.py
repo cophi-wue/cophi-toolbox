@@ -98,10 +98,10 @@ def _parameter(tokens, measure):
     elif measure in {"honore_h", "herdan_vm", "orlov_z"}:
         bow = collections.Counter(tokens)
         freq_spectrum = collections.Counter(bow.values())
-        return {"num_types": len(bow), "num_tokens": len(tokens), "freq_spectrum": freq_spectrum}
+        return {"num_types": len(bow), "num_tokens": len(tokens), "freq_spectrum": pd.Series(freq_spectrum)}
     elif measure in {"entropy", "yule_k", "simpson_d"}:
         bow = collections.Counter(tokens)
         freq_spectrum = collections.Counter(bow.values())
-        return {"num_tokens": len(tokens), "freq_spectrum": freq_spectrum}
+        return {"num_tokens": len(tokens), "freq_spectrum": pd.Series(freq_spectrum)}
     else:
         return {"num_types": len(set(tokens)), "num_tokens": len(tokens)}

@@ -211,7 +211,7 @@ def entropy(num_tokens, freq_spectrum):
 
     Parameters:
         num_tokens (int): Absolute number of tokens.
-        freq_spectrum (dict): Counted occurring frequencies.
+        freq_spectrum (pd.Series): Counted occurring frequencies.
     """
     a = freq_spectrum.index.values / num_tokens
     b = - np.log(a)
@@ -228,7 +228,7 @@ def yule_k(num_tokens, freq_spectrum):
 
     Parameters:
         num_tokens (int): Absolute number of tokens.
-        freq_spectrum (dict): Counted occurring frequencies.
+        freq_spectrum (pd.Series): Counted occurring frequencies.
     """
     a = freq_spectrum.index.values / num_tokens
     b = 1 / num_tokens
@@ -240,7 +240,7 @@ def simpson_d(num_tokens, freq_spectrum):
 
     Parameters:
         num_tokens (int): Absolute number of tokens.
-        freq_spectrum (dict): Counted occurring frequencies.
+        freq_spectrum (pd.Series): Counted occurring frequencies.
     """
     a = freq_spectrum.values / num_tokens
     b = freq_spectrum.index.values - 1
@@ -253,7 +253,7 @@ def herdan_vm(num_types, num_tokens, freq_spectrum):
     Parameters:
         num_types (int): Absolute number of types.
         num_tokens (int): Absolute number of tokens.
-        freq_spectrum (dict): Counted occurring frequencies.
+        freq_spectrum (pd.Series): Counted occurring frequencies.
     """
     a = freq_spectrum.index.values / num_tokens
     b = 1 / num_types
@@ -271,21 +271,26 @@ def orlov_z(num_tokens, num_types, freq_spectrum, max_iterations=100, min_tolera
         num_tokens (int): Absolute number of tokens.
         freq_spectrum (dict): Counted occurring frequencies.
     """
-    def function(num_tokens, num_types, p_star, z):
-        return (z / math.log(p_star * z)) * (num_tokens / (num_tokens - z)) * math.log(num_tokens / z) - num_types
-
-    def derivative(num_tokens, num_types, p_star, z):
-        return (num_tokens * ((z - num_tokens) * math.log(p_star * z) + math.log(num_tokens / z) * (num_tokens * math.log(p_star * z) - num_tokens + z))) / (((num_tokens - z) ** 2) * (math.log(p_star * z) ** 2))
-    most_frequent = freq_spectrum.values.max()
+    most_frequent = max(freq_spectrum)
     p_star = most_frequent / num_tokens
     z = num_tokens / 2
     for i in range(max_iterations):
-        next_z = z - (function(num_tokens, num_types, p_star, z) / derivative(num_tokens, num_types, p_star, z))
+        next_z = z - (_get_z(num_tokens, num_types, p_star, z) / _derivative(num_tokens, num_types, p_star, z))
         abs_diff = abs(z - next_z)
         z = next_z
         if abs_diff <= min_tolerance:
             break
     return z
+
+def _get_z(num_tokens, num_types, p_star, z):
+    """Private function for :func:`orlov_z`.
+    """
+    return (z / math.log(p_star * z)) * (num_tokens / (num_tokens - z)) * math.log(num_tokens / z) - num_types
+
+def _derivative(num_tokens, num_types, p_star, z):
+    """Private function for :func:`orlov_z`.
+    """
+    return (num_tokens * ((z - num_tokens) * math.log(p_star * z) + math.log(num_tokens / z) * (num_tokens * math.log(p_star * z) - num_tokens + z))) / (((num_tokens - z) ** 2) * (math.log(p_star * z) ** 2))
 
 
 # other:

@@ -118,6 +118,8 @@ class Document:
         self.text = text
         self.title = title
         self.lowercase = lowercase
+        if n is not None and n < 1:
+            raise ValueError("Value 'n' for ngrams must be greater than {}.".format(n))
         self.n = n
         self.token_pattern = token_pattern
         self.maximum = maximum
@@ -377,7 +379,7 @@ class Corpus:
         """
         return dtm.iloc[:, (-dtm.sum()).argsort()]
 
-    def mfw(self, n=100, rel=True, as_list=True):
+    def mfw(self, n=100, rel=False, as_list=True):
         """Most frequent words.
 
         Parameters:
@@ -501,108 +503,108 @@ class Corpus:
     def ttr(self):
         """Type-Token Ratio (TTR).
         """
-        return cophi.complexity.ttr(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.ttr(self.num_types.sum(), self.num_tokens.sum())
 
     @property
     def guiraud_r(self):
         """Guiraud’s R (1954).
         """
-        return cophi.complexity.guiraud_r(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.guiraud_r(self.num_types.sum(), self.num_tokens.sum())
 
     @property
     def herdan_c(self):
         """Herdan’s C (1960, 1964).
         """
-        return cophi.complexity.herdan_c(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.herdan_c(self.num_types.sum(), self.num_tokens.sum())
 
     @property
     def dugast_k(self):
         """Dugast’s k (1979).
         """
-        return cophi.complexity.dugast_k(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.dugast_k(self.num_types.sum(), self.num_tokens.sum())
 
     @property
     def dugast_u(self):
         """Dugast’s U (1978, 1979).
         """
-        return cophi.complexity.dugast_k(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.dugast_k(self.num_types.sum(), self.num_tokens.sum())
 
     @property
     def maas_a2(self):
         """Maas’ a^2 (1972).
         """
-        return cophi.complexity.maas_a2(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.maas_a2(self.num_types.sum(), self.num_tokens.sum())
 
     @property
     def tuldava_ln(self):
         """Tuldava’s LN (1977).
         """
-        return cophi.complexity.tuldava_ln(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.tuldava_ln(self.num_types.sum(), self.num_tokens.sum())
 
     @property
     def brunet_w(self):
         """Brunet’s W (1978).
         """
-        return cophi.complexity.brunet_w(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.brunet_w(self.num_types.sum(), self.num_tokens.sum())
 
     @property
     def cttr(self):
         """Carroll’s Corrected Type-Token Ratio (CTTR).
         """
-        return cophi.complexity.cttr(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.cttr(self.num_types.sum(), self.num_tokens.sum())
 
     @property
     def summer_s(self):
         """Summer’s S.
         """
-        return cophi.complexity.summer_s(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.summer_s(self.num_types.sum(), self.num_tokens.sum())
 
     @property
     def sichel_s(self):
         """Sichel’s S (1975).
         """
-        return cophi.complexity.sichel_s(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.sichel_s(self.num_types.sum(), self.freq_spectrum)
 
     @property
     def michea_m(self):
         """Michéa’s M (1969, 1971).
         """
-        return cophi.complexity.michea_m(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.michea_m(self.num_types.sum(), self.freq_spectrum)
 
     @property
     def honore_h(self):
         """Honoré's H (1979).
         """
-        return cophi.complexity.honore_h(self.stats["types"], self.num_tokens.sum())
+        return cophi.complexity.honore_h(self.num_types.sum(), self.num_tokens.sum(), self.freq_spectrum)
 
     @property
     def entropy(self):
         """Entropy S.
         """
-        return cophi.complexity.entropy(self.num_tokens, self.freq_spectrum)
+        return cophi.complexity.entropy(self.num_tokens.sum(), self.freq_spectrum)
 
     @property
     def yule_k(self):
         """Yule’s K (1944).
         """
-        return cophi.complexity.yule_k(self.num_tokens, self.freq_spectrum)
+        return cophi.complexity.yule_k(self.num_tokens.sum(), self.freq_spectrum)
 
     @property
     def simpson_d(self):
         """Simpson’s D (1949).
         """
-        return cophi.complexity.simpson_d(self.num_tokens, self.freq_spectrum)
+        return cophi.complexity.simpson_d(self.num_tokens.sum(), self.freq_spectrum)
 
     @property
     def herdan_vm(self):
         """Herdan’s VM (1955).
         """
-        return cophi.complexity.herdan_vm(self.stats["types"], self.num_tokens, self.freq_spectrum)
+        return cophi.complexity.herdan_vm(self.num_types.sum(), self.num_tokens.sum(), self.freq_spectrum)
 
     def orlov_z(self, max_iterations=100, min_tolerance=1):
         """Orlov’s Z (1983).
         """
-        return cophi.complexity.orlov_z(self.num_tokens, self.stats["types"], self.freq_spectrum, max_iterations, min_tolerance)
+        return cophi.complexity.orlov_z(self.num_tokens.sum(), self.num_types.sum(), self.freq_spectrum, max_iterations, min_tolerance)
 
 
 class Metadata(pd.DataFrame):
