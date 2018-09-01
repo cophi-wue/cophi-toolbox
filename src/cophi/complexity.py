@@ -44,7 +44,7 @@ def guiraud_r(num_types, num_tokens):
             num_types (int): Absolute number of types.
             num_tokens (int): Absolute number of tokens.
         """
-    return num_types / np.sqrt(num_tokens)
+    return num_types / math.sqrt(num_tokens)
 
 
 def herdan_c(num_types, num_tokens):
@@ -143,7 +143,7 @@ def cttr(num_types, num_tokens):
         num_types (int): Absolute number of types.
         num_tokens (int): Absolute number of tokens.
     """
-    return num_types / np.sqrt(2 * num_tokens)
+    return num_types / math.sqrt(2 * num_tokens)
 
 
 def summer_s(num_types, num_tokens):
@@ -213,9 +213,10 @@ def entropy(num_tokens, freq_spectrum):
         num_tokens (int): Absolute number of tokens.
         freq_spectrum (dict): Counted occurring frequencies.
     """
-    a = -math.log(freq_spectrum.index.values / num_tokens)
-    b = freq_spectrum.values / num_tokens
-    return (freq_spectrum.values * a * b).sum()
+    a = freq_spectrum.index.values / num_tokens
+    b = - np.log(a)
+    result = freq_spectrum.values * a * b
+    return result.sum()
 
 
 def yule_k(num_tokens, freq_spectrum):
@@ -254,9 +255,10 @@ def herdan_vm(num_types, num_tokens, freq_spectrum):
         num_tokens (int): Absolute number of tokens.
         freq_spectrum (dict): Counted occurring frequencies.
     """
-    a = freq_spectrum.values / num_tokens
+    a = freq_spectrum.index / num_tokens
     b = 1 / num_types
-    return np.sqrt(((freq_spectrum.values * a ** 2) - b).sum())
+    return math.sqrt((freq_spectrum * a ** 2).sum() - b)
+
 
 
 # use probabilistic models:
