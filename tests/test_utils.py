@@ -1,8 +1,7 @@
 import collections
-
 import pytest
-
 import cophi
+
 
 PARAGRAPHS = [["A B C D E F", "G H I J K L"]]
 DOCUMENT = PARAGRAPHS[0][0]
@@ -27,14 +26,12 @@ def test_segment_fuzzy():
     segments = cophi.utils.segment_fuzzy(PARAGRAPHS, 1)
     assert list(segments) == [[["A B C D E F"]], [["G H I J K L"]]]
 
-"""
 def test_parameter():
     parameter = cophi.utils._parameter(TOKENS, "sichel_s")
-    assert parameter == {"num_types": 6, "freq_spectrum": collections.Counter({1: 6})}
+    assert len(parameter) == 2
     parameter = cophi.utils._parameter(TOKENS, "honore_h")
-    assert parameter == {'num_types': 6, 'num_tokens': 6, 'freq_spectrum': Counter({1: 6})}
+    assert len(parameter) == 3
     parameter = cophi.utils._parameter(TOKENS, "entropy")
-    assert parameter == 
+    assert len(parameter) == 2
     parameter = cophi.utils._parameter(TOKENS, "ttr")
-    assert parameter == 
-"""
+    assert len(parameter) == 2

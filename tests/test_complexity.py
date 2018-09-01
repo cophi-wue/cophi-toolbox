@@ -1,9 +1,8 @@
 import collections
-
 import pandas as pd
 import pytest
-
 import cophi
+
 
 P_STAR = 1
 Z = 2
@@ -12,7 +11,6 @@ NUM_TOKENS = 8
 MEASURES = {"ttr", "guiraud_r", "herdan_c", "dugast_k", "maas_a2", "dugast_u",
             "tuldava_ln", "brunet_w", "cttr", "summer_s", "sichel_s", "michea_m",
             "honore_h", "entropy", "yule_k", "simpson_d", "herdan_vm", "orlov_z"}
-
 
 @pytest.fixture
 def frequency_spectrum():
