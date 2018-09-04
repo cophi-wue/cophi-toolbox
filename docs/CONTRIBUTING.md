@@ -37,3 +37,12 @@ Pushing to master is protected, you can only push heads that have an "green" sta
 
 If something goes wrong, `git reset --hard master origin/master` and try again.
 
+## Publishing on PyPi
+
+Simply run:
+
+```
+python setup.py upload
+```
+
+and enter your credentials.
