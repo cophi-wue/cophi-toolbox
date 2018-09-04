@@ -5,10 +5,17 @@ cophi.api
 This module implements the high-level API.
 """
 
+import logging
 import pathlib
 import uuid
 import pandas as pd
 import cophi.model
+
+
+logging.basicConfig(level=logging.INFO,
+                    format="(%(asctime)s) %(levelname)s: %(message)s",
+                    datefmt="%H:%M:%S")
+logger = logging.getLogger("cophi.api")
 
 
 def document(filepath, **kwargs):
@@ -58,6 +65,7 @@ def corpus(directory, filepath_pattern="*.*", treat_as=None, encoding="utf-8",
     metadata = cophi.model.Metadata()
     documents = pd.Series()
     for textfile in lazy_reading(filepaths):
+        logger.info("Processing '{}' ...".format(textfile.title))
         document_uuid = str(uuid.uuid1())
         text = textfile.content
         document = cophi.model.Document(text,
@@ -73,4 +81,5 @@ def corpus(directory, filepath_pattern="*.*", treat_as=None, encoding="utf-8",
                                     "title": textfile.title,
                                     "suffix": textfile.filepath.suffix},
                                     ignore_index=True)
+    logger.info("Constructing Corpus object ...")
     return cophi.model.Corpus(documents), metadata
