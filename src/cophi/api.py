@@ -12,10 +12,7 @@ import pandas as pd
 import cophi.model
 
 
-logging.basicConfig(level=logging.INFO,
-                    format="(%(asctime)s) %(name)s %(levelname)s: %(message)s",
-                    datefmt="%H:%M:%S")
-logger = logging.getLogger("cophi")
+logger = logging.getLogger(__name__)
 
 
 def document(filepath, **kwargs):
