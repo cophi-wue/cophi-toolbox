@@ -21,13 +21,13 @@ To install the latest **development** version:
 $ pip install --upgrade git+https://github.com/cophi-wue/cophi-toolbox.git@testing
 ```
 
-Check out the introducing [Jupyter notebook](notebooks/API.ipynb).
+Check out the introducing [Jupyter notebook](https://github.com/cophi-wue/cophi-toolbox/blob/master/notebooks/API.ipynb).
 
 ## Contents
-- [`api`](src/cophi_toolbox/api.py): High-level API.
-- [`model`](src/cophi_toolbox/model.py): Low-level model classes.
-- [`complexity`](src/cophi_toolbox/complexity.py): Measures that assess the linguistic and stylistic complexity of (literary) texts.
-- [`utils`](src/cophi_toolbox/utils.py): Low-level helper functions.
+- [`api`](https://github.com/cophi-wue/cophi-toolbox/blob/master/src/cophi_toolbox/api.py): High-level API.
+- [`model`](https://github.com/cophi-wue/cophi-toolbox/blob/master/src/cophi_toolbox/model.py): Low-level model classes.
+- [`complexity`](https://github.com/cophi-wue/cophi-toolbox/blob/master/src/cophi_toolbox/complexity.py): Measures that assess the linguistic and stylistic complexity of (literary) texts.
+- [`utils`](https://github.com/cophi-wue/cophi-toolbox/blob/master/src/cophi_toolbox/utils.py): Low-level helper functions.
 
 
 ## Available complexity measures
