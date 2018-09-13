@@ -87,8 +87,8 @@ def maas_a2(num_types, num_tokens):
         num_types (int): Absolute number of types.
         num_tokens (int): Absolute number of tokens.
     """
-    return (math.log(num_tokens) -
-            math.log(num_types)) / (math.log(num_tokens) ** 2)
+    return (math.log(num_tokens)
+            - math.log(num_types)) / (math.log(num_tokens) ** 2)
 
 
 def dugast_u(num_types, num_tokens):
@@ -102,8 +102,8 @@ def dugast_u(num_types, num_tokens):
         num_types (int): Absolute number of types.
         num_tokens (int): Absolute number of tokens.
     """
-    return (math.log(num_tokens) ** 2) / (math.log(num_tokens) -
-                                          math.log(num_types))
+    return (math.log(num_tokens) ** 2) / (math.log(num_tokens)
+                                          - math.log(num_types))
 
 
 def tuldava_ln(num_types, num_tokens):
@@ -204,8 +204,8 @@ def honore_h(num_types, num_tokens, freq_spectrum):
         num_types (int): Absolute number of types.
         freq_spectrum (dict): Counted occurring frequencies.
     """
-    return 100 * (math.log(num_tokens) /
-                  (1 - ((freq_spectrum[1]) / (num_types))))
+    return 100 * (math.log(num_tokens)
+                  / (1 - ((freq_spectrum[1]) / (num_types))))
 
 
 # use num_tokens + freq_spectrum:
@@ -295,20 +295,20 @@ def orlov_z(num_tokens, num_types, freq_spectrum,
 def _get_z(num_tokens, num_types, p_star, z):
     """Private function for :func:`orlov_z`.
     """
-    return (((z / math.log(p_star * z)) *
-            (num_tokens / (num_tokens - z)) *
-            math.log(num_tokens / z) - num_types))
+    return (((z / math.log(p_star * z))
+            * (num_tokens / (num_tokens - z))
+            * math.log(num_tokens / z) - num_types))
 
 
 def _derivative(num_tokens, num_types, p_star, z):
     """Private function for :func:`orlov_z`.
     """
-    return ((num_tokens *
-             ((z - num_tokens) *
-              math.log(p_star * z) +
-              math.log(num_tokens / z) *
-              (num_tokens * math.log(p_star * z) - num_tokens + z))) /
-            (((num_tokens - z) ** 2) * (math.log(p_star * z) ** 2)))
+    return ((num_tokens
+             * ((z - num_tokens)
+             * math.log(p_star * z)
+             + math.log(num_tokens / z)
+             * (num_tokens * math.log(p_star * z) - num_tokens + z)))
+            / (((num_tokens - z) ** 2) * (math.log(p_star * z) ** 2)))
 
 
 # other:
