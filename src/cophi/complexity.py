@@ -2,14 +2,16 @@
 cophi.complexity
 ~~~~~~~~~~~~~~~~
 
-This module implements measures that assess the linguistic and stylistic 
-complexity of (literary) texts.
+This module implements measures that assess the linguistic
+and stylistic complexity of (literary) texts.
 
-:math:`N` is the Absolute number of tokens, and :math:`V` the Absolute number of types.
-:math:`H` is the Absolute number of types occuring only once (hapax legomena), 
-:math:`D` is the Absolute number of types occuring twice (dislegomena).
+:math:`N` is the Absolute number of tokens, and :math:`V` the
+Absolute number of types. :math:`H` is the Absolute number of
+types occuring only once (hapax legomena), :math:`D` is the
+absolute number of types occuring twice (dislegomena).
 
-This module was taken from `here <https://github.com/tsproisl/Linguistic_and_Stylistic_Complexity>`_.
+This module was taken from
+`here <https://github.com/tsproisl/Linguistic_and_Stylistic_Complexity>`_.
 """
 
 import math
@@ -19,7 +21,7 @@ import numpy as np
 # use num_types + num_tokens (int):
 
 def ttr(num_types, num_tokens):
-    """Calculate Type-Token Ratio (TTR).
+    r"""Calculate Type-Token Ratio (TTR).
 
     Used formula:
         .. math::
@@ -33,7 +35,7 @@ def ttr(num_types, num_tokens):
 
 
 def guiraud_r(num_types, num_tokens):
-    """Calculate Guiraud’s R (1954).
+    r"""Calculate Guiraud’s R (1954).
 
     Used formula:
         .. math::
@@ -42,12 +44,12 @@ def guiraud_r(num_types, num_tokens):
     Parameters:
             num_types (int): Absolute number of types.
             num_tokens (int): Absolute number of tokens.
-        """
+    """
     return num_types / math.sqrt(num_tokens)
 
 
 def herdan_c(num_types, num_tokens):
-    """Calculate Herdan’s C (1960, 1964).
+    r"""Calculate Herdan’s C (1960, 1964).
 
     Used formula:
         .. math::
@@ -61,7 +63,7 @@ def herdan_c(num_types, num_tokens):
 
 
 def dugast_k(num_types, num_tokens):
-    """Calculate Dugast’s k (1979).
+    r"""Calculate Dugast’s k (1979).
 
     Used formula:
         .. math::
@@ -75,7 +77,7 @@ def dugast_k(num_types, num_tokens):
 
 
 def maas_a2(num_types, num_tokens):
-    """Calculate Maas’ a^2 (1972).
+    r"""Calculate Maas’ a^2 (1972).
 
     Used formula:
         .. math::
@@ -85,11 +87,12 @@ def maas_a2(num_types, num_tokens):
         num_types (int): Absolute number of types.
         num_tokens (int): Absolute number of tokens.
     """
-    return (math.log(num_tokens) - math.log(num_types)) / (math.log(num_tokens) ** 2)
+    return (math.log(num_tokens) -
+            math.log(num_types)) / (math.log(num_tokens) ** 2)
 
 
 def dugast_u(num_types, num_tokens):
-    """Calculate Dugast’s U (1978, 1979).
+    r"""Calculate Dugast’s U (1978, 1979).
 
     Used formula:
         .. math::
@@ -99,11 +102,12 @@ def dugast_u(num_types, num_tokens):
         num_types (int): Absolute number of types.
         num_tokens (int): Absolute number of tokens.
     """
-    return (math.log(num_tokens) ** 2) / (math.log(num_tokens) - math.log(num_types))
+    return (math.log(num_tokens) ** 2) / (math.log(num_tokens) -
+                                          math.log(num_types))
 
 
 def tuldava_ln(num_types, num_tokens):
-    """Calculate Tuldava’s LN (1977).
+    r"""Calculate Tuldava’s LN (1977).
 
     Used formula:
         .. math::
@@ -117,7 +121,7 @@ def tuldava_ln(num_types, num_tokens):
 
 
 def brunet_w(num_types, num_tokens):
-    """Calculate Brunet’s W (1978).
+    r"""Calculate Brunet’s W (1978).
 
     Used formula:
         .. math::
@@ -132,7 +136,7 @@ def brunet_w(num_types, num_tokens):
 
 
 def cttr(num_types, num_tokens):
-    """Calculate Carroll’s Corrected Type-Token Ration (CTTR) (1964).
+    r"""Calculate Carroll’s Corrected Type-Token Ration (CTTR) (1964).
 
     Used formula:
         .. math::
@@ -146,7 +150,7 @@ def cttr(num_types, num_tokens):
 
 
 def summer_s(num_types, num_tokens):
-    """Calculate Summer’s S.
+    r"""Calculate Summer’s S.
 
     Used formula:
         .. math::
@@ -162,7 +166,7 @@ def summer_s(num_types, num_tokens):
 # use num_types + part of freq_spectrum:
 
 def sichel_s(num_types, freq_spectrum):
-    """Calculate Sichel’s S (1975).
+    r"""Calculate Sichel’s S (1975).
 
     Used formula:
         .. math::
@@ -176,7 +180,7 @@ def sichel_s(num_types, freq_spectrum):
 
 
 def michea_m(num_types, freq_spectrum):
-    """Calculate Michéa’s M (1969, 1971).
+    r"""Calculate Michéa’s M (1969, 1971).
 
     Used formula:
         .. math::
@@ -190,7 +194,7 @@ def michea_m(num_types, freq_spectrum):
 
 
 def honore_h(num_types, num_tokens, freq_spectrum):
-    """Calculate Honoré’s H (1979).
+    r"""Calculate Honoré’s H (1979).
 
     Used formula:
         .. math::
@@ -200,13 +204,14 @@ def honore_h(num_types, num_tokens, freq_spectrum):
         num_types (int): Absolute number of types.
         freq_spectrum (dict): Counted occurring frequencies.
     """
-    return 100 * (math.log(num_tokens) / (1 - ((freq_spectrum[1]) / (num_types))))
+    return 100 * (math.log(num_tokens) /
+                  (1 - ((freq_spectrum[1]) / (num_types))))
 
 
 # use num_tokens + freq_spectrum:
 
 def entropy(num_tokens, freq_spectrum):
-    """Calculate entropy S.
+    r"""Calculate entropy S.
 
     Parameters:
         num_tokens (int): Absolute number of tokens.
@@ -219,7 +224,7 @@ def entropy(num_tokens, freq_spectrum):
 
 
 def yule_k(num_tokens, freq_spectrum):
-    """Calculate Yule’s K (1944).
+    r"""Calculate Yule’s K (1944).
 
     Used formula:
         .. math::
@@ -259,10 +264,10 @@ def herdan_vm(num_types, num_tokens, freq_spectrum):
     return math.sqrt((freq_spectrum * a ** 2).sum() - b)
 
 
-
 # use probabilistic models:
 
-def orlov_z(num_tokens, num_types, freq_spectrum, max_iterations=100, min_tolerance=1):
+def orlov_z(num_tokens, num_types, freq_spectrum,
+            max_iterations=100, min_tolerance=1):
     """Calculate Orlov’s Z (1983), approximated via Newton’s method.
 
     Parameters:
@@ -274,22 +279,36 @@ def orlov_z(num_tokens, num_types, freq_spectrum, max_iterations=100, min_tolera
     p_star = most_frequent / num_tokens
     z = num_tokens / 2
     for i in range(max_iterations):
-        next_z = z - (_get_z(num_tokens, num_types, p_star, z) / _derivative(num_tokens, num_types, p_star, z))
+        next_z = z - (_get_z(num_tokens,
+                             num_types,
+                             p_star, z) / _derivative(num_tokens,
+                                                      num_types,
+                                                      p_star,
+                                                      z))
         abs_diff = abs(z - next_z)
         z = next_z
         if abs_diff <= min_tolerance:
             break
     return z
 
+
 def _get_z(num_tokens, num_types, p_star, z):
     """Private function for :func:`orlov_z`.
     """
-    return (z / math.log(p_star * z)) * (num_tokens / (num_tokens - z)) * math.log(num_tokens / z) - num_types
+    return (((z / math.log(p_star * z)) *
+            (num_tokens / (num_tokens - z)) *
+            math.log(num_tokens / z) - num_types))
+
 
 def _derivative(num_tokens, num_types, p_star, z):
     """Private function for :func:`orlov_z`.
     """
-    return (num_tokens * ((z - num_tokens) * math.log(p_star * z) + math.log(num_tokens / z) * (num_tokens * math.log(p_star * z) - num_tokens + z))) / (((num_tokens - z) ** 2) * (math.log(p_star * z) ** 2))
+    return ((num_tokens *
+             ((z - num_tokens) *
+              math.log(p_star * z) +
+              math.log(num_tokens / z) *
+              (num_tokens * math.log(p_star * z) - num_tokens + z))) /
+            (((num_tokens - z) ** 2) * (math.log(p_star * z) ** 2)))
 
 
 # other:

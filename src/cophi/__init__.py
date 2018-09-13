@@ -1,6 +1,7 @@
-"""
-**cophi** is a Python library for handling, modeling and processing text corpora. You
-can easily pipe a collection of text files using the high-level API:
+r"""
+**cophi** is a Python library for handling, modeling and processing text
+corpora. You can easily pipe a collection of text files using the
+high-level API:
 
 .. code-block:: python
 
@@ -12,7 +13,8 @@ can easily pipe a collection of text files using the high-level API:
                                    token_pattern=r"\p{L}+\p{P}?\p{L}+")
 
 
-There are also a plenty of complexity metrics for measuring lexical richness of (literary) texts.
+There are also a plenty of complexity metrics for measuring lexical
+richness of (literary) texts.
 
 Measures that use sample size and vocabulary size:
   * Type-Token Ratio :math:`TTR`
@@ -40,8 +42,8 @@ Measures that use the whole frequency spectrum:
 Parameters of probabilistic models:
   * Orlov’s :math:`Z`
 
-For a more detailed description and the used formulas, have a look at the :module:`complexity` module.
+For a more detailed description and the used formulas, have a look at the
+:module:`complexity` module.
 """
-
 
 from cophi.api import document, corpus

@@ -77,6 +77,6 @@ def corpus(directory, filepath_pattern="*.*", treat_as=None, encoding="utf-8",
                                     "parent": textfile.parent,
                                     "title": textfile.title,
                                     "suffix": textfile.filepath.suffix},
-                                    ignore_index=True)
+                                   ignore_index=True)
     logger.info("Constructing Corpus object ...")
     return cophi.model.Corpus(documents), metadata
