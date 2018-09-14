@@ -273,8 +273,12 @@ class Document:
         """Calculate complexity with a sliding window.
 
         Parameters:
-            measure (str): Measure to use, see `help(cophi)`
-                for available metrics (optional).
+            measure (str): Measure to use, possible values are
+                'ttr', 'guiraud_r', 'herdan_c', 'dugast_k',
+                'maas_a2', 'dugast_u', 'tuldava_ln', 'brunet_w',
+                'cttr', 'summer_s', 'honore_h', 'sichel_s',
+                'michea_m', 'entropy', 'yule_k', 'simpsons_d',
+                'herdan_vm', or 'orlov_z'.
             window (int): Size of sliding window (optional).
             **kwargs: Additional parameters for
                 :func:`cophi.complexity.orlov_z` (optional).
@@ -288,8 +292,12 @@ class Document:
         """Calculate complexity, optionally with a sliding window.
 
         Parameters:
-            measure (str): Measure to use, see `help(cophi)` for
-                available metrics (optional).
+            measure (str): Measure to use, possible values are
+                'ttr', 'guiraud_r', 'herdan_c', 'dugast_k',
+                'maas_a2', 'dugast_u', 'tuldava_ln', 'brunet_w',
+                'cttr', 'summer_s', 'honore_h', 'sichel_s',
+                'michea_m', 'entropy', 'yule_k', 'simpsons_d',
+                'herdan_vm', or 'orlov_z'.
             window (int): Size of sliding window (optional).
             **kwargs: Additional parameters for
                 :func:`cophi.complexity.orlov_z` (optional).
@@ -505,8 +513,12 @@ class Corpus:
         """Calculate complexity for each document with a sliding window.
 
         Parameters:
-            measure (str): Measure to use, see `help(cophi)` for
-                available metrics (optional).
+            measure (str): Measure to use, possible values are
+                'ttr', 'guiraud_r', 'herdan_c', 'dugast_k',
+                'maas_a2', 'dugast_u', 'tuldava_ln', 'brunet_w',
+                'cttr', 'summer_s', 'honore_h', 'sichel_s',
+                'michea_m', 'entropy', 'yule_k', 'simpsons_d',
+                'herdan_vm', or 'orlov_z'.
             window (int): Size of sliding window (optional).
             **kwargs: Additional parameters for
                 :func:`cophi.complexity.orlov_z` (optional).
