@@ -21,7 +21,9 @@ def construct_ngrams(tokens, n=2, sep=" "):
     """
     return (sep.join(ngram)
             for ngram in zip(*(itertools.islice(i, token, None)
-            for token, i in enumerate(itertools.tee(tokens, 2)))))
+                             for token, i in enumerate(itertools.tee(tokens,
+                                                                     2)))))
+
 
 def find_tokens(document, token_pattern=r"\p{L}+\p{P}?\p{L}+", maximum=None):
     """
@@ -37,6 +39,7 @@ def find_tokens(document, token_pattern=r"\p{L}+\p{P}?\p{L}+", maximum=None):
         if maximum is not None and count >= maximum:
             return
 
+
 def lowercase_tokens(tokens):
     """
     Parameters:
@@ -44,16 +47,17 @@ def lowercase_tokens(tokens):
     """
     return [token.lower() for token in tokens]
 
+
 def segment_fuzzy(paragraphs, size=1000, tolerance=0.05):
     """Segment a string, respecting paragraphs.
 
     Parameters:
         paragraphs: Paragraphs of a document as separated entities.
         size: The target length of each segment in tokens.
-        tolerance: How much may the actual segment size differ from the `size`? 
-            If ``0 < tolerance < 1``, this is interpreted as a fraction of the `size`, 
-            otherwise it is interpreted as an absolute number. If ``tolerance < 0``, paragraphs 
-            are never split apart.
+        tolerance: How much may the actual segment size differ from the `size`?
+            If ``0 < tolerance < 1``, this is interpreted as a fraction
+            of the `size`, otherwise it is interpreted as an absolute number.
+            If ``tolerance < 0``, paragraphs are never split apart.
     """
     if tolerance > 0 and tolerance < 1:
         tolerance = round(size * tolerance)
@@ -84,6 +88,7 @@ def segment_fuzzy(paragraphs, size=1000, tolerance=0.05):
     if current_segment:
         yield current_segment
 
+
 def _parameter(tokens, measure):
     """Count types, tokens and occuring frequencies.
 
@@ -98,10 +103,12 @@ def _parameter(tokens, measure):
     elif measure in {"honore_h", "herdan_vm", "orlov_z"}:
         bow = collections.Counter(tokens)
         freq_spectrum = collections.Counter(bow.values())
-        return {"num_types": len(bow), "num_tokens": len(tokens), "freq_spectrum": pd.Series(freq_spectrum)}
+        return {"num_types": len(bow), "num_tokens": len(tokens),
+                "freq_spectrum": pd.Series(freq_spectrum)}
     elif measure in {"entropy", "yule_k", "simpson_d"}:
         bow = collections.Counter(tokens)
         freq_spectrum = collections.Counter(bow.values())
-        return {"num_tokens": len(tokens), "freq_spectrum": pd.Series(freq_spectrum)}
+        return {"num_tokens": len(tokens),
+                "freq_spectrum": pd.Series(freq_spectrum)}
     else:
         return {"num_types": len(set(tokens)), "num_tokens": len(tokens)}
