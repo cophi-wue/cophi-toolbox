@@ -22,7 +22,7 @@ def construct_ngrams(tokens, n=2, sep=" "):
     return (sep.join(ngram)
             for ngram in zip(*(itertools.islice(i, token, None)
                              for token, i in enumerate(itertools.tee(tokens,
-                                                                     2)))))
+                                                                     n)))))
 
 
 def find_tokens(document, token_pattern=r"\p{L}+\p{P}?\p{L}+", maximum=None):
