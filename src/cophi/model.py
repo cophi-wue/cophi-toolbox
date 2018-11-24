@@ -7,6 +7,7 @@ This module implements low-level model classes.
 
 import collections
 import itertools
+import logging
 import math
 import pathlib
 
@@ -17,6 +18,8 @@ import regex as re
 
 import cophi.utils
 import cophi.complexity
+
+logger = logging.getLogger(__name__)
 
 
 class Textfile:
@@ -351,8 +354,15 @@ class Corpus:
         else:
             matrix = pd.DataFrame
         self.documents = documents
-        self.dtm = matrix({document.title: document.bow
-                           for document in self.documents})
+        def count_corpus(documents):
+            corpus = dict()
+            for document in documents:
+                logger.info("Processing '{}'...".format(document.title))
+                corpus[document.title] = document.bow
+            return corpus
+        counts = count_corpus(self.documents)
+        logger.info("Constructing document-term matrix...")
+        self.dtm = matrix(counts)
         self.dtm = self.dtm.T.fillna(0).astype(int)
 
     @staticmethod
