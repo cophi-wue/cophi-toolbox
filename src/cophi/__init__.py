@@ -46,4 +46,4 @@ For a more detailed description and the used formulas, have a look at the
 :module:`complexity` module.
 """
 
-from cophi.api import document, corpus
+from cophi.api import document, corpus, export

@@ -10,6 +10,14 @@ def make_file(tmpdir, fname, content):
     p.write(content)
     return p
 
+@pytest.fixture
+def document():
+    return cophi.model.Document(DOCUMENT, "document", r"\w")
+
+@pytest.fixture
+def corpus(document):
+    return cophi.model.Corpus([document])
+
 def test_document(tmpdir):
     filepath = make_file(tmpdir, "document.txt", DOCUMENT)
     document = cophi.document(str(filepath), token_pattern=r"\w")
@@ -21,3 +29,19 @@ def test_corpus(tmpdir):
     corpus, metadata = cophi.corpus(directory)
     assert metadata["parent"].iloc[0] == str(directory)
     assert corpus.documents[0].text == DOCUMENT
+
+def test_export(corpus):
+    output = pathlib.Path("corpus.svmlight")
+    cophi.export(corpus.dtm, output, "svmlight")
+    assert output.exists()
+    with output.open("r", encoding="utf-8") as file:
+        assert file.read() == "document document a:1 b:1 c:1 d:1 e:1 f:1\n"
+
+    output = pathlib.Path("corpus.txt")
+    cophi.export(corpus.dtm, output, "text")
+    assert output.exists()
+    with output.open("r", encoding="utf-8") as file:
+        assert file.read() == "document document a b c d e f\n"
+
+    with pytest.raises(ValueError):
+        cophi.export(corpus.dtm, output, "unknown")
