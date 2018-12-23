@@ -7,6 +7,7 @@ This module implements low-level helper functions.
 
 import collections
 import itertools
+import pathlib
 
 import pandas as pd
 import regex as re
@@ -21,8 +22,8 @@ def construct_ngrams(tokens, n=2, sep=" "):
     """
     return (sep.join(ngram)
             for ngram in zip(*(itertools.islice(i, token, None)
-                             for token, i in enumerate(itertools.tee(tokens,
-                                                                     n)))))
+                               for token, i in enumerate(itertools.tee(tokens,
+                                                                       n)))))
 
 
 def find_tokens(document, token_pattern=r"\p{L}+\p{P}?\p{L}+", maximum=None):
@@ -112,3 +113,39 @@ def _parameter(tokens, measure):
                 "freq_spectrum": pd.Series(freq_spectrum)}
     else:
         return {"num_types": len(set(tokens)), "num_tokens": len(tokens)}
+
+
+def export_svmlight(dtm, filepath):
+    """Export document-term matrix to SVMLight format.
+
+    Parameters:
+        dtm: Document-term matrix.
+        filepath: Path to output file.
+    """
+    with pathlib.Path(filepath).open("w", encoding="utf-8") as file:
+        for title, document in dtm.iterrows():
+            # Drop types with zero frequencies:
+            document = document.dropna()
+            features = ["{word}:{freq}".format(word=word, freq=int(
+                freq)) for word, freq in document.iteritems()]
+            export = "{title} {title} {features}\n".format(
+                title=title, features=" ".join(features))
+            file.write(export)
+
+
+def export_plaintext(dtm, filepath):
+    """Export document-term matrix to plain text format.
+
+    Parameters:
+        dtm: Document-term matrix.
+        filepath: Path to output file.
+    """
+    with pathlib.Path(filepath).open("w", encoding="utf-8") as file:
+        for title, document in matrix.iterrows():
+            # Drop types with zero frequencies:
+            document = document.dropna()
+            features = [" ".join([word] * int(freq))
+                        for word, freq in document.iteritems()]
+            export = "{title} {title} {features}\n".format(
+                title=title, features=" ".join(features))
+            file.write(export)

@@ -677,42 +677,6 @@ class Corpus:
                                         max_iterations,
                                         min_tolerance)
 
-    @classmethod
-    def svmlight(cls, dtm, filepath):
-        """Export corpus to SVMLight format.
-
-        Parameters:
-            dtm: Document-term matrix.
-            filepath: Path to output file.
-        """
-        with pathlib.Path(filepath).open("w", encoding="utf-8") as file:
-            for title, document in dtm.iterrows():
-                # Drop types with zero frequencies:
-                document = document.dropna()
-                features = ["{word}:{freq}".format(word=word, freq=int(
-                    freq)) for word, freq in document.iteritems()]
-                export = "{title} {title} {features}\n".format(
-                    title=title, features=" ".join(features))
-                file.write(export)
-
-    @classmethod
-    def plaintext(cls, dtm, filepath):
-        """Export corpus to plain text format.
-
-        Parameters:
-            dtm: Document-term matrix.
-            filepath: Path to output file.
-        """
-        with pathlib.Path(filepath).open("w", encoding="utf-8") as file:
-            for title, document in dtm.iterrows():
-                # Drop types with zero frequencies:
-                document = document.dropna()
-                features = [" ".join([word] * int(freq))
-                            for word, freq in document.iteritems()]
-                export = "{title} {title} {features}\n".format(
-                    title=title, features=" ".join(features))
-                file.write(export)
-
 
 class Metadata(pd.DataFrame):
     """Handle corpus metadata.

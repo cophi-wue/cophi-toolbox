@@ -93,8 +93,8 @@ def export(dtm, filepath, format="text"):
         format: File format.
     """
     if format.lower() in {"plaintext", "text"}:
-        cophi.model.Corpus.plaintext(corpus, filepath)
+        cophi.utils.export_plaintext(corpus, filepath)
     elif format.lower() in {"svmlight"}:
-        cophi.model.Corpus.svmlight(corpus, filepath)
+        cophi.utils.export_svmlight(corpus, filepath)
     else:
         raise ValueError("'{}' is no supported file format.".format(format))
