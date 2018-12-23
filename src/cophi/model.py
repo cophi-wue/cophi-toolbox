@@ -70,7 +70,7 @@ class Textfile:
         """
         return lxml.etree.parse(str(self.filepath), parser=parser)
 
-    @classmethod
+    @staticmethod
     def stringify(tree):
         """Serialize to an encoded string representation of its XML tree.
 
@@ -230,7 +230,7 @@ class Document:
         bow = collections.Counter(self.tokens)  # no pandas needed here
         return pd.Series(collections.Counter(bow.values()))
 
-    @classmethod
+    @staticmethod
     def drop(tokens, features):
         """Drop features.
 
@@ -365,7 +365,7 @@ class Corpus:
         self.dtm = matrix(counts)
         self.dtm = self.dtm.T
 
-    @classmethod
+    @staticmethod
     def map_metadata(data, metadata, uuid="uuid", fields=["title"], sep="_"):
         """Map metadata with a UUID.
 
@@ -410,7 +410,7 @@ class Corpus:
         """
         return list(self.dtm.columns)
 
-    @classmethod
+    @staticmethod
     def sort(dtm):
         """Descending sorted document-term matrix.
 
@@ -444,7 +444,7 @@ class Corpus:
         """
         return list(self.dtm.loc[:, self.dtm.max() == 1].columns)
 
-    @classmethod
+    @staticmethod
     def drop(dtm, features):
         """Drop features from document-term matrix.
 
@@ -455,7 +455,7 @@ class Corpus:
         features = [token for token in features if token in dtm.columns]
         return dtm.drop(features, axis=1)
 
-    @classmethod
+    @staticmethod
     def cull(dtm, ratio=None, threshold=None, keepna=False):
         """Remove features that do not appear in a minimum of documents.
 
