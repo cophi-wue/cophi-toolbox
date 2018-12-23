@@ -363,7 +363,7 @@ class Corpus:
         counts = count_corpus(self.documents)
         logger.info("Constructing document-term matrix...")
         self.dtm = matrix(counts)
-        self.dtm = self.dtm.T.fillna(0).astype(int)
+        self.dtm = self.dtm.T.astype(int)
 
     @staticmethod
     def map_metadata(data, metadata, uuid="uuid", fields=["title"], sep="_"):
