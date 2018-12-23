@@ -81,3 +81,20 @@ def corpus(directory, filepath_pattern="*", treat_as=None, encoding="utf-8",
                                     ignore_index=True)
     logger.info("Constructing Corpus object ...")
     return cophi.model.Corpus(documents), metadata
+
+
+def export(dtm, filepath, format="text"):
+    """Export a document-term matrix.
+
+    Parameters:
+        dtm: A document-term matrix.
+        filepath: Path to output file. Possibel values are `plaintext`/`text` or
+            `svmlight`.
+        format: File format.
+    """
+    if format.lower() in {"plaintext", "text"}:
+        cophi.model.Corpus.plaintext(dtm, filepath)
+    elif format.lower() in {"svmlight"}:
+        cophi.model.Corpus.svmlight(dtm, filepath)
+    else:
+        raise ValueError("'{}' is no supported file format.".format(format))
