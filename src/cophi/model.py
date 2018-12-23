@@ -70,7 +70,7 @@ class Textfile:
         """
         return lxml.etree.parse(str(self.filepath), parser=parser)
 
-    @staticmethod
+    @classmethod
     def stringify(tree):
         """Serialize to an encoded string representation of its XML tree.
 
@@ -230,7 +230,7 @@ class Document:
         bow = collections.Counter(self.tokens)  # no pandas needed here
         return pd.Series(collections.Counter(bow.values()))
 
-    @staticmethod
+    @classmethod
     def drop(tokens, features):
         """Drop features.
 
@@ -365,7 +365,7 @@ class Corpus:
         self.dtm = matrix(counts)
         self.dtm = self.dtm.T
 
-    @staticmethod
+    @classmethod
     def map_metadata(data, metadata, uuid="uuid", fields=["title"], sep="_"):
         """Map metadata with a UUID.
 
@@ -410,7 +410,7 @@ class Corpus:
         """
         return list(self.dtm.columns)
 
-    @staticmethod
+    @classmethod
     def sort(dtm):
         """Descending sorted document-term matrix.
 
@@ -444,7 +444,7 @@ class Corpus:
         """
         return list(self.dtm.loc[:, self.dtm.max() == 1].columns)
 
-    @staticmethod
+    @classmethod
     def drop(dtm, features):
         """Drop features from document-term matrix.
 
@@ -455,7 +455,7 @@ class Corpus:
         features = [token for token in features if token in dtm.columns]
         return dtm.drop(features, axis=1)
 
-    @staticmethod
+    @classmethod
     def cull(dtm, ratio=None, threshold=None, keepna=False):
         """Remove features that do not appear in a minimum of documents.
 
@@ -677,7 +677,7 @@ class Corpus:
                                         max_iterations,
                                         min_tolerance)
 
-    @staticmethod
+    @classmethod
     def svmlight(dtm, filepath):
         """Export corpus to SVMLight format.
 
@@ -695,7 +695,7 @@ class Corpus:
                     title=title, features=" ".join(features))
                 file.write(export)
 
-    @staticmethod
+    @classmethod
     def plaintext(dtm, filepath):
         """Export corpus to plain text format.
 
