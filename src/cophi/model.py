@@ -691,6 +691,20 @@ class Corpus:
                     title=title, features=" ".join(features))
                 file.write(export)
 
+    @staticmethod
+    def plaintext(dtm, filepath):
+        """Export corpus to plain text format.
+        """
+        with pathlib.Path(filepath).open("w", encoding="utf-8") as file:
+            for title, document in dtm.iterrows():
+                # Drop types with zero frequencies:
+                document = document.dropna()
+                features = [" ".join([word] * int(freq))
+                            for word, freq in document.iteritems()]
+                export = "{title} {title} {features}\n".format(
+                    title=title, features=" ".join(features))
+                file.write(export)
+
 
 class Metadata(pd.DataFrame):
     """Handle corpus metadata.
