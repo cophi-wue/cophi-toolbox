@@ -38,6 +38,7 @@ class Textfile:
         parent (str): Parent path of text file.
         encoding (str): Encoding used for UTF when reading.
     """
+
     def __init__(self, filepath, treat_as=None, encoding="utf-8"):
         if isinstance(filepath, str):
             filepath = pathlib.Path(filepath)
@@ -46,7 +47,7 @@ class Textfile:
         self.suffix = self.filepath.suffix
         self.parent = str(self.filepath.parent)
         self.encoding = encoding
-        if treat_as and treat_as not in {".txt", ".xml"}:
+        if treat_as is not None and treat_as not in {".txt", ".xml"}:
             raise ValueError("The file format '{}' is not supported. "
                              "Try '.txt', or '.xml'.".format(treat_as))
         else:
@@ -83,13 +84,9 @@ class Textfile:
     def content(self):
         """Content of text file.
         """
-        if (not self.treat_as) and\
-           (self.suffix == ".txt") or\
-           (self.treat_as == ".txt"):
+        if (self.treat_as is None and self.suffix == ".txt") or (self.treat_as == ".txt"):
             return self.filepath.read_text(encoding=self.encoding)
-        elif ((not self.treat_as) and
-              (self.suffix == ".xml") or
-              (self.treat_as == ".xml")):
+        elif (self.treat_as is None and self.suffix == ".xml") or (self.treat_as == ".xml"):
             tree = self.parse_xml()
             return self.stringify(tree)
 
@@ -120,6 +117,7 @@ class Document:
         maximum (int): Stopped tokenizing after that much tokens.
         tokens (list): Tokenized content of the document.
     """
+
     def __init__(self, text, title=None, token_pattern=r"\p{L}+\p{P}?\p{L}+",
                  lowercase=True, n=None, maximum=None):
         self.text = text
@@ -342,6 +340,7 @@ class Corpus:
         dtm (pd.DataFrame): Document-term matrix with absolute
             word frequencies.
     """
+
     def __init__(self, documents, sparse=False):
         if sparse:
             raise NotImplementedError("This feature is not yet "
@@ -354,6 +353,7 @@ class Corpus:
         else:
             matrix = pd.DataFrame
         self.documents = documents
+
         def count_corpus(documents):
             corpus = dict()
             for document in documents:
@@ -363,7 +363,7 @@ class Corpus:
         counts = count_corpus(self.documents)
         logger.info("Constructing document-term matrix...")
         self.dtm = matrix(counts)
-        self.dtm = self.dtm.T.fillna(0).astype(int)
+        self.dtm = self.dtm.T
 
     @staticmethod
     def map_metadata(data, metadata, uuid="uuid", fields=["title"], sep="_"):
@@ -677,11 +677,48 @@ class Corpus:
                                         max_iterations,
                                         min_tolerance)
 
+    @staticmethod
+    def svmlight(dtm, filepath):
+        """Export corpus to SVMLight format.
+
+        Parameters:
+            dtm: Document-term matrix.
+            filepath: Path to output file.
+        """
+        with pathlib.Path(filepath).open("w", encoding="utf-8") as file:
+            for title, document in dtm.iterrows():
+                # Drop types with zero frequencies:
+                document = document.dropna()
+                features = ["{word}:{freq}".format(word=word, freq=int(
+                    freq)) for word, freq in document.iteritems()]
+                export = "{title} {title} {features}\n".format(
+                    title=title, features=" ".join(features))
+                file.write(export)
+
+    @staticmethod
+    def plaintext(dtm, filepath):
+        """Export corpus to plain text format.
+
+        Parameters:
+            dtm: Document-term matrix.
+            filepath: Path to output file.
+        """
+        with pathlib.Path(filepath).open("w", encoding="utf-8") as file:
+            for title, document in dtm.iterrows():
+                # Drop types with zero frequencies:
+                document = document.dropna()
+                features = [" ".join([word] * int(freq))
+                            for word, freq in document.iteritems()]
+                export = "{title} {title} {features}\n".format(
+                    title=title, features=" ".join(features))
+                file.write(export)
+
 
 class Metadata(pd.DataFrame):
     """Handle corpus metadata.
 
     Feel free to implement some fancy stuff here.
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
