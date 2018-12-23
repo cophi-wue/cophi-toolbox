@@ -57,7 +57,8 @@ def corpus(directory, filepath_pattern="*", treat_as=None, encoding="utf-8",
 
     def lazy_reading(filepaths):
         for filepath in filepaths:
-            yield cophi.model.Textfile(filepath, treat_as, encoding)
+            if filepath.is_file():
+                yield cophi.model.Textfile(filepath, treat_as, encoding)
 
     metadata = cophi.model.Metadata()
     documents = pd.Series()

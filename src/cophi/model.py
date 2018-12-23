@@ -47,7 +47,7 @@ class Textfile:
         self.suffix = self.filepath.suffix
         self.parent = str(self.filepath.parent)
         self.encoding = encoding
-        if treat_as and treat_as not in {".txt", ".xml"}:
+        if treat_as is not None and treat_as not in {".txt", ".xml"}:
             raise ValueError("The file format '{}' is not supported. "
                              "Try '.txt', or '.xml'.".format(treat_as))
         else:
@@ -363,7 +363,7 @@ class Corpus:
         counts = count_corpus(self.documents)
         logger.info("Constructing document-term matrix...")
         self.dtm = matrix(counts)
-        self.dtm = self.dtm.T.astype(int)
+        self.dtm = self.dtm.T
 
     @staticmethod
     def map_metadata(data, metadata, uuid="uuid", fields=["title"], sep="_"):
