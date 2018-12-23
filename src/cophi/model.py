@@ -678,7 +678,7 @@ class Corpus:
                                         min_tolerance)
 
     @classmethod
-    def svmlight(dtm, filepath):
+    def svmlight(cls, dtm, filepath):
         """Export corpus to SVMLight format.
 
         Parameters:
@@ -696,7 +696,7 @@ class Corpus:
                 file.write(export)
 
     @classmethod
-    def plaintext(dtm, filepath):
+    def plaintext(cls, dtm, filepath):
         """Export corpus to plain text format.
 
         Parameters:
