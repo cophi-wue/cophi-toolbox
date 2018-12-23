@@ -38,6 +38,7 @@ class Textfile:
         parent (str): Parent path of text file.
         encoding (str): Encoding used for UTF when reading.
     """
+
     def __init__(self, filepath, treat_as=None, encoding="utf-8"):
         if isinstance(filepath, str):
             filepath = pathlib.Path(filepath)
@@ -83,13 +84,9 @@ class Textfile:
     def content(self):
         """Content of text file.
         """
-        if (not self.treat_as) and\
-           (self.suffix == ".txt") or\
-           (self.treat_as == ".txt"):
+        if (self.treat_as is None and self.suffix == ".txt") or (self.treat_as == ".txt"):
             return self.filepath.read_text(encoding=self.encoding)
-        elif ((not self.treat_as) and
-              (self.suffix == ".xml") or
-              (self.treat_as == ".xml")):
+        elif (self.treat_as is None and self.suffix == ".xml") or (self.treat_as == ".xml"):
             tree = self.parse_xml()
             return self.stringify(tree)
 
@@ -120,6 +117,7 @@ class Document:
         maximum (int): Stopped tokenizing after that much tokens.
         tokens (list): Tokenized content of the document.
     """
+
     def __init__(self, text, title=None, token_pattern=r"\p{L}+\p{P}?\p{L}+",
                  lowercase=True, n=None, maximum=None):
         self.text = text
@@ -342,6 +340,7 @@ class Corpus:
         dtm (pd.DataFrame): Document-term matrix with absolute
             word frequencies.
     """
+
     def __init__(self, documents, sparse=False):
         if sparse:
             raise NotImplementedError("This feature is not yet "
@@ -354,6 +353,7 @@ class Corpus:
         else:
             matrix = pd.DataFrame
         self.documents = documents
+
         def count_corpus(documents):
             corpus = dict()
             for document in documents:
@@ -683,5 +683,6 @@ class Metadata(pd.DataFrame):
 
     Feel free to implement some fancy stuff here.
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
