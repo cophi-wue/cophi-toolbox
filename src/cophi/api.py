@@ -57,7 +57,7 @@ def corpus(directory, filepath_pattern="*", treat_as=None, encoding="utf-8",
 
     def lazy_reading(filepaths):
         for filepath in filepaths:
-            if filepath.is_file():
+            if filepath.is_file() and ".git" not in str(filepath):
                 yield cophi.model.Textfile(filepath, treat_as, encoding)
 
     metadata = cophi.model.Metadata()
