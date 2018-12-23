@@ -680,6 +680,10 @@ class Corpus:
     @staticmethod
     def svmlight(dtm, filepath):
         """Export corpus to SVMLight format.
+
+        Parameters:
+            dtm: Document-term matrix.
+            filepath: Path to output file.
         """
         with pathlib.Path(filepath).open("w", encoding="utf-8") as file:
             for title, document in dtm.iterrows():
@@ -694,6 +698,10 @@ class Corpus:
     @staticmethod
     def plaintext(dtm, filepath):
         """Export corpus to plain text format.
+
+        Parameters:
+            dtm: Document-term matrix.
+            filepath: Path to output file.
         """
         with pathlib.Path(filepath).open("w", encoding="utf-8") as file:
             for title, document in dtm.iterrows():
