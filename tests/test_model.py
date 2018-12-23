@@ -1,5 +1,3 @@
-import tempdir
-
 import pytest
 import lxml
 import numpy as np
