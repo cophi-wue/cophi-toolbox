@@ -87,14 +87,14 @@ def export(dtm, filepath, format="text"):
     """Export a document-term matrix.
 
     Parameters:
-        corpus: A document-term matrix.
+        dtm: A document-term matrix.
         filepath: Path to output file. Possibel values are `plaintext`/`text` or
             `svmlight`.
         format: File format.
     """
     if format.lower() in {"plaintext", "text"}:
-        cophi.utils.export_plaintext(corpus, filepath)
+        cophi.utils.export_plaintext(dtm, filepath)
     elif format.lower() in {"svmlight"}:
-        cophi.utils.export_svmlight(corpus, filepath)
+        cophi.utils.export_svmlight(dtm, filepath)
     else:
         raise ValueError("'{}' is no supported file format.".format(format))
