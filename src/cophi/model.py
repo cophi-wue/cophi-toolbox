@@ -676,6 +676,7 @@ class Corpus:
                                         self.freq_spectrum,
                                         max_iterations,
                                         min_tolerance)
+
     @staticmethod
     def svmlight(dtm, filepath):
         """Export corpus to SVMLight format.
@@ -684,8 +685,10 @@ class Corpus:
             for title, document in dtm.iterrows():
                 # Drop types with zero frequencies:
                 document = document.dropna()
-                features = ["{word}:{freq}".format(word=word, freq=int(freq)) for word, freq in document.iteritems()]
-                export = "{title} {title} {features}\n".format(title=title, features=" ".join(features))
+                features = ["{word}:{freq}".format(word=word, freq=int(
+                    freq)) for word, freq in document.iteritems()]
+                export = "{title} {title} {features}\n".format(
+                    title=title, features=" ".join(features))
                 file.write(export)
 
 
