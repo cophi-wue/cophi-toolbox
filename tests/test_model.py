@@ -289,14 +289,14 @@ class TestCorpus:
 
     def test_svmlight(self, corpus):
         output = pathlib.Path("corpus.svmlight")
-        corpus.svmlight(corpus.dtm, output)
+        cophi.model.Corpus.svmlight(corpus.dtm, output)
         assert output.exists()
         with output.open("r", encoding="utf-8") as file:
             assert file.read() == "document document a:3 b:2 c:3 d:1 e:1 f:1\n"
 
     def test_plaintext(self, corpus):
         output = pathlib.Path("corpus.txt")
-        corpus.plaintext(corpus.dtm, output)
+        cophi.model.Corpus.plaintext(corpus.dtm, output)
         assert output.exists()
         with output.open("r", encoding="utf-8") as file:
             assert file.read() == "document document a a a b b c c c d e f\n"

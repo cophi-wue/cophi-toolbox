@@ -677,8 +677,8 @@ class Corpus:
                                         max_iterations,
                                         min_tolerance)
 
-    @staticmethod
-    def svmlight(dtm, filepath):
+    @classmethod
+    def svmlight(cls, dtm, filepath):
         """Export corpus to SVMLight format.
 
         Parameters:
@@ -695,8 +695,8 @@ class Corpus:
                     title=title, features=" ".join(features))
                 file.write(export)
 
-    @staticmethod
-    def plaintext(dtm, filepath):
+    @classmethod
+    def plaintext(cls, dtm, filepath):
         """Export corpus to plain text format.
 
         Parameters:
