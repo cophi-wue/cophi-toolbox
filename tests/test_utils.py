@@ -7,14 +7,6 @@ PARAGRAPHS = [["A B C D E F", "G H I J K L"]]
 DOCUMENT = PARAGRAPHS[0][0]
 TOKENS = DOCUMENT.split(" ")
 
-@pytest.fixture
-def document():
-    return cophi.model.Document(DOCUMENT, "document", r"\w")
-
-@pytest.fixture
-def corpus(document):
-    return cophi.model.Corpus([document])
-
 def test_construct_ngrams():
     ngrams = cophi.utils.construct_ngrams(TOKENS)
     assert list(ngrams) == ["A B", "B C", "C D", "D E", "E F"]
@@ -43,17 +35,3 @@ def test_parameter():
     assert len(parameter) == 2
     parameter = cophi.utils._parameter(TOKENS, "ttr")
     assert len(parameter) == 2
-
-def test_svmlight(self, corpus):
-    output = pathlib.Path("corpus.svmlight")
-    cophi.utils.export_svmlight(corpus.dtm, output)
-    assert output.exists()
-    with output.open("r", encoding="utf-8") as file:
-        assert file.read() == "document document a:1 b:1 c:1 d:1 e:1 f:1\n"
-
-def test_plaintext(self, corpus):
-    output = pathlib.Path("corpus.txt")
-    cophi.utils.export_plaintext(corpus.dtm, output)
-    assert output.exists()
-    with output.open("r", encoding="utf-8") as file:
-        assert file.read() == "document document a b c d e f\n"
