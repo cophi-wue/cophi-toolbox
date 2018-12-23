@@ -33,7 +33,7 @@ def document(filepath, **kwargs):
     return cophi.model.Document(textfile.content, **kwargs)
 
 
-def corpus(directory, filepath_pattern="*.*", treat_as=None, encoding="utf-8",
+def corpus(directory, filepath_pattern="*", treat_as=None, encoding="utf-8",
            lowercase=True, n=None, token_pattern=r"\p{L}+\p{P}?\p{L}+",
            maximum=None):
     """Pipe a collection of text files and create a Corpus object.
@@ -53,7 +53,7 @@ def corpus(directory, filepath_pattern="*.*", treat_as=None, encoding="utf-8",
     """
     if not isinstance(directory, pathlib.Path):
         directory = pathlib.Path(directory)
-    filepaths = directory.glob(filepath_pattern)
+    filepaths = directory.rglob(filepath_pattern)
 
     def lazy_reading(filepaths):
         for filepath in filepaths:
