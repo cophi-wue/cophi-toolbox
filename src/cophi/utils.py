@@ -25,7 +25,7 @@ def construct_ngrams(tokens, n=2, sep=" "):
                                                                      n)))))
 
 
-def find_tokens(document, token_pattern=r"\p{L}+\p{P}?\p{L}+", maximum=None):
+def find_tokens(document, token_pattern=r"\p{L}+\p{Connector_Punctuation}?\p{L}+", maximum=None):
     """
     Parameters:
         document (str): The text of a document.
