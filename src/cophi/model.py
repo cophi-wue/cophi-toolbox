@@ -504,7 +504,7 @@ class Corpus:
             tf_{t,d} \times log(\frac{N}{df_t})
         """
         tf = self.rel
-        idf = self.stats["documents"] / self.dtm.astype(bool).sum(axis=0)
+        idf = self.stats["documents"] / self.dtm.fillna(0).astype(bool).sum(axis=0)
         return tf * np.log(idf)
 
     @property
