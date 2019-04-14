@@ -35,7 +35,7 @@ def document(filepath, **kwargs):
 
 def corpus(directory, filepath_pattern="*", treat_as=None, encoding="utf-8",
            lowercase=True, n=None, token_pattern=r"\p{L}+\p{P}?\p{L}+",
-           maximum=None):
+           maximum=None, metadata=False):
     """Pipe a collection of text files and create a Corpus object.
 
     Parameters:
@@ -47,9 +47,10 @@ def corpus(directory, filepath_pattern="*", treat_as=None, encoding="utf-8",
         n (int): Number of tokens per ngram (optional).
         token_pattern (str): Regex pattern for one token (optional).
         maximum (int): Stop tokenizing after that much tokens (optional).
+        metadata (bool): Extract metadata from filenames (optional).
 
     Returns:
-        A Corpus model object and a Metadata object.
+        A Corpus model object and optionally a Metadata object.
     """
     if not isinstance(directory, pathlib.Path):
         directory = pathlib.Path(directory)
@@ -60,28 +61,32 @@ def corpus(directory, filepath_pattern="*", treat_as=None, encoding="utf-8",
             if filepath.is_file() and ".git" not in str(filepath):
                 yield cophi.model.Textfile(filepath, treat_as, encoding)
 
-    metadata = cophi.model.Metadata()
+    if metadata:
+        metadata_ = cophi.model.Metadata()
     documents = pd.Series()
     for textfile in lazy_reading(filepaths):
         logger.info("Processing '{}' ...".format(textfile.title))
-        document_uuid = str(uuid.uuid1())
+        title = str(uuid.uuid1()) if metadata else textfile.title
         text = textfile.content
         document = cophi.model.Document(text,
-                                        document_uuid,
+                                        title,
                                         token_pattern,
                                         lowercase,
                                         n,
                                         maximum)
-        documents[document_uuid] = document
-        metadata = metadata.append({"uuid": document_uuid,
-                                    "filepath": textfile.filepath,
-                                    "parent": textfile.parent,
-                                    "title": textfile.title,
-                                    "suffix": textfile.filepath.suffix},
-                                    ignore_index=True)
+        documents[title] = document
+        if metadata:
+            metadata_ = metadata_.append({"uuid": title,
+                                          "filepath": textfile.filepath,
+                                          "parent": textfile.parent,
+                                          "title": textfile.title,
+                                          "suffix": textfile.filepath.suffix},
+                                          ignore_index=True)
     logger.info("Constructing Corpus object ...")
-    return cophi.model.Corpus(documents), metadata
-
+    if metadata:
+        return cophi.model.Corpus(documents), metadata_
+    else:
+        return cophi.model.Corpus(documents)
 
 def export(dtm, filepath, format="text"):
     """Export a document-term matrix.

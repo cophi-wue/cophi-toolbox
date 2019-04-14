@@ -26,7 +26,7 @@ def test_document(tmpdir):
 def test_corpus(tmpdir):
     p = make_file(tmpdir, "document.txt", DOCUMENT)
     directory = pathlib.Path(str(p)).parent
-    corpus, metadata = cophi.corpus(directory)
+    corpus, metadata = cophi.corpus(directory, metadata=True)
     assert metadata["parent"].iloc[0] == str(directory)
     assert corpus.documents[0].text == DOCUMENT
 
