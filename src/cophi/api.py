@@ -35,7 +35,7 @@ def document(filepath, **kwargs):
 
 def corpus(directory, filepath_pattern="*", treat_as=None, encoding="utf-8",
            lowercase=True, n=None, token_pattern=r"\p{L}+\p{P}?\p{L}+",
-           maximum=None, metadata=False):
+           maximum=None, metadata=True):
     """Pipe a collection of text files and create a Corpus object.
 
     Parameters:
