@@ -84,7 +84,7 @@ def corpus(directory, filepath_pattern="*", treat_as=None, encoding="utf-8",
                                           ignore_index=True)
     logger.info("Constructing Corpus object ...")
     if metadata:
-        return cophi.model.Corpus(documents), metadata
+        return cophi.model.Corpus(documents), metadata_
     else:
         return cophi.model.Corpus(documents)
 
