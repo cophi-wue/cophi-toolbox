@@ -4,7 +4,7 @@ import pytest
 import lxml
 import numpy as np
 import pandas as pd
-import cophi
+from cophi.text import model
 
 
 DOCUMENT = "AAABBCCCDEF"
@@ -19,25 +19,25 @@ def make_file(tmpdir, fname, content):
 @pytest.fixture
 def textfile_suffix(tmpdir):
     p = make_file(tmpdir, "document.txt", DOCUMENT)
-    return cophi.model.Textfile(str(p), treat_as=None)
+    return model.Textfile(str(p), treat_as=None)
 
 @pytest.fixture
 def textfile_txt(tmpdir):
     p = make_file(tmpdir, "document.txt", DOCUMENT)
-    return cophi.model.Textfile(str(p), treat_as=".txt")
+    return model.Textfile(str(p), treat_as=".txt")
 
 @pytest.fixture
 def textfile_xml(tmpdir):
     p = make_file(tmpdir, "document.xml", "<xml>{}</xml>".format(DOCUMENT))
-    return cophi.model.Textfile(str(p), treat_as=".xml")
+    return model.Textfile(str(p), treat_as=".xml")
 
 @pytest.fixture
 def document():
-    return cophi.model.Document(DOCUMENT, "document", r"\w")
+    return model.Document(DOCUMENT, "document", r"\w")
 
 @pytest.fixture
 def corpus(document):
-    return cophi.model.Corpus([document])
+    return model.Corpus([document])
 
 
 class TestTextfile:
@@ -80,7 +80,7 @@ class TestTextfile:
 
     def test_value_error(self, tmpdir):
         with pytest.raises(ValueError):
-            cophi.model.Textfile("raises", treat_as="error")
+            model.Textfile("raises", treat_as="error")
 
 
 class TestDocument:
@@ -95,15 +95,15 @@ class TestDocument:
 
     def test_ngram_value_error(self):
         with pytest.raises(ValueError):
-            cophi.model.Document(DOCUMENT, n=0)
+            model.Document(DOCUMENT, n=0)
 
     def test_ngrams(self):
-        document = cophi.model.Document(DOCUMENT, token_pattern=r"\w", n=2)
+        document = model.Document(DOCUMENT, token_pattern=r"\w", n=2)
         assert list(document.ngrams)[0] == "a a"
-        document = cophi.model.Document(DOCUMENT, token_pattern=r"\w", n=1)
+        document = model.Document(DOCUMENT, token_pattern=r"\w", n=1)
         assert document.ngrams == LOWERCASE_TOKENS
         with pytest.raises(ValueError):
-            document = cophi.model.Document(DOCUMENT, token_pattern=r"\w", n=None)
+            document = model.Document(DOCUMENT, token_pattern=r"\w", n=None)
             document.ngrams == LOWERCASE_TOKENS
 
     def test_types(self, document):
@@ -176,7 +176,7 @@ class TestDocument:
 class TestCorpus:
     def test_sparse_error(self, document):
         with pytest.raises(NotImplementedError):
-            cophi.model.Corpus([document], sparse=True)
+            model.Corpus([document], sparse=True)
 
     def test_dtm(self, corpus):
         assert corpus.dtm.sum().sum() == len(TOKENS)
@@ -289,14 +289,14 @@ class TestCorpus:
 
     def test_svmlight(self, corpus):
         output = pathlib.Path("corpus.svmlight")
-        cophi.model.Corpus.svmlight(corpus.dtm, output)
+        model.Corpus.svmlight(corpus.dtm, output)
         assert output.exists()
         with output.open("r", encoding="utf-8") as file:
             assert file.read() == "document document a:3 b:2 c:3 d:1 e:1 f:1\n"
 
     def test_plaintext(self, corpus):
         output = pathlib.Path("corpus.txt")
-        cophi.model.Corpus.plaintext(corpus.dtm, output)
+        model.Corpus.plaintext(corpus.dtm, output)
         assert output.exists()
         with output.open("r", encoding="utf-8") as file:
             assert file.read() == "document document a a a b b c c c d e f\n"
