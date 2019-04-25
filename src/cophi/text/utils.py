@@ -132,4 +132,4 @@ def export(dtm, filepath, format="text"):
     elif format.lower() in {"svmlight"}:
         model.Corpus.svmlight(dtm, filepath)
     else:
-        raise ValueError(f"'{format}' is no supported file format.")
+        raise ValueError("'{}' is no supported file format.".format(format))
