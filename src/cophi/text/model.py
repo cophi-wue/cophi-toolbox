@@ -710,7 +710,7 @@ class Corpus:
                 document = document.dropna()
                 features = [" ".join([word] * int(freq))
                             for word, freq in document.iteritems()]
-                export = "{title} {title} {features}\n".format(
+                export = "{title} {features}\n".format(
                     title=title, features=" ".join(features))
                 file.write(export)
 
