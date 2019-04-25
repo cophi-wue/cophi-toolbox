@@ -102,7 +102,7 @@ def corpus(directory, filepath_pattern="*.txt", treat_as=None, encoding="utf-8",
             document.title = title
             metadata_ = metadata_.append({"uuid": title,
                                           "filepath": str(filepath),
-                                          "parent": filepath.parent,
+                                          "parent": str(filepath.parent),
                                           "title": filepath.stem,
                                           "suffix": filepath.suffix},
                                           ignore_index=True)
