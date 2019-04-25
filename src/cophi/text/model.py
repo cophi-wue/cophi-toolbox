@@ -48,8 +48,8 @@ class Textfile:
         self.parent = str(self.filepath.parent)
         self.encoding = encoding
         if treat_as is not None and treat_as not in {".txt", ".xml"}:
-            raise ValueError(f"The file format '{treat_as}' is not supported. "
-                              "Try '.txt', or '.xml'.")
+            raise ValueError("The file format '{}' is not supported. "
+                             "Try '.txt', or '.xml'.".format(treat_as))
         else:
             self.treat_as = treat_as
 
