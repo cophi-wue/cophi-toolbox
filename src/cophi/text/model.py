@@ -1,6 +1,6 @@
 """
-cophi.model
-~~~~~~~~~~~
+text.model
+~~~~~~~~~~~~~~~~
 
 This module implements low-level model classes.
 """
@@ -16,8 +16,8 @@ import numpy as np
 import pandas as pd
 import regex as re
 
-import cophi.utils
-import cophi.complexity
+from cophi.text import utils, complexity
+
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +118,8 @@ class Document:
         tokens (list): Tokenized content of the document.
     """
 
-    def __init__(self, text, title=None, token_pattern=r"\p{L}+\p{P}?\p{L}+",
+    def __init__(self, text, title=None,
+                 token_pattern=r"\p{L}+\p{Connector_Punctuation}?\p{L}+",
                  lowercase=True, n=None, maximum=None):
         self.text = text
         self.title = title
@@ -128,11 +129,11 @@ class Document:
         self.n = n
         self.token_pattern = token_pattern
         self.maximum = maximum
-        self.tokens = list(cophi.utils.find_tokens(self.text,
-                                                   self.token_pattern,
-                                                   self.maximum))
+        self.tokens = list(utils.find_tokens(self.text,
+                                             self.token_pattern,
+                                             self.maximum))
         if self.lowercase:
-            self.tokens = cophi.utils.lowercase_tokens(self.tokens)
+            self.tokens = utils.lowercase_tokens(self.tokens)
 
     @property
     def ngrams(self):
@@ -140,7 +141,7 @@ class Document:
         """
         try:
             if self.n > 1:
-                return cophi.utils.construct_ngrams(self.tokens, self.n)
+                return utils.construct_ngrams(self.tokens, self.n)
             else:
                 return self.tokens
         except TypeError:
@@ -260,7 +261,7 @@ class Document:
                 paragraph borders (optional).
             flatten (bool): If True, flatten the segments list (optional).
         """
-        segments = cophi.utils.segment_fuzzy([self.tokens],
+        segments = utils.segment_fuzzy([self.tokens],
                                              size,
                                              tolerance)
         if flatten:
@@ -282,11 +283,11 @@ class Document:
                 'herdan_vm', or 'orlov_z'.
             window (int): Size of sliding window (optional).
             **kwargs: Additional parameters for
-                :func:`cophi.complexity.orlov_z` (optional).
+                :func:`complexity.orlov_z` (optional).
         """
         for chunk in self.window(window):
-            parameter = cophi.utils._parameter(chunk, measure)
-            calculate_complexity = cophi.complexity.wrapper(measure)
+            parameter = utils._parameter(chunk, measure)
+            calculate_complexity = complexity.wrapper(measure)
             yield calculate_complexity(**parameter, **kwargs)
 
     def complexity(self, measure="ttr", window=None, **kwargs):
@@ -301,31 +302,31 @@ class Document:
                 'herdan_vm', or 'orlov_z'.
             window (int): Size of sliding window (optional).
             **kwargs: Additional parameters for
-                :func:`cophi.complexity.orlov_z` (optional).
+                :func:`complexity.orlov_z` (optional).
         """
         if measure == "ttr":
             if window:
                 sttr = list(self.bootstrap(measure, window))
-                return np.array(sttr).mean(), cophi.complexity.ci(sttr)
+                return np.array(sttr).mean(), complexity.ci(sttr)
             else:
-                calculate_complexity = cophi.complexity.wrapper(measure)
-                parameter = cophi.utils._parameter(self.tokens, measure)
+                calculate_complexity = complexity.wrapper(measure)
+                parameter = utils._parameter(self.tokens, measure)
                 return calculate_complexity(**parameter)
         elif measure == "orlov_z":
             if window:
                 orlov = list(self.bootstrap(measure, window, **kwargs))
                 return np.array(orlov).mean()
             else:
-                calculate_complexity = cophi.complexity.wrapper(measure)
-                parameter = cophi.utils._parameter(self.tokens, measure)
+                calculate_complexity = complexity.wrapper(measure)
+                parameter = utils._parameter(self.tokens, measure)
                 return calculate_complexity(**parameter, **kwargs)
         else:
             if window:
                 results = list(self.bootstrap(measure, window))
                 return np.array(results).mean()
             else:
-                calculate_complexity = cophi.complexity.wrapper(measure)
-                parameter = cophi.utils._parameter(self.tokens, measure)
+                calculate_complexity = complexity.wrapper(measure)
+                parameter = utils._parameter(self.tokens, measure)
                 return calculate_complexity(**parameter)
 
 
@@ -480,7 +481,7 @@ class Corpus:
 
     @property
     def zscores(self):
-        r"""Standardized document-term matrix.
+        """Standardized document-term matrix.
 
         Used formula:
         .. math::
@@ -496,7 +497,7 @@ class Corpus:
 
     @property
     def tfidf(self):
-        r"""TF-IDF normalized document-term matrix.
+        """TF-IDF normalized document-term matrix.
 
         Used formula:
         .. math::
@@ -531,7 +532,7 @@ class Corpus:
                 'herdan_vm', or 'orlov_z'.
             window (int): Size of sliding window (optional).
             **kwargs: Additional parameters for
-                :func:`cophi.complexity.orlov_z` (optional).
+                :func:`complexity.orlov_z` (optional).
         """
         if measure == "ttr":
             results = pd.DataFrame()
@@ -551,91 +552,91 @@ class Corpus:
     def ttr(self):
         """Type-Token Ratio (TTR).
         """
-        return cophi.complexity.ttr(self.num_types.sum(),
+        return complexity.ttr(self.num_types.sum(),
                                     self.num_tokens.sum())
 
     @property
     def guiraud_r(self):
         """Guiraud’s R (1954).
         """
-        return cophi.complexity.guiraud_r(self.num_types.sum(),
+        return complexity.guiraud_r(self.num_types.sum(),
                                           self.num_tokens.sum())
 
     @property
     def herdan_c(self):
         """Herdan’s C (1960, 1964).
         """
-        return cophi.complexity.herdan_c(self.num_types.sum(),
+        return complexity.herdan_c(self.num_types.sum(),
                                          self.num_tokens.sum())
 
     @property
     def dugast_k(self):
         """Dugast’s k (1979).
         """
-        return cophi.complexity.dugast_k(self.num_types.sum(),
+        return complexity.dugast_k(self.num_types.sum(),
                                          self.num_tokens.sum())
 
     @property
     def dugast_u(self):
         """Dugast’s U (1978, 1979).
         """
-        return cophi.complexity.dugast_k(self.num_types.sum(),
+        return complexity.dugast_k(self.num_types.sum(),
                                          self.num_tokens.sum())
 
     @property
     def maas_a2(self):
         """Maas’ a^2 (1972).
         """
-        return cophi.complexity.maas_a2(self.num_types.sum(),
+        return complexity.maas_a2(self.num_types.sum(),
                                         self.num_tokens.sum())
 
     @property
     def tuldava_ln(self):
         """Tuldava’s LN (1977).
         """
-        return cophi.complexity.tuldava_ln(self.num_types.sum(),
+        return complexity.tuldava_ln(self.num_types.sum(),
                                            self.num_tokens.sum())
 
     @property
     def brunet_w(self):
         """Brunet’s W (1978).
         """
-        return cophi.complexity.brunet_w(self.num_types.sum(),
+        return complexity.brunet_w(self.num_types.sum(),
                                          self.num_tokens.sum())
 
     @property
     def cttr(self):
         """Carroll’s Corrected Type-Token Ratio (CTTR).
         """
-        return cophi.complexity.cttr(self.num_types.sum(),
+        return complexity.cttr(self.num_types.sum(),
                                      self.num_tokens.sum())
 
     @property
     def summer_s(self):
         """Summer’s S.
         """
-        return cophi.complexity.summer_s(self.num_types.sum(),
+        return complexity.summer_s(self.num_types.sum(),
                                          self.num_tokens.sum())
 
     @property
     def sichel_s(self):
         """Sichel’s S (1975).
         """
-        return cophi.complexity.sichel_s(self.num_types.sum(),
+        return complexity.sichel_s(self.num_types.sum(),
                                          self.freq_spectrum)
 
     @property
     def michea_m(self):
         """Michéa’s M (1969, 1971).
         """
-        return cophi.complexity.michea_m(self.num_types.sum(),
+        return complexity.michea_m(self.num_types.sum(),
                                          self.freq_spectrum)
 
     @property
     def honore_h(self):
         """Honoré's H (1979).
         """
-        return cophi.complexity.honore_h(self.num_types.sum(),
+        return complexity.honore_h(self.num_types.sum(),
                                          self.num_tokens.sum(),
                                          self.freq_spectrum)
 
@@ -643,35 +644,35 @@ class Corpus:
     def entropy(self):
         """Entropy S.
         """
-        return cophi.complexity.entropy(self.num_tokens.sum(),
+        return complexity.entropy(self.num_tokens.sum(),
                                         self.freq_spectrum)
 
     @property
     def yule_k(self):
         """Yule’s K (1944).
         """
-        return cophi.complexity.yule_k(self.num_tokens.sum(),
+        return complexity.yule_k(self.num_tokens.sum(),
                                        self.freq_spectrum)
 
     @property
     def simpson_d(self):
         """Simpson’s D (1949).
         """
-        return cophi.complexity.simpson_d(self.num_tokens.sum(),
+        return complexity.simpson_d(self.num_tokens.sum(),
                                           self.freq_spectrum)
 
     @property
     def herdan_vm(self):
         """Herdan’s VM (1955).
         """
-        return cophi.complexity.herdan_vm(self.num_types.sum(),
+        return complexity.herdan_vm(self.num_types.sum(),
                                           self.num_tokens.sum(),
                                           self.freq_spectrum)
 
     def orlov_z(self, max_iterations=100, min_tolerance=1):
         """Orlov’s Z (1983).
         """
-        return cophi.complexity.orlov_z(self.num_tokens.sum(),
+        return complexity.orlov_z(self.num_tokens.sum(),
                                         self.num_types.sum(),
                                         self.freq_spectrum,
                                         max_iterations,
@@ -691,7 +692,7 @@ class Corpus:
                 document = document.dropna()
                 features = ["{word}:{freq}".format(word=word, freq=int(
                     freq)) for word, freq in document.iteritems()]
-                export = "{title} {title} {features}\n".format(
+                export = "{title} {features}\n".format(
                     title=title, features=" ".join(features))
                 file.write(export)
 
@@ -709,7 +710,7 @@ class Corpus:
                 document = document.dropna()
                 features = [" ".join([word] * int(freq))
                             for word, freq in document.iteritems()]
-                export = "{title} {title} {features}\n".format(
+                export = "{title} {features}\n".format(
                     title=title, features=" ".join(features))
                 file.write(export)
 

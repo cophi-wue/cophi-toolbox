@@ -6,21 +6,28 @@ This module implements the high-level API.
 """
 
 import logging
-import pathlib
+from pathlib import Path
 import uuid
+
 import pandas as pd
-import cophi.model
+
+from cophi import dkpro, text
 
 
 logger = logging.getLogger(__name__)
 
 
-def document(filepath, **kwargs):
+def document(filepath, lemma=False, pos=None, jar="ddw-0.4.6.jar",
+             language="de", **kwargs):
     """Read a text file and create a Document object.
 
     Parameter:
         filepath (str): Path to the text file.
-        title (str): Describing title for the document. (optional).
+        lemma (bool): If True, lemmatize text (optional).
+        pos (list): If not None, filter POS tags (optional).
+        jar (str): Path to DARIAH-DKPro-Wrapper JAR file (optional).
+        language (str): Language of text (optional).
+        title (str): Describing title for the document (optional).
         lowercase (bool): If True, writes all letters in lowercase (optional).
         n (int): Number of tokens per ngram (optional).
         token_pattern (str): Regex pattern for one token (optional).
@@ -29,13 +36,17 @@ def document(filepath, **kwargs):
     Returns:
         A Document object.
     """
-    textfile = cophi.model.Textfile(filepath)
-    return cophi.model.Document(textfile.content, **kwargs)
+    if lemma or pos:
+        return dkpro.pipe(filepath, jar, language, lemma, pos, **kwargs)
+    else:
+        filepath = text.model.Textfile(filepath)
+        return text.model.Document(filepath.content, **kwargs)
 
 
-def corpus(directory, filepath_pattern="*", treat_as=None, encoding="utf-8",
+def corpus(directory, filepath_pattern="*.txt", treat_as=None, encoding="utf-8",
            lowercase=True, n=None, token_pattern=r"\p{L}+\p{P}?\p{L}+",
-           maximum=None, metadata=True):
+           maximum=None, metadata=True, lemma=False, pos=None,
+           jar="ddw-0.4.6.jar", language="de"):
     """Pipe a collection of text files and create a Corpus object.
 
     Parameters:
@@ -48,58 +59,56 @@ def corpus(directory, filepath_pattern="*", treat_as=None, encoding="utf-8",
         token_pattern (str): Regex pattern for one token (optional).
         maximum (int): Stop tokenizing after that much tokens (optional).
         metadata (bool): Extract metadata from filenames (optional).
+        lemma (bool): If True, lemmatize text (optional).
+        pos (list): If not None, filter POS tags (optional).
+        jar (str): Path to DARIAH-DKPro-Wrapper JAR file (optional).
+        language (str): Language of text (optional).
 
     Returns:
         A Corpus model object and optionally a Metadata object.
     """
-    if not isinstance(directory, pathlib.Path):
-        directory = pathlib.Path(directory)
-    filepaths = directory.rglob(filepath_pattern)
+    filepaths = Path(directory).rglob(filepath_pattern)
 
-    def lazy_reading(filepaths):
+    def lazy_processing(filepaths, **kwargs):
         for filepath in filepaths:
-            if filepath.is_file() and ".git" not in str(filepath):
-                yield cophi.model.Textfile(filepath, treat_as, encoding)
+            logger.info("Processing '{}' ...".format(filepath.stem))
+            if filepath.is_file():
+                if lemma or pos:
+                    document = dkpro.pipe(filepath,
+                                          jar,
+                                          language,
+                                          lemma,
+                                          pos,
+                                          **kwargs)
+                else:
+                    textfile = text.model.Textfile(filepath, treat_as, encoding)
+                    document = text.model.Document(textfile.content,
+                                                   textfile.title,
+                                                   **kwargs)
+                yield filepath, document
 
     if metadata:
-        metadata_ = cophi.model.Metadata()
+        metadata_ = text.model.Metadata()
+
     documents = pd.Series()
-    for textfile in lazy_reading(filepaths):
-        logger.info("Processing '{}' ...".format(textfile.title))
-        title = str(uuid.uuid1()) if metadata else textfile.title
-        text = textfile.content
-        document = cophi.model.Document(text,
-                                        title,
-                                        token_pattern,
-                                        lowercase,
-                                        n,
-                                        maximum)
-        documents[title] = document
+    for filepath, document in lazy_processing(filepaths,
+                                              token_pattern=token_pattern,
+                                              lowercase=lowercase,
+                                              n=n,
+                                              maximum=maximum):
+        title = document.title
         if metadata:
+            title = str(uuid.uuid1())
+            document.title = title
             metadata_ = metadata_.append({"uuid": title,
-                                          "filepath": textfile.filepath,
-                                          "parent": textfile.parent,
-                                          "title": textfile.title,
-                                          "suffix": textfile.filepath.suffix},
+                                          "filepath": str(filepath),
+                                          "parent": str(filepath.parent),
+                                          "title": filepath.stem,
+                                          "suffix": filepath.suffix},
                                           ignore_index=True)
+        documents[title] = document
     logger.info("Constructing Corpus object ...")
     if metadata:
-        return cophi.model.Corpus(documents), metadata_
+        return text.model.Corpus(documents), metadata_
     else:
-        return cophi.model.Corpus(documents)
-
-def export(dtm, filepath, format="text"):
-    """Export a document-term matrix.
-
-    Parameters:
-        dtm: A document-term matrix.
-        filepath: Path to output file. Possibel values are `plaintext`/`text` or
-            `svmlight`.
-        format: File format.
-    """
-    if format.lower() in {"plaintext", "text"}:
-        cophi.model.Corpus.plaintext(dtm, filepath)
-    elif format.lower() in {"svmlight"}:
-        cophi.model.Corpus.svmlight(dtm, filepath)
-    else:
-        raise ValueError("'{}' is no supported file format.".format(format))
+        return text.model.Corpus(documents)

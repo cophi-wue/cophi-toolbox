@@ -1,5 +1,5 @@
 """
-cophi.utils
+cophi.text.utils
 ~~~~~~~~~~~
 
 This module implements low-level helper functions.
@@ -10,6 +10,8 @@ import itertools
 
 import pandas as pd
 import regex as re
+
+from cophi.text import model
 
 
 def construct_ngrams(tokens, n=2, sep=" "):
@@ -25,7 +27,9 @@ def construct_ngrams(tokens, n=2, sep=" "):
                                                                      n)))))
 
 
-def find_tokens(document, token_pattern=r"\p{L}+\p{Connector_Punctuation}?\p{L}+", maximum=None):
+def find_tokens(document,
+                token_pattern=r"\p{L}+\p{Connector_Punctuation}?\p{L}+",
+                maximum=None):
     """
     Parameters:
         document (str): The text of a document.
@@ -112,3 +116,20 @@ def _parameter(tokens, measure):
                 "freq_spectrum": pd.Series(freq_spectrum)}
     else:
         return {"num_types": len(set(tokens)), "num_tokens": len(tokens)}
+
+
+def export(dtm, filepath, format="text"):
+    """Export a document-term matrix.
+
+    Parameters:
+        dtm: A document-term matrix.
+        filepath: Path to output file. Possible values are `plaintext`/`text` or
+            `svmlight`.
+        format: File format.
+    """
+    if format.lower() in {"plaintext", "text"}:
+        model.Corpus.plaintext(dtm, filepath)
+    elif format.lower() in {"svmlight"}:
+        model.Corpus.svmlight(dtm, filepath)
+    else:
+        raise ValueError("'{}' is no supported file format.".format(format))
