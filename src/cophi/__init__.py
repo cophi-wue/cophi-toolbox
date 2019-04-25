@@ -1,19 +1,17 @@
-r"""
-**cophi** is a Python library for handling, modeling and processing text
+"""
+This is a Python library for handling, modeling and processing text
 corpora. You can easily pipe a collection of text files using the
 high-level API:
 
-.. code-block:: python
+```
+corpus, metadata = cophi.corpus(directory="british-fiction-corpus",
+                                pathname_pattern="**/*.txt",
+                                encoding="utf-8",
+                                lowercase=True,
+                                token_pattern=r"\p{L}+\p{P}?\p{L}+")
+```
 
-   corpus, metadata = cophi.corpus(directory="british-fiction-corpus",
-                                   pathname_pattern="**/*.txt",
-                                   encoding="utf-8",
-                                   lowercase=True,
-                                   n=1,
-                                   token_pattern=r"\p{L}+\p{P}?\p{L}+")
-
-
-There are also a plenty of complexity metrics for measuring lexical
+There are also a plenty of complexity metrics for measuring the lexical
 richness of (literary) texts.
 
 Measures that use sample size and vocabulary size:
@@ -46,4 +44,5 @@ For a more detailed description and the used formulas, have a look at the
 :module:`complexity` module.
 """
 
-from cophi.api import document, corpus, export
+
+from cophi.api import document, corpus

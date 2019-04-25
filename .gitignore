@@ -21,3 +21,6 @@ _build
 htmlcov
 tests.xml
 .pytest_cache
+notebooks/ddw-0.4.6.jar
+notebooks/ddw.log
+notebooks/configs/*

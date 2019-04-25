@@ -1,14 +1,16 @@
 # A library for preprocessing
-`cophi` is a Python library for handling, modeling and processing text corpora. You
-can easily pipe a collection of text files using the high-level API:
+`cophi` is a Python library for handling, modeling and processing text corpora. You can easily pipe a collection of text files using the high-level API:
 
-```python
+```
 corpus, metadata = cophi.corpus(directory="british-fiction-corpus",
-                                filepath_pattern="*.txt",
+                                pathname_pattern="**/*.txt",
                                 encoding="utf-8",
                                 lowercase=True,
                                 token_pattern=r"\p{L}+\p{P}?\p{L}+")
 ```
+
+You can also plug the [DARIAH-DKPro-Wrapper](https://dariah-de.github.io/DARIAH-DKPro-Wrapper/) into this pipeline to lemmatize text, or just keep certain word types. Check out the introducing [Jupyter notebook](https://github.com/cophi-wue/cophi-toolbox/blob/master/notebooks/introducing-cophi.ipynb).
+
 
 ## Getting started
 To install the latest **stable** version:
@@ -21,16 +23,10 @@ To install the latest **development** version:
 $ pip install --upgrade git+https://github.com/cophi-wue/cophi-toolbox.git@testing
 ```
 
-Check out the introducing [Jupyter notebook](https://github.com/cophi-wue/cophi-toolbox/blob/master/notebooks/API.ipynb).
-
-## Contents
-- [`api`](https://github.com/cophi-wue/cophi-toolbox/blob/master/src/cophi_toolbox/api.py): High-level API.
-- [`model`](https://github.com/cophi-wue/cophi-toolbox/blob/master/src/cophi_toolbox/model.py): Low-level model classes.
-- [`complexity`](https://github.com/cophi-wue/cophi-toolbox/blob/master/src/cophi_toolbox/complexity.py): Measures that assess the linguistic and stylistic complexity of (literary) texts.
-- [`utils`](https://github.com/cophi-wue/cophi-toolbox/blob/master/src/cophi_toolbox/utils.py): Low-level helper functions.
-
-
 ## Available complexity measures
+There are also a plenty of complexity metrics for measuring the lexical richness of (literary) texts.
+
+
 Measures that use sample size and vocabulary size:
   * Type-Token Ratio TTR
   * Guiraud’s R

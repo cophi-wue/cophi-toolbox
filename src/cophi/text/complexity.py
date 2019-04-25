@@ -1,6 +1,6 @@
 """
-cophi.complexity
-~~~~~~~~~~~~~~~~
+cophi.text.complexity
+~~~~~~~~~~~~~~~~~~~~~
 
 This module implements measures that assess the linguistic
 and stylistic complexity of (literary) texts.
@@ -10,7 +10,7 @@ Absolute number of types. :math:`H` is the Absolute number of
 types occuring only once (hapax legomena), :math:`D` is the
 absolute number of types occuring twice (dislegomena).
 
-This module was taken from
+The code module was taken from
 `here <https://github.com/tsproisl/Linguistic_and_Stylistic_Complexity>`_.
 """
 
@@ -21,7 +21,7 @@ import numpy as np
 # use num_types + num_tokens (int):
 
 def ttr(num_types, num_tokens):
-    r"""Calculate Type-Token Ratio (TTR).
+    """Calculate Type-Token Ratio (TTR).
 
     Used formula:
         .. math::
@@ -35,7 +35,7 @@ def ttr(num_types, num_tokens):
 
 
 def guiraud_r(num_types, num_tokens):
-    r"""Calculate Guiraud’s R (1954).
+    """Calculate Guiraud’s R (1954).
 
     Used formula:
         .. math::
@@ -49,7 +49,7 @@ def guiraud_r(num_types, num_tokens):
 
 
 def herdan_c(num_types, num_tokens):
-    r"""Calculate Herdan’s C (1960, 1964).
+    """Calculate Herdan’s C (1960, 1964).
 
     Used formula:
         .. math::
@@ -63,7 +63,7 @@ def herdan_c(num_types, num_tokens):
 
 
 def dugast_k(num_types, num_tokens):
-    r"""Calculate Dugast’s k (1979).
+    """Calculate Dugast’s k (1979).
 
     Used formula:
         .. math::
@@ -77,7 +77,7 @@ def dugast_k(num_types, num_tokens):
 
 
 def maas_a2(num_types, num_tokens):
-    r"""Calculate Maas’ a^2 (1972).
+    """Calculate Maas’ a^2 (1972).
 
     Used formula:
         .. math::
@@ -92,7 +92,7 @@ def maas_a2(num_types, num_tokens):
 
 
 def dugast_u(num_types, num_tokens):
-    r"""Calculate Dugast’s U (1978, 1979).
+    """Calculate Dugast’s U (1978, 1979).
 
     Used formula:
         .. math::
@@ -107,7 +107,7 @@ def dugast_u(num_types, num_tokens):
 
 
 def tuldava_ln(num_types, num_tokens):
-    r"""Calculate Tuldava’s LN (1977).
+    """Calculate Tuldava’s LN (1977).
 
     Used formula:
         .. math::
@@ -121,7 +121,7 @@ def tuldava_ln(num_types, num_tokens):
 
 
 def brunet_w(num_types, num_tokens):
-    r"""Calculate Brunet’s W (1978).
+    """Calculate Brunet’s W (1978).
 
     Used formula:
         .. math::
@@ -136,7 +136,7 @@ def brunet_w(num_types, num_tokens):
 
 
 def cttr(num_types, num_tokens):
-    r"""Calculate Carroll’s Corrected Type-Token Ration (CTTR) (1964).
+    """Calculate Carroll’s Corrected Type-Token Ration (CTTR) (1964).
 
     Used formula:
         .. math::
@@ -150,7 +150,7 @@ def cttr(num_types, num_tokens):
 
 
 def summer_s(num_types, num_tokens):
-    r"""Calculate Summer’s S.
+    """Calculate Summer’s S.
 
     Used formula:
         .. math::
@@ -166,7 +166,7 @@ def summer_s(num_types, num_tokens):
 # use num_types + part of freq_spectrum:
 
 def sichel_s(num_types, freq_spectrum):
-    r"""Calculate Sichel’s S (1975).
+    """Calculate Sichel’s S (1975).
 
     Used formula:
         .. math::
@@ -180,7 +180,7 @@ def sichel_s(num_types, freq_spectrum):
 
 
 def michea_m(num_types, freq_spectrum):
-    r"""Calculate Michéa’s M (1969, 1971).
+    """Calculate Michéa’s M (1969, 1971).
 
     Used formula:
         .. math::
@@ -194,7 +194,7 @@ def michea_m(num_types, freq_spectrum):
 
 
 def honore_h(num_types, num_tokens, freq_spectrum):
-    r"""Calculate Honoré’s H (1979).
+    """Calculate Honoré’s H (1979).
 
     Used formula:
         .. math::
@@ -211,7 +211,7 @@ def honore_h(num_types, num_tokens, freq_spectrum):
 # use num_tokens + freq_spectrum:
 
 def entropy(num_tokens, freq_spectrum):
-    r"""Calculate entropy S.
+    """Calculate entropy S.
 
     Parameters:
         num_tokens (int): Absolute number of tokens.
@@ -224,7 +224,7 @@ def entropy(num_tokens, freq_spectrum):
 
 
 def yule_k(num_tokens, freq_spectrum):
-    r"""Calculate Yule’s K (1944).
+    """Calculate Yule’s K (1944).
 
     Used formula:
         .. math::
