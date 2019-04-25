@@ -39,7 +39,7 @@ def document(filepath, lemma=False, pos=None, jar="ddw-0.4.6.jar",
     if lemma or pos:
         return dkpro.pipe(filepath, jar, language, lemma, pos, **kwargs)
     else:
-        filepath = text.model.filepath(filepath)
+        filepath = text.model.Textfile(filepath)
         return text.model.Document(filepath.content, **kwargs)
 
 
