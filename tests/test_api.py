@@ -1,5 +1,6 @@
 import pytest
 import pathlib
+import cophi
 from cophi.text import model, utils
 
 
@@ -35,13 +36,13 @@ def test_export(corpus):
     utils.export(corpus.dtm, output, "svmlight")
     assert output.exists()
     with output.open("r", encoding="utf-8") as file:
-        assert file.read() == "document document a:1 b:1 c:1 d:1 e:1 f:1\n"
+        assert file.read() == "document a:1 b:1 c:1 d:1 e:1 f:1\n"
 
     output = pathlib.Path("corpus.txt")
     utils.export(corpus.dtm, output, "text")
     assert output.exists()
     with output.open("r", encoding="utf-8") as file:
-        assert file.read() == "document document a b c d e f\n"
+        assert file.read() == "document a b c d e f\n"
 
     with pytest.raises(ValueError):
         utils.export(corpus.dtm, output, "unknown")
