@@ -3,7 +3,7 @@
 
 ```python
 corpus, metadata = cophi.corpus(directory="british-fiction-corpus",
-                                pathname_pattern="**/*.txt",
+                                filepath_pattern="**/*.txt",
                                 encoding="utf-8",
                                 lowercase=True,
                                 token_pattern=r"\p{L}+\p{P}?\p{L}+")
