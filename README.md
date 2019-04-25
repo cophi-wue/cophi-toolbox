@@ -1,7 +1,7 @@
 # A library for preprocessing
 `cophi` is a Python library for handling, modeling and processing text corpora. You can easily pipe a collection of text files using the high-level API:
 
-```
+```python
 corpus, metadata = cophi.corpus(directory="british-fiction-corpus",
                                 pathname_pattern="**/*.txt",
                                 encoding="utf-8",
@@ -9,7 +9,9 @@ corpus, metadata = cophi.corpus(directory="british-fiction-corpus",
                                 token_pattern=r"\p{L}+\p{P}?\p{L}+")
 ```
 
-You can also plug the [DARIAH-DKPro-Wrapper](https://dariah-de.github.io/DARIAH-DKPro-Wrapper/) into this pipeline to lemmatize text, or just keep certain word types. Check out the introducing [Jupyter notebook](https://github.com/cophi-wue/cophi-toolbox/blob/master/notebooks/introducing-cophi.ipynb).
+You can also plug the [DARIAH-DKPro-Wrapper](https://dariah-de.github.io/DARIAH-DKPro-Wrapper/) into this pipeline to lemmatize text, or just keep certain word types.
+
+>Check out the introducing [Jupyter notebook](https://github.com/cophi-wue/cophi-toolbox/blob/master/notebooks/introducing-cophi.ipynb).
 
 
 ## Getting started
