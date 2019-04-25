@@ -1,6 +1,6 @@
 import pytest
 import pathlib
-import cophi
+from cophi.text import model, utils
 
 
 DOCUMENT = "A B C D E F"
@@ -12,11 +12,11 @@ def make_file(tmpdir, fname, content):
 
 @pytest.fixture
 def document():
-    return cophi.model.Document(DOCUMENT, "document", r"\w")
+    return model.Document(DOCUMENT, "document", r"\w")
 
 @pytest.fixture
 def corpus(document):
-    return cophi.model.Corpus([document])
+    return model.Corpus([document])
 
 def test_document(tmpdir):
     filepath = make_file(tmpdir, "document.txt", DOCUMENT)
@@ -32,16 +32,16 @@ def test_corpus(tmpdir):
 
 def test_export(corpus):
     output = pathlib.Path("corpus.svmlight")
-    cophi.export(corpus.dtm, output, "svmlight")
+    utils.export(corpus.dtm, output, "svmlight")
     assert output.exists()
     with output.open("r", encoding="utf-8") as file:
         assert file.read() == "document document a:1 b:1 c:1 d:1 e:1 f:1\n"
 
     output = pathlib.Path("corpus.txt")
-    cophi.export(corpus.dtm, output, "text")
+    utils.export(corpus.dtm, output, "text")
     assert output.exists()
     with output.open("r", encoding="utf-8") as file:
         assert file.read() == "document document a b c d e f\n"
 
     with pytest.raises(ValueError):
-        cophi.export(corpus.dtm, output, "unknown")
+        utils.export(corpus.dtm, output, "unknown")
