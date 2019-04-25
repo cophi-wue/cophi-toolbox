@@ -71,7 +71,7 @@ def corpus(directory, filepath_pattern="*.txt", treat_as=None, encoding="utf-8",
 
     def lazy_processing(filepaths, **kwargs):
         for filepath in filepaths:
-            logger.info(f"Processing '{filepath.stem}' ...")
+            logger.info("Processing '{}' ...".format(filepath.stem))
             if filepath.is_file():
                 if lemma or pos:
                     document = dkpro.pipe(filepath,
