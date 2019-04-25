@@ -19,6 +19,7 @@ class DKPro:
     def __init__(self, jar, xms="4g"):
         self.jar = jar
         self.xms = xms
+        self._check()
 
     def process(self, **parameters):
         """Process a single text file or a whole directory.
@@ -34,6 +35,14 @@ class DKPro:
             True, if call was successful.
         """
         return dkpro.core.call(self.jar, self.xms, **parameters)
+
+    def _check(self):
+        jar = Path(self.jar)
+        configs = Path(jar.parent, "configs")
+        if not jar.exists() or jar.suffix != ".jar":
+            raise OSError("DARIAH-DKPro-Wrapper JAR file not found.")
+        if not configs.exists():
+            raise OSError("DARIAH-DKPro-Wrapper configs folder not found.")
 
 
 class Document:
