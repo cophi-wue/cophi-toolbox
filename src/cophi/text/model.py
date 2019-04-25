@@ -130,8 +130,8 @@ class Document:
         self.token_pattern = token_pattern
         self.maximum = maximum
         self.tokens = list(utils.find_tokens(self.text,
-                                                   self.token_pattern,
-                                                   self.maximum))
+                                             self.token_pattern,
+                                             self.maximum))
         if self.lowercase:
             self.tokens = utils.lowercase_tokens(self.tokens)
 
