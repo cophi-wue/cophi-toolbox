@@ -41,7 +41,7 @@
 *.pyw 		text
 *.pyx  		text
 
-*.ipynb text filter=clean_ipynb
+*.ipynb
 
 # Binary files
 # ============
