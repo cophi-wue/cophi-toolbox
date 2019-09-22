@@ -41,7 +41,8 @@
 *.pyw 		text
 *.pyx  		text
 
-*.ipynb
+*.ipynb linguist-vendored
+notebooks/* linguist-vendored
 
 # Binary files
 # ============
